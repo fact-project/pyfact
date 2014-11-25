@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
-This file plots the classic EventView for every Event
-in a data file. It need improvement, using command line argumetns
-for the input file would be nice
+This file plots the classic EventView for every Event in a data file.
+It can be imported into zour own Python scripts or called from the command
+line with the options below
 
 Usage:
-    FactEventPlotter <inputfile> [--group=<group>] [--ring]
+    FactEventPlotter <inputfile> [options]
 
 Options:
-    --group=<group>   group from which to read, default: first found group
+    --group=<group>     group from which to read, default: first found group
+    --dataset=<key>     hdf5 dataset from which to read. [default: photoncharge]
+    --pixelset=<key>    Special pixelset which is plotted with different border color
+    --cmap=<cmap>       The matplotlib cmap to be used [default: gray]
+    --pixelmap=<file>   File that contains the pixelmap [default: pixel-map.csv]
 """
 
 import h5py
@@ -27,7 +31,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Viewer():
-    def __init__(self, dataset, key, pixelset=None, mapfile="data/pixel-map.csv", cmap="gray"):
+    def __init__(self, dataset, key, pixelset=None, mapfile="pixel-map.csv", cmap="gray"):
         self.event = 0
         self.dataset = dataset
         self.numEvents = len(dataset)
@@ -114,7 +118,6 @@ class Viewer():
     def calc_marker_size(self):
         bbox = self.ax.get_window_extent().transformed(self.fig.dpi_scale_trans.inverted())
         width, height = bbox.width, bbox.height
-        print(width, height)
         self.size = (min(width/1.2, height)/5)**2 * 120
         self.linewidth = min(width/1.2, height)/5 * 1.2
 
@@ -188,6 +191,7 @@ class Viewer():
 
 if __name__ == "__main__":
     args = docopt(__doc__)
+    print(args)
 
     inputfile = h5py.File(args["<inputfile>"], "r")
     if not args["--group"]:
@@ -195,15 +199,17 @@ if __name__ == "__main__":
     else:
         group = inputfile[args["--group"]]
 
-    photoncharge = group["photoncharge"]
-    arrivalTime = group["arrivalTime"]
-    nights = group["NIGHT"]
-    runids = group["RUNID"]
-    eventnums = group["EventNum"]
-    ringpixel = group["bestRingPixel"]
+    dataset = group.get(args["--dataset"])
 
-    # myViewer = Viewer(arrivalTime, "arrivalTime", cmap='jet', pixelset=ringpixel)
-    plt.hist(np.max(arrivalTime, axis=1), 100)
-    plt.show()
-# If you put root.destroy() here, it will cause an error if
-# the window is closed with the window manager.
+    if args["--pixelset"] is not None:
+        pixelset = group.get(args["--pixelset"])
+    else:
+        pixelset = None
+
+
+    myViewer = Viewer(dataset,
+                      args["--dataset"],
+                      cmap=args["--cmap"],
+                      pixelset=pixelset,
+                      mapfile=args["--pixelmap"],
+                      )
