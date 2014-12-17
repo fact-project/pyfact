@@ -5,22 +5,32 @@ import numpy as np
 #------------------------------------------------------------------------------
 class FACT_db_time_slice_of_collection(object):
     
-    def __init__(self,collection):
+    def __init__(self,collection,key):
         self.__collection = collection
+        self.__key = key
+    
+    # a valid time stamp to test 16420
+    def from_until(self,start_unix_time, end_unix_time):
+        start = self.__unix2crazyFACT_MJD(start_unix_time)
+        end = self.__unix2crazyFACT_MJD(end_unix_time)       
+        cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
+        return self.__monog_curser2numpy_array(cursor)
 
-    def get_time_slice_from_until(self,start_unix_time, end_unix_time):
-        return self.__collection.find()
-
-    def __unix2crazyFACT_MJD(unix_time_stamp):
+    def __unix2crazyFACT_MJD(self,unix_time_stamp):
         return unix_time_stamp 
-
+        
+    def __monog_curser2numpy_array(self,cursor):
+        array = np.resize(0.0, cursor.count())
+        for counter, document in enumerate(cursor):
+            array[counter] = document[self.__key]
+        return array
 #------------------------------------------------------------------------------
 class FACT_db_collection(object):
     
     def __init__(self,collection):  
         self.__get_keys_of_collection_assuming_they_are_the_same_for_all_documents(collection)
         for key in self.__keys:
-            setattr(self, key, FACT_db_time_slice_of_collection(collection))
+            setattr(self, key, FACT_db_time_slice_of_collection(collection, key))
                 
     def __get_keys_of_collection_assuming_they_are_the_same_for_all_documents(self,coll):
         self.__keys = coll.find_one()
