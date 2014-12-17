@@ -196,7 +196,7 @@ def is_interesting_for_slow_database(path_):
 
 def main(opts):
     connection = pymongo.MongoClient(opts['--host'], int(opts['--port']) )
-    db = connection.fact_slow_data
+    db = connection.aux
 
     if opts['--delete_all']:
         try_to_delete_all_collections_from(db)
