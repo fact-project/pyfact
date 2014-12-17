@@ -14,7 +14,7 @@ from docopt import docopt
 program_options = docopt(__doc__, version='Filler 1')
 import os
 import pyfact
-from glob import iglob
+from glob import glob
 import time
 import pymongo
 from pprint import pprint
@@ -211,6 +211,23 @@ def is_interesting_for_slow_database(path_):
     if service_name in service_names_of_interest:
         return True
 
+def list_of_paths(base):
+
+    search_path = os.path.join(base, '2014/*/*/*.fits')
+    all_paths = glob(search_path)
+    
+    sorted_paths = sorted(all_paths, reverse=True)
+    # sorted from december to january now 
+    
+    for path_ in sorted_paths:
+        date = date_from_path(path_)
+        if date.m == 12:
+            continue
+        if date.m < 6:
+            raise StopIteration()
+        yield path_
+
+
 
 def main(opts):
     connection = pymongo.MongoClient(settings.host, settings.port)
@@ -219,9 +236,7 @@ def main(opts):
     if opts['--delete_all']:
         try_to_delete_all_collections_from(db)
 
-    for p in iglob(os.path.join(opts['--base'], '2014/12/*/*.fits')):
-        
-
+    for p in list_of_paths(opts['--base']):
         if is_interesting_for_slow_database(p):
             starttime = time.time()
             insert_service_from_fitsfile_into_db(p, db)
