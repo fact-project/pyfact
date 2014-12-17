@@ -6,8 +6,6 @@ Usage:
 
 Options:
   -h --help          Show this screen.
-  --host HOSTNAME    Mongo DB Server Host Name [default: localhost].
-  --port PORTNUMBER  Mongo DB port [default: 27017].
   --delete_all       delete all collections prior to filling [default: False].
   --base PATH        base path to slow files (e.g. /fact/aux) [default: /data/fact_aux]
 
@@ -15,25 +13,28 @@ Options:
 from docopt import docopt
 program_options = docopt(__doc__, version='Filler 1')
 import os
-import pyfact 
+import pyfact
 from glob import iglob
 import time
 import pymongo
 from pprint import pprint
+from . import settings
 
 
 class MyDate(object):
-    def __init__(self, y , m , d ):
+    def __init__(self, y, m, d):
         self.y = y
         self.m = m
         self.d = d
+
 
 def date_from_path(p):
     yyyy = int(p[15:19])
     mm = int(p[20:22])
     dd = int(p[23:25])
-    return MyDate(yyyy, mm, dd) 
-    
+    return MyDate(yyyy, mm, dd)
+
+
 def get_mongo_db_collection_by_name(db, name):
     """ creates collection if it does not yet exist.
         if it exists, it simply returns it.
@@ -41,8 +42,11 @@ def get_mongo_db_collection_by_name(db, name):
     c = getattr(db, name)
     return c
 
+
 def list_of_services_of_interest():
-    aux_files_of_interest = """
+    aux_files_of_interest = "SQM_CONTROL_DATA"
+
+    aux_files_of_interest2 = """
         AGILENT_CONTROL_24V_DATA
         AGILENT_CONTROL_50V_DATA
         AGILENT_CONTROL_80V_DATA
@@ -111,31 +115,32 @@ def list_of_services_of_interest():
         TNG_WEATHER_DUST
         TNG_WEATHER_STATE
     """
+    aux_files_of_interest2
     service_names_of_interest = aux_files_of_interest.split()
     return service_names_of_interest
 
 
 def try_to_delete_all_collections_from(database):
-    for coll_name in database.collection_names():    
+    for coll_name in database.collection_names():
         coll = get_mongo_db_collection_by_name(database, coll_name)
         try:
             coll.drop()
         except pymongo.errors.OperationFailure as e:
+            e
             print "Was not able to drop collection {}".format(coll_name)
 
- 
-def service_name_from_path( p ):
+
+def service_name_from_path(p):
     filename = os.path.split(p)[1]
     service_name = filename[9:-5]
     return service_name
-
 
 
 def build_mongo_document_from_current_fits_file_row(fits_file):
     doc = dict()
     for col_name in fits_file.cols:
         cell_content = fits_file.cols[col_name]
-        
+
         # mongo document fields can contain lists, or scalars, no numpy arrays!
         # fits files only contain 1D numpy arrays (sometimes with only 1 element)
         # so here I convert them to lists, and in the 1 element case, to scalars.
@@ -147,16 +152,15 @@ def build_mongo_document_from_current_fits_file_row(fits_file):
             # pass if we find an empty numpy array, we ignore it.
             pass
         else:
-            # negative length can't happen, so 
+            # negative length can't happen, so
             pass
 
     return doc
-        
 
 
 def make_time_index_for_service(fits_file_path, db):
     coll = get_mongo_db_collection_by_name(db, service_name_from_path(fits_file_path))
-    coll.ensure_index([("Time",1)], unique=True, dropDups=True)
+    coll.ensure_index([("Time", 1)], unique=True, dropDups=True)
 
 
 def bulk_insert_fits_file_to_collection(fits_file, coll):
@@ -179,29 +183,31 @@ def insert_service_from_fitsfile_into_db(fits_file_path, db):
 def get_report(fits_file_path, starttime):
     fits_file = pyfact.Fits(fits_file_path)
     report = "{time_str} : {d.y}/{d.m}/{d.d}: {svc_name:.<40} : {len:6d} : {dura:2.3f}".format(
-        d = date_from_path(fits_file_path),
-        svc_name = service_name_from_path(fits_file_path),
-        dura = time.time() - starttime,
+        d=date_from_path(fits_file_path),
+        svc_name=service_name_from_path(fits_file_path),
+        dura=time.time() - starttime,
         len=fits_file.header["NAXIS2"],
-        time_str = time.strftime("%Y/%m/%d-%H:%M:%S")
+        time_str=time.strftime("%Y/%m/%d-%H:%M:%S")
         )
 
     return report
 
+
 def is_interesting_for_slow_database(path_):
-    service_name = service_name_from_path(p)
+    service_name = service_name_from_path(path_)
+    service_names_of_interest = list_of_services_of_interest()
     if service_name in service_names_of_interest:
         return True
 
 
 def main(opts):
-    connection = pymongo.MongoClient(opts['--host'], int(opts['--port']) )
-    db = connection.aux
+    connection = pymongo.MongoClient(opts['--host'], int(opts['--port']))
+    db = getattr(connection, settings.database_name)
 
     if opts['--delete_all']:
         try_to_delete_all_collections_from(db)
 
-    for p in iglob(os.path.join(opts['--base'],'/2014/*/*/*.fits')):
+    for p in iglob(os.path.join(opts['--base'], '/2014/*/*/*.fits')):
         if is_interesting_for_slow_database(p):
             starttime = time.time()
             insert_service_from_fitsfile_into_db(p, db)
@@ -212,7 +218,7 @@ def main(opts):
         # the data in the databse.
         # The header information **should** be identical for all instances of a certain service
         # so only one header per service is needed.
-        # but one can never be sure. So 
+        # but one can never be sure. So
 
 if __name__ == "__main__":
     print program_options
