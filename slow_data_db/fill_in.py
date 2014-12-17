@@ -18,8 +18,8 @@ from glob import iglob
 import time
 import pymongo
 from pprint import pprint
-from . import settings
-
+import settings
+import unittest
 
 class MyDate(object):
     def __init__(self, y, m, d):
@@ -44,9 +44,7 @@ def get_mongo_db_collection_by_name(db, name):
 
 
 def list_of_services_of_interest():
-    aux_files_of_interest = "SQM_CONTROL_DATA"
-
-    aux_files_of_interest2 = """
+    aux_files_of_interest = """
         AGILENT_CONTROL_24V_DATA
         AGILENT_CONTROL_50V_DATA
         AGILENT_CONTROL_80V_DATA
@@ -109,25 +107,29 @@ def list_of_services_of_interest():
         RATE_SCAN_DATA
         RATE_SCAN_PROCESS_DATA
         RATE_SCAN_STATE
+        SQM_CONTROL_DATA
         TEMPERATURE_DATA
         TIME_CHECK_OFFSET
         TNG_WEATHER_DATA
         TNG_WEATHER_DUST
         TNG_WEATHER_STATE
     """
-    aux_files_of_interest2
     service_names_of_interest = aux_files_of_interest.split()
     return service_names_of_interest
 
 
 def try_to_delete_all_collections_from(database):
     for coll_name in database.collection_names():
+        if 'system.indexes' in coll_name:
+            continue
         coll = get_mongo_db_collection_by_name(database, coll_name)
-        try:
+        """try:
             coll.drop()
         except pymongo.errors.OperationFailure as e:
-            e
-            print "Was not able to drop collection {}".format(coll_name)
+            print ("Was not able to drop collection {}\n"
+                    "Exception Details:\n"
+                    "args:{ex.args} | details:{ex.details} | message:{ex.message} | code:{ex.code}").format(coll_name, ex=e)
+        """
 
 
 def service_name_from_path(p):
@@ -147,7 +149,7 @@ def build_mongo_document_from_current_fits_file_row(fits_file):
         if len(cell_content) > 1:
             doc[col_name] = cell_content.tolist()
         elif len(cell_content) == 1:
-            doc[col_name] = cell_content[0]
+            doc[col_name] = float(cell_content[0])
         elif len(cell_content) == 0:
             # pass if we find an empty numpy array, we ignore it.
             pass
@@ -171,13 +173,23 @@ def bulk_insert_fits_file_to_collection(fits_file, coll):
     try:
         bulk.execute()
     except pymongo.errors.BulkWriteError as bwe:
-        pprint(bwe.details)
+        code = bwe.details['writeErrors'][0]['code']
+        if not code == 11000:
+            raise bwe
+        #pprint(bwe.details)
+
+
+def insert_fits_file_to_collection(fits_file, coll):
+    for row in fits_file:
+        doc = build_mongo_document_from_current_fits_file_row(fits_file)
+        coll.insert(doc)
 
 
 def insert_service_from_fitsfile_into_db(fits_file_path, db):
     fits_file = pyfact.Fits(fits_file_path)
     coll = get_mongo_db_collection_by_name(db, service_name_from_path(fits_file_path))
     bulk_insert_fits_file_to_collection(fits_file, coll)
+    #insert_fits_file_to_collection(fits_file, coll)
 
 
 def get_report(fits_file_path, starttime):
@@ -201,13 +213,15 @@ def is_interesting_for_slow_database(path_):
 
 
 def main(opts):
-    connection = pymongo.MongoClient(opts['--host'], int(opts['--port']))
+    connection = pymongo.MongoClient(settings.host, settings.port)
     db = getattr(connection, settings.database_name)
 
     if opts['--delete_all']:
         try_to_delete_all_collections_from(db)
 
-    for p in iglob(os.path.join(opts['--base'], '/2014/*/*/*.fits')):
+    for p in iglob(os.path.join(opts['--base'], '2014/12/*/*.fits')):
+        
+
         if is_interesting_for_slow_database(p):
             starttime = time.time()
             insert_service_from_fitsfile_into_db(p, db)
@@ -220,6 +234,10 @@ def main(opts):
         # so only one header per service is needed.
         # but one can never be sure. So
 
+class Sometests(unittest.TestCase):
+
+    def test_something():
+        pass
+
 if __name__ == "__main__":
-    print program_options
     main(program_options)
