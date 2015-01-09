@@ -213,25 +213,45 @@ def is_interesting_for_slow_database(path_):
 
 def list_of_paths(base):
 
-    search_path = os.path.join(base, '2014/*/*/*.fits')
+    search_path = os.path.join(base, '*/*/*/*.fits')
     all_paths = glob(search_path)
     
     sorted_paths = sorted(all_paths, reverse=True)
-    # sorted from december to january now 
     
     for path_ in sorted_paths:
         date = date_from_path(path_)
-        if date.m == 12:
-            continue
-        if date.m < 6:
+        if date.y < 2012:
             raise StopIteration()
         yield path_
 
+
+def insert_service_description_from_fitsfile_into_db(fits_file_path, db):
+    service_name = service_name_from_path(fits_file_path)
+    coll = db.service_descriptions
+
+    # only insert this, if it has never been inserted before
+    if coll.find({'_id':service_name}).count():
+        return
+
+    fits_file = pyfact.Fits(fits_file_path)
+    
+    # document should contain the header information from the fits file.
+    header = fits_file.header
+    comments = fits_file.header_comments
+    doc = {}
+    for k in header:
+        if k in comments:
+            doc[k] = [header[k], comments[k]]
+        else:
+            doc[k] = header[k]
+    doc['_id'] = service_name
+    coll.insert(doc)
 
 
 def main(opts):
     connection = pymongo.MongoClient(settings.host, settings.port)
     db = getattr(connection, settings.database_name)
+    aux_meta = getattr(connection, 'aux_meta')
 
     if opts['--delete_all']:
         try_to_delete_all_collections_from(db)
@@ -239,6 +259,7 @@ def main(opts):
     for p in list_of_paths(opts['--base']):
         if is_interesting_for_slow_database(p):
             starttime = time.time()
+            insert_service_description_from_fitsfile_into_db(p, aux_meta)
             insert_service_from_fitsfile_into_db(p, db)
             make_time_index_for_service(p, db)
             print get_report(p, starttime)
