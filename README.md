@@ -44,4 +44,4 @@ The file, `slow_data_db_frontend.py` is of course not necessary for you to acces
 
 Caveats:
 
-    * In case the name of a field in the DB is identical to a member of a numpy array, I don't know what happens, when you try to access them like via the dot operator. Suppose the field name ist "Time" everything is fine. You can access it via `a.Time` as well as via `a["Time"]`. But what if the name is "T"? There is member of each numpy called "T" already, which provides the transposed array. 
+* In case the name of a field in the DB is identical to a member of a numpy array, I don't know what happens, when you try to access them like via the dot operator. Suppose the field name ist "Time" everything is fine. You can access it via `a.Time` as well as via `a["Time"]`. But what if the name is "T"? There is member of each numpy called "T" already, which provides the transposed array.
