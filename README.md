@@ -14,6 +14,7 @@ Dependencies:
 
 Example:
 
+    :::shell-session
     $ cd pyfact/slow_data_db
     $ ./make_tunnel.sh      (enter the FACT std password)
     $ ipython -i slow_data_db_front_end.py
