@@ -7,9 +7,10 @@
 If you like to look at some of the so called "Slow Data" of FACT, but are fed up with opening and closing the thousands of FITS files, you can as well just request the data from a MongoDB we set up for this purpose. 
 
 Dependencies:
-    pymongo >2.4 (I think). We are using 2.7.2
-    (the version of the Ubuntu(14.04) python-pymongo is too old, so you will want to install it using pip, I guess)
-    numpy, matplotlib
+
+* pymongo >2.4 (I think). We are using 2.7.2. The version of the Ubuntu 14.04 python-pymongo is too old, so you will want to install it using pip, I guess.
+* numpy
+* matplotlib
 
 Example:
 
