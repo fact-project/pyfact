@@ -161,6 +161,14 @@ def build_mongo_document_from_current_fits_file_row(fits_file):
 
 
 def make_time_index_for_service(fits_file_path, db):
+    """ This simply ensures, that for the collection associated with the dim service,
+        which is stored inside the given file, there is indeed an index built for the 'Time' field.
+
+        So in almost all cases, when this method is called nothing will happen, because the index is already there.
+
+        This method only triggers an action on the DB side, when there is a new service being filled in,
+        or when for some reason an index was dropped.
+    """
     coll = get_mongo_db_collection_by_name(db, service_name_from_path(fits_file_path))
     coll.ensure_index([("Time", 1)], unique=True, dropDups=True)
 
@@ -256,12 +264,12 @@ def main(opts):
     if opts['--delete_all']:
         try_to_delete_all_collections_from(db)
 
-    for p in list_of_paths(opts['--base']):
+    for path in list_of_paths(opts['--base']):
         if is_interesting_for_slow_database(p):
             starttime = time.time()
-            insert_service_description_from_fitsfile_into_db(p, aux_meta)
-            insert_service_from_fitsfile_into_db(p, db)
-            make_time_index_for_service(p, db)
+            insert_service_description_from_fitsfile_into_db(path, aux_meta)
+            insert_service_from_fitsfile_into_db(path, db)
+            make_time_index_for_service(path, db)
             print get_report(p, starttime)
         #TODO:
         # Store also the **header** of the fits file to the mongo DB, so the **types** of
