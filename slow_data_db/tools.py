@@ -3,8 +3,8 @@ import pymongo
 import logging
 
 def cursor_to_rec_array(cursor):
-	array = cursor_to_structured_array(cursor)
-    return array.view(np.recarray)	
+    array = cursor_to_structured_array(cursor)
+    return array.view(np.recarray)
 
 def cursor_to_structured_array(cursor):
     N = cursor.count()
@@ -43,5 +43,5 @@ def make_numpy_dtype_from_document(doc):
             (str(field_name), element_array.dtype.str, element_array.shape)
         )
 
-    return structured_array_dtype = np.dtype(list_of_names_n_types)    
+    return np.dtype(list_of_names_n_types)    
     
