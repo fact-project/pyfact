@@ -3,6 +3,7 @@ import pymongo
 from pymongo import MongoClient
 import numpy as np
 import settings
+
 import tools
 #------------------------------------------------------------------------------
 class FACT_db_time_slice_of_collection(object):
@@ -55,6 +56,13 @@ class AuxDataBaseFrontEnd(object):
                 self.__service_names.append(collection_name)
                 
 
+def correlate(A, B, delta):
+    tt = np.array(tools.create_time_averages_from(A,B,delta))
+    ttt = tools.common_times_to_be_evaluated(A,B,tt)
+    Bi = tools.interpolator(B, ttt)
+    Ai = tools.interpolator(A, ttt)
+    return Ai, Bi
+
 
 #------------------------------------------------------------------------------
 import matplotlib.pyplot as plt
@@ -80,3 +88,54 @@ print "in order to plot for example the average sensor temperature vs. Time, you
 print "       plt.plot_date(a.Time, a.T_sens.mean(axis=1), '.')"
 print  
 print "Have Fun!"
+
+
+print """ Example for correlation plots:
+start = tools.datestr_to_facttime("20140925 20:00")
+stop = tools.datestr_to_facttime("20140926 6:00")
+A = aux.FSC_CONTROL_TEMPERATURE.from_until(start, stop)
+B = aux.DRIVE_CONTROL_POINTING_POSITION.from_until(start, stop)
+Ai,Bi = correlate(A,B, 10)
+plt.plot(Ai["T_sens"][:, 0], Bi["Zd"], ".")
+"""
+
+
+"""
+start = tools.datestr_to_facttime("20140925 20:00")
+stop = tools.datestr_to_facttime("20140927 20:00")
+
+#A = aux.FTM_CONTROL_TRIGGER_RATES.from_until(start, stop)
+#B = aux.SQM_CONTROL_DATA.from_until(start, stop)
+
+#A = aux.FSC_CONTROL_TEMPERATURE.from_until(start, stop)
+A = aux.BIAS_CONTROL_CURRENT.from_until(start, stop)
+#A = aux.FSC_CONTROL_HUMIDITY.from_until(start, stop)
+B = aux.BIAS_CONTROL_VOLTAGE.from_until(start, stop)
+
+as_name = "I"
+bs_name = "Uout"
+
+#plt.figure()
+#plt.title("original")
+#plt.plot_date(A["Time"], A[as_name], ".")
+#plt.plot_date(B["Time"], B[bs_name], ".")
+
+
+Ai,Bi = correlate(A,B, 1./(24.*3600.))
+
+#plt.figure()
+#plt.title("interpolated")
+#plt.plot_date(Ai["Time"], Ai[as_name], ".")
+#plt.plot_date(Bi["Time"], Bi[bs_name], ".")
+
+
+plt.figure()
+for i in range(320):
+    plt.cla()
+    plt.title("corr")
+    plt.plot(Ai[as_name][:,i], Bi[bs_name][:,i], ".")
+    plt.xlabel(as_name)
+    plt.ylabel(bs_name)
+    plt.grid()
+    raw_input("?")
+"""
