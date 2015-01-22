@@ -139,3 +139,9 @@ for i in range(320):
     plt.grid()
     raw_input("?")
 """
+start = tools.datestr_to_facttime("20120925 20:00")
+stop = tools.datestr_to_facttime("20140927 6:00")
+A,B = tools.correlate_dom_like(
+    aux.MAGIC_WEATHER_DATA.from_until(start, stop),
+    aux.FSC_CONTROL_HUMIDITY.from_until(start, stop),
+    limit_in_sec = 60.)
