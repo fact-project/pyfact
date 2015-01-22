@@ -188,7 +188,7 @@ def create_mongo_doc(fits_row):
     return doc
 
 
-def make_time_index_for_service(fits_file_path, database):
+def make_time_index_for_service(fits_file, database):
     """ ensure that Time index exists 
 
         This simply ensures, that for the collection associated with the dim service,
@@ -200,8 +200,9 @@ def make_time_index_for_service(fits_file_path, database):
         or when for some reason an index was dropped.
     """
     coll = get_mongo_db_collection_by_name(database, 
-                                service_name_from_path(fits_file_path))
+                                service_name_from_path(fits_file._path))
     coll.ensure_index([("Time", 1)], unique=True, dropDups=True)
+
 
 def bulk_insert_fits_file(fits_file, collection):
     """ insert contents of fits_file into collection use bulk insert
@@ -217,6 +218,7 @@ def bulk_insert_fits_file(fits_file, collection):
         if not code == 11000:
             raise bwe
 
+
 def insert_fits_file(fits_file, coll):
     """ insert contents of fits_file into collection, SLOW!
     """
@@ -225,19 +227,30 @@ def insert_fits_file(fits_file, coll):
         coll.insert(doc)
 
 
-def insert_fitsfile(fits_file_path, database):
+def insert_fitsfile(fits_file, database):
     """ insert data from fits file into the database
     """
-    fits_file = pyfact.Fits(fits_file_path)
+    fits_start_time = fits_file.header['TSTARTI']+fits_file.header['TSTARTF']
+    fits_stop_time = fits_file.header['TSTOPI']+fits_file.header['TSTOPF']
     collection = get_mongo_db_collection_by_name(database, 
-        service_name_from_path(fits_file_path))
+        service_name_from_path(fits_file._path))
+
+    start_found = False
+    stop_found = False
+    if not collection.find_one({"Time" : fits_start_time}) is None:
+        start_found = True
+    if not collection.find_one({"Time" : fits_stop_time})  is None:
+        stop_found = True
+    if start_found and stop_found:
+        return
+
     bulk_insert_fits_file(fits_file, collection)
 
 
-
-def get_report(fits_file_path, starttime):
+def get_report(fits_file, starttime):
     """ creates a textual report about the time
     """
+    fits_file_path = fits_file._path
     fits_file = pyfact.Fits(fits_file_path)
     report = ("{time_str} : {d.y}/{d.m}/{d.d}:"
               " {svc_name:.<40} : {len:6d} : {dura:2.3f}".format(
@@ -274,9 +287,10 @@ def list_of_paths(base):
         yield path_
 
 
-def insert_service_description(fits_file_path, database):
+def insert_service_description(fits_file, database):
     """ insert fits header information into database
     """
+    fits_file_path = fits_file._path
     service_name = service_name_from_path(fits_file_path)
     coll = database.service_descriptions
 
@@ -284,8 +298,6 @@ def insert_service_description(fits_file_path, database):
     if coll.find({'_id':service_name}).count():
         return
 
-    fits_file = pyfact.Fits(fits_file_path)
-    
     # document should contain the header information from the fits file.
     header = fits_file.header
     comments = fits_file.header_comments
@@ -312,18 +324,14 @@ def main(opts):
     for path in list_of_paths(opts['--base']):
         if is_file_intersting(path):
             starttime = time.time()
-            insert_service_description(path, aux_meta)
-            insert_fitsfile(path, database)
-            make_time_index_for_service(path, database)
-            print get_report(path, starttime)
-        #TODO:
-        # Store also the **header** of the fits file to the mongo DB, 
-        # so the **types** of
-        # the data in the databse.
-        # The header information **should** be identical for 
-        # all instances of a certain service
-        # so only one header per service is needed.
-        # but one can never be sure. So
+            try:
+                fits_file = pyfact.Fits(path)
+                insert_service_description(fits_file, aux_meta)
+                insert_fitsfile(fits_file, database)
+                make_time_index_for_service(fits_file, database)
+                print get_report(fits_file, starttime)
+            except TypeError as exception:
+                print "TypeError", path, exception
 
 if __name__ == "__main__":
     main(program_options)
