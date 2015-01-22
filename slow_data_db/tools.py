@@ -20,14 +20,20 @@ def cursor_to_structured_array(cursor):
 
     for counter, document in enumerate(cursor):
         for field_name in structured_array_dtype.names:
-            array[field_name][counter] = document[field_name]
+            try:
+                array[field_name][counter] = document[field_name]
+            except KeyError:
+                array[field_name][counter] = np.nan
 
     return array
 
 def make_numpy_dtype_from_cursor(cursor):
 
 	collection_of_this_cursor = cursor.collection
-	example_document = collection_of_this_cursor.find_one()
+    # get the newest entry from this collection
+    # this one defines the dtype of the numpy array, 
+    # and we want to stick to the newest format.
+	example_document = collection_of_this_cursor.find_one({}, sort=[("Time", pymongo.DESCENDING)])
 	if example_document is None:
 		# collection is empty
 		raise LookupError('associated collection of cursor is empty.')
@@ -48,11 +54,8 @@ def make_numpy_dtype_from_document(doc):
               element_array.shape)
         )
 
-    return np.dtype(list_of_names_n_types)    
+    return np.dtype(list_of_names_n_types)
     
-#------------------------------------------------------------------------------------
-# interpolator
-# zeit konzidenz finder -- time adjazenz matrix macher oder so
 
 def common_times_to_be_evaluated(support_A, support_B, times_to_be_evaluated):
     tA = support_A["Time"]    
@@ -197,3 +200,6 @@ def apply_limit(A, B, limit_in_sec):
     tB = B['Time'] * 24 * 3600
     good = np.abs(tA-tB) < limit_in_sec
     return A[good], B[good]
+
+from datetime import datetime
+offset = (datetime(1970,1,1)-datetime(1,1,1)).days
