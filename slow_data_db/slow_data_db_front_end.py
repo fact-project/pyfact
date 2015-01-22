@@ -100,37 +100,34 @@ plt.plot(Ai["T_sens"][:, 0], Bi["Zd"], ".")
 """
 
 
-"""
+
 start = tools.datestr_to_facttime("20140925 20:00")
-stop = tools.datestr_to_facttime("20140927 20:00")
-
-#A = aux.FTM_CONTROL_TRIGGER_RATES.from_until(start, stop)
-#B = aux.SQM_CONTROL_DATA.from_until(start, stop)
-
-#A = aux.FSC_CONTROL_TEMPERATURE.from_until(start, stop)
-A = aux.BIAS_CONTROL_CURRENT.from_until(start, stop)
-#A = aux.FSC_CONTROL_HUMIDITY.from_until(start, stop)
-B = aux.BIAS_CONTROL_VOLTAGE.from_until(start, stop)
-
+stop = tools.datestr_to_facttime("20140927 6:00")
 as_name = "I"
 bs_name = "Uout"
 
-#plt.figure()
-#plt.title("original")
-#plt.plot_date(A["Time"], A[as_name], ".")
-#plt.plot_date(B["Time"], B[bs_name], ".")
-
-
-Ai,Bi = correlate(A,B, 1./(24.*3600.))
-
-#plt.figure()
-#plt.title("interpolated")
-#plt.plot_date(Ai["Time"], Ai[as_name], ".")
-#plt.plot_date(Bi["Time"], Bi[bs_name], ".")
-
+A = aux.BIAS_CONTROL_CURRENT.from_until(start, stop)
+B = aux.BIAS_CONTROL_VOLTAGE.from_until(start, stop)
+Ai,Bi = correlate(A,B, 10./(24.*3600.))
 
 plt.figure()
+plt.figure()
+plt.figure()
 for i in range(320):
+
+    plt.figure(1)
+    plt.cla()
+    plt.title("original")
+    plt.plot_date(A["Time"], A[as_name][:,i], ".")
+    plt.plot_date(B["Time"], B[bs_name][:,i], ".")
+
+    plt.figure(2)
+    plt.cla()
+    plt.title("interpolated")
+    plt.plot_date(Ai["Time"], Ai[as_name][:,i], ".")
+    plt.plot_date(Bi["Time"], Bi[bs_name][:,i], ".")
+
+    plt.figure(3)
     plt.cla()
     plt.title("corr")
     plt.plot(Ai[as_name][:,i], Bi[bs_name][:,i], ".")
@@ -138,4 +135,3 @@ for i in range(320):
     plt.ylabel(bs_name)
     plt.grid()
     raw_input("?")
-"""
