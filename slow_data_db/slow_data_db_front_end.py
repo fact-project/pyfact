@@ -140,5 +140,22 @@ for i in range(320):
 start = tools.datestr_to_facttime("20100101 0:00")
 stop = tools.datestr_to_facttime("20160101 0:00")
 A = aux.MAGIC_WEATHER_DATA.from_until(start, stop)
-B = aux.FSC_CONTROL_HUMIDITY.from_until(start, stop),
+B = aux.FSC_CONTROL_HUMIDITY.from_until(start, stop)
+
+plt.figure()
+ax1 = plt.subplot(3,1,1)
+ax1.plot_date(A['Time']+tools.offset, A['H'], "b,", label="MAGIC humidity")
+ax1.grid()
+ax1.legend()
+
+ax2 = plt.subplot(3,1,2, sharex=ax1)
+ax2.plot_date(B['Time']+tools.offset, B['H'][:,1], "r,", label="FACT humidity 1")
+ax2.plot_date(B['Time']+tools.offset, B['H'][:,3], "g,", label="FACT humidity 3")
+ax2.grid()
+ax2.legend()
+
+ax3 = plt.subplot(3,1,3, sharex=ax1)
+ax3.plot_date(A['Time']+tools.offset, A['T'], "k,", label="MAGIC temperature")
+ax3.grid()
+ax3.legend()
 """
