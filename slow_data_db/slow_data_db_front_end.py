@@ -3,41 +3,20 @@ import pymongo
 from pymongo import MongoClient
 import numpy as np
 import settings
+
+import tools
 #------------------------------------------------------------------------------
 class FACT_db_time_slice_of_collection(object):
     
-    def __init__(self,collection,key):
+    def __init__(self, collection, key):
         self.__collection = collection
         self.__key = key
     
     # a valid time stamp to test 16420
-    def from_until(self,start_unix_time, end_unix_time):
-        start = self.__unix2crazyFACT_MJD(start_unix_time)
-        end = self.__unix2crazyFACT_MJD(end_unix_time)       
+    def from_until(self, start, end):
         cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
-        return self.__monog_curser2numpy_array(cursor)
-
-    def __unix2crazyFACT_MJD(self,unix_time_stamp):
-        return unix_time_stamp 
+        return tools.cursor_to_structured_array(cursor)
         
-    def __monog_curser2numpy_array(self,cursor):
-        example_doc = cursor[0]
-
-        list_of_names_n_types = []
-        for field_name in example_doc:
-            element = example_doc[field_name]
-            element_array = np.array(element)
-            list_of_names_n_types.append(
-                (field_name, element_array.dtype, element_array.shape)
-            )
-
-        structured_array_dtype = np.dtype(list_of_names_n_types)
-        print structured_array_dtype
-        array = np.zeros(cursor.count(), structured_array_dtype)
-
-        for counter, document in enumerate(cursor):
-            array[counter] = document[self.__key]
-        return array
 #------------------------------------------------------------------------------
 class FACT_db_collection(object):
     
@@ -52,40 +31,26 @@ class FACT_db_collection(object):
         del self.__keys['_id']
         del self.__keys['QoS']
 
-    # a valid time stamp to test 16420
-    def from_until(self,start, end):
+    def from_until(self, start, end):
         cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
-        return self.__cur_to_array(cursor)
+        return tools.cursor_to_structured_array(cursor)
 
-    def __cur_to_array(self, cursor):
-        N = cursor.count()
-        if N > 1000:
-            print "info: loading {} documents form database .. might take a while".format(N)
-        example_doc = cursor[0]
+    def from_until_sample_density_and_rate(self, start, end, density, rate):
+        number_of_samples = (end-start)*rate
+        time_between_samples = 1.0/rate
+        time_width_of_sample = time_between_samples*density
 
-        list_of_names_n_types = []
-        for field_name in example_doc:
-            if '_id' in field_name:
-                continue
-            element = example_doc[field_name]
-            element_array = np.array(element)
-            list_of_names_n_types.append(
-                (str(field_name), element_array.dtype.str, element_array.shape)
-            )
+        dict_list = []
 
-        structured_array_dtype = np.dtype(list_of_names_n_types)    
-        array = np.zeros(N, structured_array_dtype)
+        for sample in range(number_of_samples):
+            sample_start_time = start + sample*time_between_samples
+            sample_end_time = sample_start_time+time_width_of_sample
+            start_stop_dict = {"Time":{"$gte": sample_start_time, "$lt": sample_end_time}}
+            dict_list.append(start_stop_dict)
 
-        for counter, document in enumerate(cursor):
-            for field_name in document:
-                if '_id' in field_name:
-                    continue
-                array[field_name][counter] = document[field_name]
-
-        return array.view(np.recarray)
-
-
-
+        cursor = self.__collection.find({"$or": dict_list })
+        return tools.cursor_to_structured_array(cursor)
+        
 #------------------------------------------------------------------------------
 class AuxDataBaseFrontEnd(object):
             
@@ -104,39 +69,14 @@ class AuxDataBaseFrontEnd(object):
         for collection_name in self.database.collection_names():
             if 'system.indexes' not in collection_name:
                 self.__service_names.append(collection_name)
+                
 
-    def has_service(self, name):
-        """
-        Hi this is a text.
-        @param name: this is the name we give it
-        @return: returns a bool if this instance has the asked service
-        """
-        if name in self.database.collection_names():
-            return True
-        else:
-            return False
-            
-    def __print_list(self,list_to_print):
-        for item in list_to_print:
-            print item
-    
-    def print_all_services(self):
-        self.__print_list(self.database.collection_names())
- 
-    def __get_subset_of_services_containing(self,signature):
-        subset = []
-        for service_name in self.database.collection_names():
-            if signature in service_name:
-                subset.append(service_name)
-        return subset
-    
-    def print_all_services_containing_snippset(self,snippset):
-        subset_of_services = \
-            self.__get_subset_of_services_containing(snippset)
-        if not subset_of_services:
-            print 'There is no service containing the snippset', snippset
-        else:
-            self.__print_list(subset_of_services)
+def correlate(A, B, delta):
+    tt = np.array(tools.create_time_averages_from(A,B,delta))
+    ttt = tools.common_times_to_be_evaluated(A,B,tt)
+    Bi = tools.interpolator(B, ttt)
+    Ai = tools.interpolator(A, ttt)
+    return Ai, Bi
 
 
 #------------------------------------------------------------------------------
@@ -163,3 +103,57 @@ print "in order to plot for example the average sensor temperature vs. Time, you
 print "       plt.plot_date(a.Time, a.T_sens.mean(axis=1), '.')"
 print  
 print "Have Fun!"
+
+
+print """ Example for correlation plots:
+start = tools.datestr_to_facttime("20140925 20:00")
+stop = tools.datestr_to_facttime("20140926 6:00")
+A = aux.FSC_CONTROL_TEMPERATURE.from_until(start, stop)
+B = aux.DRIVE_CONTROL_POINTING_POSITION.from_until(start, stop)
+Ai,Bi = correlate(A,B, 10)
+plt.plot(Ai["T_sens"][:, 0], Bi["Zd"], ".")
+"""
+
+
+"""
+start = tools.datestr_to_facttime("20140925 20:00")
+stop = tools.datestr_to_facttime("20140927 6:00")
+as_name = "I"
+bs_name = "Uout"
+
+A = aux.BIAS_CONTROL_CURRENT.from_until(start, stop)
+B = aux.BIAS_CONTROL_VOLTAGE.from_until(start, stop)
+Ai,Bi = correlate(A,B, 10./(24.*3600.))
+
+plt.figure()
+plt.figure()
+plt.figure()
+for i in range(320):
+
+    plt.figure(1)
+    plt.cla()
+    plt.title("original")
+    plt.plot_date(A["Time"], A[as_name][:,i], ".")
+    plt.plot_date(B["Time"], B[bs_name][:,i], ".")
+
+    plt.figure(2)
+    plt.cla()
+    plt.title("interpolated")
+    plt.plot_date(Ai["Time"], Ai[as_name][:,i], ".")
+    plt.plot_date(Bi["Time"], Bi[bs_name][:,i], ".")
+
+    plt.figure(3)
+    plt.cla()
+    plt.title("corr")
+    plt.plot(Ai[as_name][:,i], Bi[bs_name][:,i], ".")
+    plt.xlabel(as_name)
+    plt.ylabel(bs_name)
+    plt.grid()
+    raw_input("?")
+"""
+"""
+start = tools.datestr_to_facttime("20100101 0:00")
+stop = tools.datestr_to_facttime("20160101 0:00")
+A = aux.MAGIC_WEATHER_DATA.from_until(start, stop)
+B = aux.FSC_CONTROL_HUMIDITY.from_until(start, stop),
+"""
