@@ -35,7 +35,22 @@ class FACT_db_collection(object):
         cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
         return tools.cursor_to_structured_array(cursor)
 
+    def from_until_sample_density_and_rate(self, start, end, density, rate):
+        number_of_samples = (end-start)*rate
+        time_between_samples = 1.0/rate
+        time_width_of_sample = time_between_samples*density
 
+        dict_list = []
+
+        for sample in range(number_of_samples):
+            sample_start_time = start + sample*time_between_samples
+            sample_end_time = sample_start_time+time_width_of_sample
+            start_stop_dict = {"Time":{"$gte": sample_start_time, "$lt": sample_end_time}}
+            dict_list.append(start_stop_dict)
+
+        cursor = self.__collection.find({"$or": dict_list })
+        return tools.cursor_to_structured_array(cursor)
+        
 #------------------------------------------------------------------------------
 class AuxDataBaseFrontEnd(object):
             
