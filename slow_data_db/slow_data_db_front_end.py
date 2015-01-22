@@ -100,7 +100,7 @@ plt.plot(Ai["T_sens"][:, 0], Bi["Zd"], ".")
 """
 
 
-
+"""
 start = tools.datestr_to_facttime("20140925 20:00")
 stop = tools.datestr_to_facttime("20140927 6:00")
 as_name = "I"
@@ -135,3 +135,10 @@ for i in range(320):
     plt.ylabel(bs_name)
     plt.grid()
     raw_input("?")
+"""
+"""
+start = tools.datestr_to_facttime("20100101 0:00")
+stop = tools.datestr_to_facttime("20160101 0:00")
+A = aux.MAGIC_WEATHER_DATA.from_until(start, stop)
+B = aux.FSC_CONTROL_HUMIDITY.from_until(start, stop),
+"""

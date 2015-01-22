@@ -169,3 +169,31 @@ def datestr_to_facttime(str):
 def facttime_to_datestr(t):
     tup = time.gmtime(t*24*3600)
     return time.strftime("%Y%m%d %H:%M", tup)
+
+
+def correlate_dom_like(A, B, limit_in_sec):
+    if A.shape[0] > B.shape[0]:
+        new_A = shorten_according_to_times(A,B)
+        return apply_limit(new_A, B, limit_in_sec)
+    else:
+        new_B = shorten_according_to_times(B,A)
+        return apply_limit(A, new_B, limit_in_sec)
+    
+
+def shorten_according_to_times(longer, shorter):
+    t_short = shorter['Time']
+    t_long = longer['Time']
+    indices_in_longer = np.searchsorted(a=t_long, v=t_short)
+    times_in_longer_smaller_than_those_in_shorter = t_long.take(indices_in_longer-1, mode='clip')
+    times_in_longer_GREATER_than_those_in_shorter = t_long.take(indices_in_longer, mode='clip')
+    indices_in_longer_nearest_to_those_times_in_shorter = np.where((t_short-times_in_longer_smaller_than_those_in_shorter) 
+                                                                              < (times_in_longer_GREATER_than_those_in_shorter-t_short),
+                                                                   indices_in_longer-1, 
+                                                                   indices_in_longer)
+    return longer.take(indices_in_longer_nearest_to_those_times_in_shorter, mode='clip')
+
+def apply_limit(A, B, limit_in_sec):
+    tA = A['Time'] * 24 * 3600
+    tB = B['Time'] * 24 * 3600
+    good = np.abs(tA-tB) < limit_in_sec
+    return A[good], B[good]
