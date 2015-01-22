@@ -123,13 +123,6 @@ def try_to_delete_all_collections_from(database):
         if 'system.indexes' in coll_name:
             continue
         coll = get_mongo_db_collection_by_name(database, coll_name)
-        """try:
-            coll.drop()
-        except pymongo.errors.OperationFailure as e:
-            print ("Was not able to drop collection {}\n"
-                    "Exception Details:\n"
-                    "args:{ex.args} | details:{ex.details} | message:{ex.message} | code:{ex.code}").format(coll_name, ex=e)
-        """
 
 
 def service_name_from_path(p):
@@ -160,7 +153,7 @@ def build_mongo_document_from_current_fits_file_row(fits_file):
     return doc
 
 
-def make_time_index_for_service(fits_file_path, db):
+def make_time_index_for_service(fits_file, db):
     """ This simply ensures, that for the collection associated with the dim service,
         which is stored inside the given file, there is indeed an index built for the 'Time' field.
 
@@ -169,6 +162,7 @@ def make_time_index_for_service(fits_file_path, db):
         This method only triggers an action on the DB side, when there is a new service being filled in,
         or when for some reason an index was dropped.
     """
+    fits_file_path = fits_file._path
     coll = get_mongo_db_collection_by_name(db, service_name_from_path(fits_file_path))
     coll.ensure_index([("Time", 1)], unique=True, dropDups=True)
 
@@ -193,15 +187,28 @@ def insert_fits_file_to_collection(fits_file, coll):
         coll.insert(doc)
 
 
-def insert_service_from_fitsfile_into_db(fits_file_path, db):
-    fits_file = pyfact.Fits(fits_file_path)
+def insert_service_from_fitsfile_into_db(fits_file, db):
+    fits_file_path = fits_file._path
+
+    fits_start_time = fits_file.header['TSTARTI']+fits_file.header['TSTARTF']
+    fits_stop_time = fits_file.header['TSTOPI']+fits_file.header['TSTOPF']
     coll = get_mongo_db_collection_by_name(db, service_name_from_path(fits_file_path))
+    start_found = False
+    stop_found = False
+    if not coll.find_one({"Time" : fits_start_time}) is None:
+        #print "    -> fits_start_time:{0} found".format(fits_start_time)
+        start_found = True
+    if not coll.find_one({"Time" : fits_stop_time})  is None:
+        #print "    -> fits_stop_time:{0} found".format(fits_stop_time)
+        stop_found = True
+    if start_found and stop_found:
+        return
     bulk_insert_fits_file_to_collection(fits_file, coll)
     #insert_fits_file_to_collection(fits_file, coll)
 
 
-def get_report(fits_file_path, starttime):
-    fits_file = pyfact.Fits(fits_file_path)
+def get_report(fits_file, starttime):
+    fits_file_path = fits_file._path
     report = "{time_str} : {d.y}/{d.m}/{d.d}: {svc_name:.<40} : {len:6d} : {dura:2.3f}".format(
         d=date_from_path(fits_file_path),
         svc_name=service_name_from_path(fits_file_path),
@@ -228,12 +235,11 @@ def list_of_paths(base):
     
     for path_ in sorted_paths:
         date = date_from_path(path_)
-        if date.y < 2012:
-            raise StopIteration()
         yield path_
 
 
-def insert_service_description_from_fitsfile_into_db(fits_file_path, db):
+def insert_service_description_from_fitsfile_into_db(fits_file, db):
+    fits_file_path = fits_file._path
     service_name = service_name_from_path(fits_file_path)
     coll = db.service_descriptions
 
@@ -241,8 +247,6 @@ def insert_service_description_from_fitsfile_into_db(fits_file_path, db):
     if coll.find({'_id':service_name}).count():
         return
 
-    fits_file = pyfact.Fits(fits_file_path)
-    
     # document should contain the header information from the fits file.
     header = fits_file.header
     comments = fits_file.header_comments
@@ -265,12 +269,16 @@ def main(opts):
         try_to_delete_all_collections_from(db)
 
     for path in list_of_paths(opts['--base']):
-        if is_interesting_for_slow_database(p):
+        if is_interesting_for_slow_database(path):
             starttime = time.time()
-            insert_service_description_from_fitsfile_into_db(path, aux_meta)
-            insert_service_from_fitsfile_into_db(path, db)
-            make_time_index_for_service(path, db)
-            print get_report(p, starttime)
+            try:
+                fits_file = pyfact.Fits(path)
+                insert_service_description_from_fitsfile_into_db(fits_file, aux_meta)
+                insert_service_from_fitsfile_into_db(fits_file, db)
+                make_time_index_for_service(fits_file, db)
+                print get_report(fits_file, starttime)
+            except TypeError as e:
+                print "TypeError", path, e
         #TODO:
         # Store also the **header** of the fits file to the mongo DB, so the **types** of
         # the data in the databse.
