@@ -1,68 +1,102 @@
-import time
-import pymongo
-from pymongo import MongoClient
-import numpy as np
-import settings
+""" FACT slow database frontent
 
+provided for your convenience.
+"""
+import numpy as np
+from pymongo import MongoClient
+import settings
 import tools
-#------------------------------------------------------------------------------
-class FACT_db_time_slice_of_collection(object):
+import _time as facttime
+
+class ServiceField(object):
+    """ represents one Field of a Service
+    """
     
     def __init__(self, collection, key):
         self.__collection = collection
         self.__key = key
     
-    # a valid time stamp to test 16420
     def from_until(self, start, end):
+        """ retrieve field from start to end date as numpy array.
+        """
         cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
         return tools.cursor_to_structured_array(cursor)
         
 #------------------------------------------------------------------------------
-class FACT_db_collection(object):
+class Service(object):
+    """ represents a FACT slow data service
+    """
     
-    def __init__(self,collection):
+    def __init__(self, collection):
         self.__collection = collection
-        self.__get_keys_of_collection_assuming_they_are_the_same_for_all_documents(collection)
+        self.__get_service_field_names(collection)
         for key in self.__keys:
-            setattr(self, key, FACT_db_time_slice_of_collection(collection, key))
-                
-    def __get_keys_of_collection_assuming_they_are_the_same_for_all_documents(self,coll):
+            setattr(
+                self, 
+                key, 
+                ServiceField(collection, key))
+
+        self.__keys = None
+
+    def __get_service_field_names(self, coll):
+        """ retrieve the field names of this service 
+
+        by  using one example decument. 
+        """
         self.__keys = coll.find_one()
         del self.__keys['_id']
-        del self.__keys['QoS']
+        
 
-    def from_until(self, start, end):
-        cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
-        return tools.cursor_to_structured_array(cursor)
 
-    def from_until_sample_density_and_rate(self, start, end, density, rate):
-        number_of_samples = (end-start)*rate
-        time_between_samples = 1.0/rate
-        time_width_of_sample = time_between_samples*density
+    def from_until_sample(self, start, end, sample_period=None, skip=None, fields=None):
+        """ retrieve service from start to end date as numpy array. 
 
+        start : starttime in FJD
+        end   : end time in FJD 
+
+        keyword arguments:
+
+        sample_period : time(in days) into which the request should be splitted --> skip
+        skip   : number of periods, which should be skipped during request
+        fields : list of field names to be requested [default: all fields]
+        """
+        if not sample_period is None:
+            sample_boundaries = np.arange(start, end, sample_period)
+        else:
+            sample_boundaries = np.array([start, end])
+
+        
+
+        samples_start = sample_boundaries[0:-1:skip]
+        samples_end = sample_boundaries[1::skip]
         dict_list = []
-
-        for sample in range(number_of_samples):
-            sample_start_time = start + sample*time_between_samples
-            sample_end_time = sample_start_time+time_width_of_sample
-            start_stop_dict = {"Time":{"$gte": sample_start_time, "$lt": sample_end_time}}
+        for _start, _end in zip(samples_start, samples_end):
+            start_stop_dict = {  "Time":{
+                                         "$gte": float(_start), 
+                                         "$lt": float(_end)}}
             dict_list.append(start_stop_dict)
 
-        cursor = self.__collection.find({"$or": dict_list })
+        if not fields is None:
+            cursor = self.__collection.find({"$or": dict_list }, fields=fields)
+        else:
+            cursor = self.__collection.find({"$or": dict_list })
+
         return tools.cursor_to_structured_array(cursor)
+        
         
 #------------------------------------------------------------------------------
 class AuxDataBaseFrontEnd(object):
             
     def __init__(self, database):
         self.database = database
-        self.fill_in_services()
+        self.__service_names = None # to be initialised in __init_service_names
+        self.__fill_in_services()
         
-    def fill_in_services(self):
+    def __fill_in_services(self):
         self.__init_service_names()
-        for service in self.__service_names:
-            FACT_coll = FACT_db_collection(self.database[service]) 
-            setattr(AuxDataBaseFrontEnd, service, FACT_coll)    
+        for service_name in self.__service_names:
+            service = Service(self.database[service_name]) 
+            setattr(self, service_name, service)    
                 
     def __init_service_names(self):
         self.__service_names = list()
@@ -71,12 +105,6 @@ class AuxDataBaseFrontEnd(object):
                 self.__service_names.append(collection_name)
                 
 
-def correlate(A, B, delta):
-    tt = np.array(tools.create_time_averages_from(A,B,delta))
-    ttt = tools.common_times_to_be_evaluated(A,B,tt)
-    Bi = tools.interpolator(B, ttt)
-    Ai = tools.interpolator(A, ttt)
-    return Ai, Bi
 
 
 #------------------------------------------------------------------------------
@@ -102,10 +130,16 @@ print
 print "in order to plot for example the average sensor temperature vs. Time, you can do:"
 print "       plt.plot_date(a.Time, a.T_sens.mean(axis=1), '.')"
 print  
+print "########################################################"
+print "### check out the new facttime module:               ###"
+print "###                                                  ###"
+print "### just type: facttime.<tab>  to see whats in there ###"
+print "########################################################"
+print
 print "Have Fun!"
 
 
-print """ Example for correlation plots:
+""" Example for correlation plots:
 start = tools.datestr_to_facttime("20140925 20:00")
 stop = tools.datestr_to_facttime("20140926 6:00")
 A = aux.FSC_CONTROL_TEMPERATURE.from_until(start, stop)

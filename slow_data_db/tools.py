@@ -3,11 +3,6 @@
 import numpy as np
 import pymongo
 import logging
-import time 
-import calendar
-from datetime import datetime
-
-OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
 
 def cursor_to_rec_array(cursor):
     """ convert a pymongo.cursor.Cursor to an numpz recarray
@@ -66,16 +61,3 @@ def make_numpy_dtype_from_document(doc):
         )
 
     return np.dtype(list_of_names_n_types)
-
-def facttime(time_string):
-    """ conver time-string to fact time
-    """
-    return calendar.timegm(time.strptime(
-        time_string,"%Y%m%d %H:%M")) / (24.*3600.)
-
-
-def datestr(fact_time):
-    """ convert facttime to datestring
-    """
-    tup = time.gmtime(fact_time*24*3600)
-    return time.strftime("%Y%m%d %H:%M", tup)
