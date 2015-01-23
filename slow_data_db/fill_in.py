@@ -13,6 +13,7 @@ Options:
 from docopt import docopt
 program_options = docopt(__doc__, version='Filler 1')
 import os
+import re
 import pyfact
 from glob import glob
 import time
@@ -152,14 +153,16 @@ def service_name_from_path(path):
     """Grab the service name from a fits_file_path
 
     path : should be a full file path
-    the path is split and then the filename is taken from it by taking characters [9:-5]
-    this is a vety bad way to implement this!
-    TODO: improve... what if the filename does not look like this: 
-        yyyymmdd.SERVICE_NAME.fits, 
-    but there is a fits.gz or fits.fz ending?? hu?
+
+    service name is defines as any number of characters
+    A-Z (or underscore _), which follows the 8-digit date
+    any file extension like ".fits", ".fits.gz" 
+    even no file extension is permitted.
     """
     filename = os.path.split(path)[1]
-    return filename[9:-5]
+    match = re.match(r"^\d{8}\.([A-Z_]+)", filename)
+    return match.group(1)
+
 
 
 def create_mongo_doc(fits_row):
@@ -315,11 +318,11 @@ def main(opts):
     """ main function of this filler
     """
     connection = pymongo.MongoClient(settings.host, settings.port)
-    database = getattr(connection, settings.database_name)
+    aux = getattr(connection, settings.database_name)
     aux_meta = getattr(connection, 'aux_meta')
 
     if opts['--delete_all']:
-        delete_all_collections_from(database)
+        delete_all_collections_from(aux)
 
     for path in list_of_paths(opts['--base']):
         if is_file_intersting(path):
@@ -327,8 +330,8 @@ def main(opts):
             try:
                 fits_file = pyfact.Fits(path)
                 insert_service_description(fits_file, aux_meta)
-                insert_fitsfile(fits_file, database)
-                make_time_index_for_service(fits_file, database)
+                insert_fitsfile(fits_file, aux)
+                make_time_index_for_service(fits_file, aux)
                 print get_report(fits_file, starttime)
             except TypeError as exception:
                 print "TypeError", path, exception
