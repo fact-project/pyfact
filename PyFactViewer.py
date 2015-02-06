@@ -8,11 +8,14 @@ Usage:
     FactEventPlotter <inputfile> [options]
 
 Options:
-    --group=<group>     group from which to read, default: first found group
-    --dataset=<key>     hdf5 dataset from which to read. [default: photoncharge]
-    --pixelset=<key>    Special pixelset which is plotted with different border color
-    --cmap=<cmap>       The matplotlib cmap to be used [default: gray]
-    --pixelmap=<file>   File that contains the pixelmap [default: pixel-map.csv]
+    --group=<group>       group from which to read, default: first found group
+    --dataset=<key>       hdf5 dataset from which to read. [default: photoncharge]
+    --pixelset=<key>      Special pixelset which is plotted with different border color
+    --cmap=<cmap>         The matplotlib cmap to be used [default: gray]
+    --pixelmap=<file>     File that contains the pixelmap [default: pixel-map.csv]
+    --linecolor=<colors>  color for the pixelset [default: g]
+    --vmin=<vmin>         minimal value for the colormap
+    --vmax=<vmax>         maximal value for the colormap
 """
 
 import h5py
@@ -94,10 +97,20 @@ class Viewer():
 
         self.calc_marker_size()
 
+        if args["--vmin"] is not None:
+            vmin=args["--vmin"]
+        else:
+            vmin=np.min(self.dataset[self.event])
+        if args["--vmax"] is not None:
+            vmax=args["--vmax"]
+        else:
+            vmax=np.max(self.dataset[self.event])
+
         self.plot = self.ax.scatter(self.pixel_x,
                                     self.pixel_y,
                                     c=self.dataset[self.event],
-                                    vmin=0,
+                                    vmin=vmin,
+                                    vmax=vmax,
                                     lw=self.linewidth,
                                     marker='H',
                                     s=self.size,
@@ -106,14 +119,15 @@ class Viewer():
             self.pixelsetplot = self.ax.scatter(self.pixel_x[self.pixelset[self.event]],
                                                 self.pixel_y[self.pixelset[self.event]],
                                                 c=self.dataset[self.event][self.pixelset[self.event]],
-                                                vmin=0,
                                                 lw=self.linewidth,
-                                                edgecolor='g',
+                                                edgecolor=args["--linecolor"],
                                                 marker='H',
+                                                vmin=vmin,
+                                                vmax=vmax,
                                                 s=self.size,
                                                 cmap=self.cmap)
         self.cb = self.fig.colorbar(self.plot, ax=self.ax, label=self.key, shrink=0.95)
-        self.cb.set_clim(0, max(self.dataset[self.event]))
+        self.cb.set_clim(vmin=vmin, vmax=vmax)
         # self.cb.set_ticks(np.arange(0, int(max(self.dataset[self.event])+1)))
         self.cb.draw_all()
         # self.fig.tight_layout()
@@ -185,7 +199,14 @@ class Viewer():
             self.pixelsetplot.set_array(self.dataset[self.event][mask])
             self.pixelsetplot.set_offsets(np.transpose([self.pixel_x[mask], self.pixel_y[mask]]))
             self.pixelsetplot.changed()
-        self.cb.set_clim(0, max(self.dataset[self.event]))
+        if args["--vmin"] is not None:
+            self.cb.set_clim(vmin=args["--vmin"])
+        else:
+            self.cb.set_clim(vmin=np.min(self.dataset[self.event]))
+        if args["--vmax"] is not None:
+            self.cb.set_clim(vmax=args["--vmax"])
+        else:
+            self.cb.set_clim(vmax=np.max(self.dataset[self.event]))
         # self.cb.set_ticks(np.arange(0, int(max(self.dataset[self.event])+1)))
         self.cb.draw_all()
         self.canvas.draw()
@@ -194,6 +215,11 @@ class Viewer():
 if __name__ == "__main__":
     args = docopt(__doc__)
     print(args)
+
+    if args["--vmin"] is not None:
+        args["--vmin"] = float(args["--vmin"])
+    if args["--vmax"] is not None:
+        args["--vmax"] = float(args["--vmax"])
 
     inputfile = h5py.File(args["<inputfile>"], "r")
     if not args["--group"]:
