@@ -29,8 +29,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 # implement the default mpl key bindings
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
-import tkinter as Tk
 import numpy as np
+
+try:
+    import tkinter as tk
+    from tkinter import filedialog
+except ImportError:
+    import Tkinter as tk
+    import tkFileDialog as filedialog
 
 class Viewer():
     def __init__(self, dataset, key, pixelset=None, mapfile="pixel-map.csv", cmap="gray"):
@@ -48,40 +54,42 @@ class Viewer():
 
         #### GUI Stuff ####
 
-        self.root = Tk.Tk()
+        self.root = tk.Tk()
         self.root.geometry(("1024x768"))
         self.root.wm_title("PyFactViewer")
 
 
-        buttonFrame = Tk.Frame(self.root)
-        plotFrame = Tk.Frame(self.root)
+        buttonFrame = tk.Frame(self.root)
+        plotFrame = tk.Frame(self.root)
 
-        buttonFrame.pack(side=Tk.TOP)
-        plotFrame.pack(side=Tk.BOTTOM, expand=True, fill=Tk.BOTH)
+        buttonFrame.pack(side=tk.TOP)
+        plotFrame.pack(side=tk.BOTTOM, expand=True, fill=tk.BOTH)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=plotFrame)
         self.canvas.show()
-        self.canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-        self.canvas._tkcanvas.pack(side=Tk.BOTTOM, fill=Tk.BOTH, expand=1)
+        self.canvas._tkcanvas.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)
         self.root.bind('<Key>', self.on_key_event)
 
-        self.quit_button = Tk.Button(master=buttonFrame, text='Quit', command=self.quit, expand=None)
-        self.next_button = Tk.Button(master=buttonFrame, text='Next', command=self.next, expand=None)
-        # self.redraw_button = Tk.Button(master=buttonFrame, text='Redraw', command=self.redraw, expand=None)
-        self.previous_button = Tk.Button(master=buttonFrame, text='Previous', command=self.previous, expand=None)
+        self.quit_button = tk.Button(master=buttonFrame, text='Quit', command=self.quit, expand=None)
+        self.next_button = tk.Button(master=buttonFrame, text='Next', command=self.next, expand=None)
+        # self.redraw_button = tk.Button(master=buttonFrame, text='Redraw', command=self.redraw, expand=None)
+        self.previous_button = tk.Button(master=buttonFrame, text='Previous', command=self.previous, expand=None)
+        self.save_button = tk.Button(master=buttonFrame, text='Save Image', command=self.save, expand=None)
 
-        self.eventstring = Tk.StringVar()
+        self.eventstring = tk.StringVar()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
-        self.eventbox = Tk.Label(master=buttonFrame, textvariable=self.eventstring)
-        self.eventbox.pack(side=Tk.LEFT)
-        self.previous_button.pack(side=Tk.LEFT)
-        self.next_button.pack(side=Tk.LEFT)
-        # self.redraw_button.pack(side=Tk.LEFT)
-        self.quit_button.pack(side=Tk.RIGHT)
+        self.eventbox = tk.Label(master=buttonFrame, textvariable=self.eventstring)
+        self.eventbox.pack(side=tk.LEFT)
+        self.previous_button.pack(side=tk.LEFT)
+        self.next_button.pack(side=tk.LEFT)
+        # self.redraw_button.pack(side=tk.LEFT)
+        self.quit_button.pack(side=tk.RIGHT)
+        self.save_button.pack(side=tk.RIGHT)
         # self.root.bind("<Configure>", self.store_event)
         self.root.after(100, self.redraw)
-        Tk.mainloop()
+        tk.mainloop()
 
     # def store_event(self, event):
     #     self.lastevent = event
@@ -131,6 +139,19 @@ class Viewer():
         # self.cb.set_ticks(np.arange(0, int(max(self.dataset[self.event])+1)))
         self.cb.draw_all()
         # self.fig.tight_layout()
+
+    def save(self):
+        filename = filedialog.asksaveasfilename(
+            initialdir=os.getcwd(),
+            parent=self.root,
+            title="Choose a filename for the saved image",
+            defaultextension=".pdf",
+        )
+        print(filename)
+        if filename is not None:
+            fig = self.fig
+            # fig.tight_layout()
+            fig.savefig(filename, dpi=300, bbox_inches="tight", transparent=True)
 
     def calc_marker_size(self):
         bbox = self.ax.get_window_extent().transformed(self.fig.dpi_scale_trans.inverted())
