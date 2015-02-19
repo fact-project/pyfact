@@ -39,14 +39,26 @@ except ImportError:
     import tkFileDialog as filedialog
 
 class Viewer():
-    def __init__(self, dataset, key, pixelset=None, mapfile="pixel-map.csv", cmap="gray"):
+    def __init__(self,
+                 dataset,
+                 key,
+                 pixelset=None,
+                 pixelsetcolour="g",
+                 mapfile="pixel-map.csv",
+                 cmap="gray",
+                 vmin=None,
+                 vmax=None,
+                 ):
         self.event = 0
         self.resizing = False
         self.dataset = dataset
         self.numEvents = len(dataset)
         self.pixelset = pixelset
+        self.pixelsetcolour = pixelsetcolour
         self.key = key
         self.cmap = cmap
+        self.vmin = vmin
+        self.vmax = vmax
         self.pixel_x, self.pixel_y = self.get_pixel_coords(mapfile)
         self.fig = Figure(figsize=(7,6), dpi=100)
 
@@ -74,7 +86,6 @@ class Viewer():
 
         self.quit_button = tk.Button(master=buttonFrame, text='Quit', command=self.quit, expand=None)
         self.next_button = tk.Button(master=buttonFrame, text='Next', command=self.next, expand=None)
-        # self.redraw_button = tk.Button(master=buttonFrame, text='Redraw', command=self.redraw, expand=None)
         self.previous_button = tk.Button(master=buttonFrame, text='Previous', command=self.previous, expand=None)
         self.save_button = tk.Button(master=buttonFrame, text='Save Image', command=self.save, expand=None)
 
@@ -84,15 +95,10 @@ class Viewer():
         self.eventbox.pack(side=tk.LEFT)
         self.previous_button.pack(side=tk.LEFT)
         self.next_button.pack(side=tk.LEFT)
-        # self.redraw_button.pack(side=tk.LEFT)
         self.quit_button.pack(side=tk.RIGHT)
         self.save_button.pack(side=tk.RIGHT)
-        # self.root.bind("<Configure>", self.store_event)
         self.root.after(100, self.redraw)
         tk.mainloop()
-
-    # def store_event(self, event):
-    #     self.lastevent = event
 
     def init_plot(self):
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
@@ -105,14 +111,14 @@ class Viewer():
 
         self.calc_marker_size()
 
-        if args["--vmin"] is not None:
-            vmin=args["--vmin"]
-        else:
+        if self.vmin is None:
             vmin=np.min(self.dataset[self.event])
-        if args["--vmax"] is not None:
-            vmax=args["--vmax"]
         else:
+            vmin = self.vmin
+        if self.vmax is None:
             vmax=np.max(self.dataset[self.event])
+        else:
+            vmax = self.vmax
 
         self.plot = self.ax.scatter(self.pixel_x,
                                     self.pixel_y,
@@ -128,7 +134,7 @@ class Viewer():
                                                 self.pixel_y[self.pixelset[self.event]],
                                                 c=self.dataset[self.event][self.pixelset[self.event]],
                                                 lw=self.linewidth,
-                                                edgecolor=args["--linecolor"],
+                                                edgecolor=self.pixelsetcolour,
                                                 marker='H',
                                                 vmin=vmin,
                                                 vmax=vmax,
@@ -220,15 +226,15 @@ class Viewer():
             self.pixelsetplot.set_array(self.dataset[self.event][mask])
             self.pixelsetplot.set_offsets(np.transpose([self.pixel_x[mask], self.pixel_y[mask]]))
             self.pixelsetplot.changed()
-        if args["--vmin"] is not None:
-            self.cb.set_clim(vmin=args["--vmin"])
+        if self.vmin is None:
+            vmin = np.min(self.dataset[self.event])
         else:
-            self.cb.set_clim(vmin=np.min(self.dataset[self.event]))
-        if args["--vmax"] is not None:
-            self.cb.set_clim(vmax=args["--vmax"])
+            vmin=self.vmin
+        if self.vmax is None:
+            vmax = np.max(self.dataset[self.event])
         else:
-            self.cb.set_clim(vmax=np.max(self.dataset[self.event]))
-        # self.cb.set_ticks(np.arange(0, int(max(self.dataset[self.event])+1)))
+            vmax=self.vmax
+        self.cb.set_clim(vmin=vmin, vmax=vmax)
         self.cb.draw_all()
         self.canvas.draw()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
@@ -258,9 +264,17 @@ if __name__ == "__main__":
     else:
         pixelset = None
 
+    if args["--vmin"] is not None:
+        args["--vmin"] = float(args["--vmin"])
+    if args["--vmax"] is not None:
+        args["--vmax"] = float(args["--vmax"])
+
     myViewer = Viewer(dataset,
                       args["--dataset"],
                       cmap=args["--cmap"],
+                      vmin=args["--vmin"],
+                      vmax=args["--vmax"],
                       pixelset=pixelset,
+                      pixelsetcolour=args["--linecolor"],
                       mapfile=args["--pixelmap"],
                       )
