@@ -4,7 +4,7 @@ Most of the functions get added to matplotlib, so you can just use e.g.
 
 import matplotlib.pyplot as plt
 import fact.plotting as fplot
-plt.fact_pixel(data)
+plt.camerapixel(data)
 
 The Viewer class starts a GUI with tkinter, that let's you click through
 events
@@ -15,10 +15,12 @@ import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import os
 import numpy as np
 import pkg_resources as res
-from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # tkinter is named differently in python2 and python3
 try:
@@ -33,6 +35,65 @@ try:
     from importlib import reload
 except ImportError:
     from imp import reload
+
+__all__ = ['Viewer', 'get_pixel_coords', 'calc_marker_size']
+
+def factcamera(self,
+               data,
+               pixelcoords=None,
+               cmap='gray',
+               vmin=None,
+               vmax=None,
+               pixelset=None,
+               pixelsetcolour='g',
+               ):
+    self.set_aspect('equal')
+    self.set_xlim(-200, 200)
+    self.set_ylim(-200, 200)
+    size, linewidth = calc_marker_size(self)
+
+    if pixelcoords is None:
+        pixel_x, pixel_y = get_pixel_coords()
+
+    if vmin is None:
+        vmin = np.min(data)
+    if vmax is None:
+        vmax = np.max(data)
+
+    ret = self.scatter(pixel_x,
+                       pixel_y,
+                       c=data,
+                       vmin=vmin,
+                       vmax=vmax,
+                       lw=linewidth,
+                       marker='h',
+                       s=size,
+                       cmap=cmap
+                       )
+
+    if pixelset is not None:
+        self.scatter(pixel_x[pixelset],
+                     pixel_y[pixelset],
+                     c=data[pixelset],
+                     lw=linewidth,
+                     edgecolor=pixelsetcolour,
+                     marker='h',
+                     vmin=vmin,
+                     vmax=vmax,
+                     s=size,
+                     cmap=cmap
+                     )
+    return ret
+
+Axes.factcamera = factcamera
+
+def pltfactcamera(*args, **kwargs):
+    ax = plt.gca()
+    ret = ax.factcamera(*args, **kwargs)
+    plt.draw_if_interactive()
+    return ret
+
+plt.factcamera = pltfactcamera
 
 def calc_marker_size(ax):
     """
@@ -59,10 +120,10 @@ def calc_marker_size(ax):
     x1, x2 = ax.get_xlim()
     y1, y2 = ax.get_ylim()
 
-    x_stretch = (x2 - x1)/400 * 1.2
+    x_stretch = (x2 - x1)/400
     y_stretch = (y2 - y1)/400
 
-    size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 120
+    size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 100
     linewidth = min(width/1.2, height)/5 * 1.2
 
     return size, linewidth
@@ -221,7 +282,9 @@ class Viewer():
     def init_plot(self):
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
         self.fig.clf()
-        self.ax = self.fig.add_axes((0.01, 0.01, 0.98, 0.98), aspect=1)
+        self.ax = self.fig.add_subplot(1,1,1, aspect=1)
+        divider = make_axes_locatable(self.ax)
+        self.cax = divider.append_axes("right", size="5%", pad=0.1)
         self.ax.set_xticks([])
         self.ax.set_yticks([])
         self.ax.set_xlim(-200, 200)
@@ -258,11 +321,9 @@ class Viewer():
                                                 vmax=vmax,
                                                 s=self.size,
                                                 cmap=self.cmap)
-        self.cb = self.fig.colorbar(self.plot, ax=self.ax, label=self.label, shrink=0.95)
+        self.cb = self.fig.colorbar(self.plot, cax=self.cax, label=self.label)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
-        # self.cb.set_ticks(np.arange(0, int(max(self.dataset[self.event])+1)))
         self.cb.draw_all()
-        # self.fig.tight_layout()
 
     def save(self):
         filename = filedialog.asksaveasfilename(
@@ -273,7 +334,6 @@ class Viewer():
         )
         if filename is not None:
             fig = self.fig
-            # fig.tight_layout()
             fig.savefig(filename, dpi=300, bbox_inches="tight", transparent=True)
             print("Image sucessfully saved to", filename)
 
@@ -284,10 +344,15 @@ class Viewer():
             self.plot._sizes = np.ones(self.dataset.shape[1])*self.size
             self.plot.set_linewidth(self.linewidth)
             if self.pixelset is not None:
-                self.pixelsetplot._sizes = np.ones(self.dataset.shape[1])*self.size
+                self.pixelsetplot._sizes = np.ones(self.dataset.shape[1]) * self.size
                 self.pixelsetplot.set_linewidth(self.linewidth)
             self.canvas.draw()
             self.resizing = False
+            try:
+                self.fig.tight_layout()
+            except ValueError:
+                pass
+
         self.root.after(100, self.redraw)
 
     def quit(self):
