@@ -16,7 +16,7 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
-        'matplotlib',
+        'matplotlib>=1.4',
     ],
     zip_safe=False
 )
