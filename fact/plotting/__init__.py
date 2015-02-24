@@ -123,9 +123,8 @@ def calc_marker_size(ax):
     x_stretch = (x2 - x1)/400
     y_stretch = (y2 - y1)/400
 
-    size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 100
-    linewidth = min(width/1.2, height)/5 * 1.2
-
+    size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 9.45**2
+    linewidth = min(width/x_stretch, height/y_stretch)/5 * 0.5
     return size, linewidth
 
 def get_pixel_coords(mapfile=None,
