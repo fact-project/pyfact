@@ -332,7 +332,7 @@ class Viewer():
             title="Choose a filename for the saved image",
             defaultextension=".pdf",
         )
-        if filename is not None:
+        if filename:
             fig = self.fig
             fig.savefig(filename, dpi=300, bbox_inches="tight", transparent=True)
             print("Image sucessfully saved to", filename)
