@@ -1,36 +1,26 @@
-#!/usr/bin/env python3
 """
-This file plots the classic EventView for every Event in a data file.
-It can be imported into zour own Python scripts or called from the command
-line with the options below
+This module contains functions to plot fact data into the camera view.
+Most of the functions get added to matplotlib, so you can just use e.g.
 
-Usage:
-    FactEventPlotter <inputfile> [options]
+import matplotlib.pyplot as plt
+import fact.plotting as fplot
+plt.fact_pixel(data)
 
-Options:
-    --group=<group>       group from which to read, default: first found group
-    --dataset=<key>       hdf5 dataset from which to read. [default: photoncharge]
-    --pixelset=<key>      Special pixelset which is plotted with different border color
-    --cmap=<cmap>         The matplotlib cmap to be used [default: gray]
-    --pixelmap=<file>     File that contains the pixelmap [default: pixel-map.csv]
-    --linecolor=<colors>  color for the pixelset [default: g]
-    --vmin=<vmin>         minimal value for the colormap
-    --vmax=<vmax>         maximal value for the colormap
+The Viewer class starts a GUI with tkinter, that let's you click through
+events
 """
 
-import h5py
-import os
-import os.path
-from docopt import docopt
+from fact import __path__
 import matplotlib
-matplotlib.use('TkAgg')
-matplotlib.rcParams["text.usetex"] = False
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-# implement the default mpl key bindings
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
+import os
 import numpy as np
+import pkg_resources as res
+from matplotlib.axes import Axes
 
+# tkinter is named differently in python2 and python3
 try:
     import tkinter as tk
     from tkinter import filedialog
@@ -38,10 +28,136 @@ except ImportError:
     import Tkinter as tk
     import tkFileDialog as filedialog
 
+# for python2 use imp.reload, for python3 use importlib
+try:
+    from importlib import reload
+except ImportError:
+    from imp import reload
+
+def calc_marker_size(ax):
+    """
+    calculate the correct marker size and linewidth for the fact pixels,
+    so that plt.scatter(x, y, s=size, marker='H', linewidth=linewidth)
+    produces a nice view of the fact camera
+
+    Arguments
+    ---------
+    ax  : matplotlib Axes instance
+        the axes you want to calculate the size for
+
+    Returns
+    -------
+    size : float
+    linewidth : float
+    """
+
+    fig = ax.get_figure()
+
+    bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    width, height = bbox.width, bbox.height
+
+    x1, x2 = ax.get_xlim()
+    y1, y2 = ax.get_ylim()
+
+    x_stretch = (x2 - x1)/400 * 1.2
+    y_stretch = (y2 - y1)/400
+
+    size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 120
+    linewidth = min(width/1.2, height)/5 * 1.2
+
+    return size, linewidth
+
+def get_pixel_coords(mapfile=None,
+                     rotate=True,
+                     columns=[0,9,10,11],
+                     skiprows=1,
+                     delimiter=",",
+                     unpack=True,
+                     ):
+    """
+    Calculate the pixel coordinates from the standard pixel-map file
+    by default it gets rotated by 90 degrees clockwise to show the same
+    orientation as MARS and fact-tools
+
+    Arguments
+    ---------
+    mapfile : str
+        path/to/pixelmap.csv, if None than the package resource is used
+        [defailt: None]
+    rotate : bool
+        if True the view is rotated by 90 degrees counter-clockwise
+        [default: True]
+    colums : list-like
+        the columns in the file for softID, chid, x, y
+        default: [0, 9, 10, 11]
+    """
+
+    if mapfile is None:
+        mapfile = res.resource_filename("fact", "resources/pixel-map.csv")
+
+    softID, chid, pixel_x_soft, pixel_y_soft = np.genfromtxt(
+        mapfile,
+        skiprows=skiprows,
+        delimiter=delimiter,
+        usecols=columns,
+        unpack=unpack,
+    )
+
+    pixel_x_chid = np.zeros(1440)
+    pixel_y_chid = np.zeros(1440)
+
+    pixel_x_soft*=9.5
+    pixel_y_soft*=9.5
+
+    for i in range(1440):
+        pixel_x_chid[chid[i]] = pixel_x_soft[i]
+        pixel_y_chid[chid[i]] = pixel_y_soft[i]
+
+    # rotate by 90 degrees to show correct orientation
+    if rotate is True:
+        pixel_x = - pixel_y_chid
+        pixel_y = pixel_x_chid
+    else:
+        pixel_x = pixel_x_chid
+        pixel_y = pixel_y_chid
+
+    return pixel_x, pixel_y
+
+
+
 class Viewer():
+    """
+    A tkinter based GUI to look at fact events in the camera view.
+
+    Attributes
+    ----------
+
+    dataset  : array like with shape (num_events, 1440)
+        the data you want to plot into the pixels
+    label    : str
+        the label for the colormap
+    pixelset : boolean array with shape (num_events, 1440)
+        the pixels where pixelset is True are marked with 'pixelsetcolour'
+        [default: None]
+    pixelsetcolour : a matplotlib conform colour representation
+        the colour for the pixels in 'pixelset',
+        [default: green]
+    mapfile : str
+        path/to/fact/pixelmap.csv
+        [default pixel-map.csv]
+    cmap : str or matplotlib colormap instance
+        the colormap to use for plotting the 'dataset'
+        [default: gray]
+    vmin : float
+        the minimum for the colorbar, if None min(dataset[event]) is used
+        [default: None]
+    vmax : float
+        the maximum for the colorbar, if None max(dataset[event]) is used
+        [default: None]
+    """
     def __init__(self,
                  dataset,
-                 key,
+                 label,
                  pixelset=None,
                  pixelsetcolour="g",
                  mapfile="pixel-map.csv",
@@ -49,17 +165,19 @@ class Viewer():
                  vmin=None,
                  vmax=None,
                  ):
+        matplotlib.use('TkAgg', warn=False, force=True)
+        matplotlib.rcdefaults()
         self.event = 0
         self.resizing = False
         self.dataset = dataset
         self.numEvents = len(dataset)
         self.pixelset = pixelset
         self.pixelsetcolour = pixelsetcolour
-        self.key = key
+        self.label = label
         self.cmap = cmap
         self.vmin = vmin
         self.vmax = vmax
-        self.pixel_x, self.pixel_y = self.get_pixel_coords(mapfile)
+        self.pixel_x, self.pixel_y = get_pixel_coords()
         self.fig = Figure(figsize=(7,6), dpi=100)
 
         self.init_plot()
@@ -109,7 +227,7 @@ class Viewer():
         self.ax.set_xlim(-200, 200)
         self.ax.set_ylim(-200, 200)
 
-        self.calc_marker_size()
+        self.size, self.linewidth = calc_marker_size(self.ax)
 
         if self.vmin is None:
             vmin=np.min(self.dataset[self.event])
@@ -126,7 +244,7 @@ class Viewer():
                                     vmin=vmin,
                                     vmax=vmax,
                                     lw=self.linewidth,
-                                    marker='H',
+                                    marker='h',
                                     s=self.size,
                                     cmap=self.cmap)
         if self.pixelset is not None:
@@ -135,12 +253,12 @@ class Viewer():
                                                 c=self.dataset[self.event][self.pixelset[self.event]],
                                                 lw=self.linewidth,
                                                 edgecolor=self.pixelsetcolour,
-                                                marker='H',
+                                                marker='h',
                                                 vmin=vmin,
                                                 vmax=vmax,
                                                 s=self.size,
                                                 cmap=self.cmap)
-        self.cb = self.fig.colorbar(self.plot, ax=self.ax, label=self.key, shrink=0.95)
+        self.cb = self.fig.colorbar(self.plot, ax=self.ax, label=self.label, shrink=0.95)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
         # self.cb.set_ticks(np.arange(0, int(max(self.dataset[self.event])+1)))
         self.cb.draw_all()
@@ -153,22 +271,16 @@ class Viewer():
             title="Choose a filename for the saved image",
             defaultextension=".pdf",
         )
-        print(filename)
         if filename is not None:
             fig = self.fig
             # fig.tight_layout()
             fig.savefig(filename, dpi=300, bbox_inches="tight", transparent=True)
-
-    def calc_marker_size(self):
-        bbox = self.ax.get_window_extent().transformed(self.fig.dpi_scale_trans.inverted())
-        width, height = bbox.width, bbox.height
-        self.size = (min(width/1.2, height)/5)**2 * 120
-        self.linewidth = min(width/1.2, height)/5 * 1.2
+            print("Image sucessfully saved to", filename)
 
     def redraw(self):
         if self.width != self.fig.get_figwidth() and self.height != self.fig.get_figheight():
             self.resizing = True
-            self.calc_marker_size()
+            self.size, self.linewidth = calc_marker_size(self.ax)
             self.plot._sizes = np.ones(self.dataset.shape[1])*self.size
             self.plot.set_linewidth(self.linewidth)
             if self.pixelset is not None:
@@ -177,23 +289,6 @@ class Viewer():
             self.canvas.draw()
             self.resizing = False
         self.root.after(100, self.redraw)
-
-    def get_pixel_coords(self, mapfile):
-        softID, chid, pixel_x_soft, pixel_y_soft = np.loadtxt(mapfile,
-                                                              skiprows=1,
-                                                              delimiter=",",
-                                                              usecols=(0,9,10,11),
-                                                              unpack=True)
-        pixel_x_chid = np.zeros(1440)
-        pixel_y_chid = np.zeros(1440)
-
-        pixel_x_soft*=9.5
-        pixel_y_soft*=9.5
-
-        for i in range(1440):
-            pixel_x_chid[chid[i]] = pixel_x_soft[i]
-            pixel_y_chid[chid[i]] = pixel_y_soft[i]
-        return pixel_x_chid, pixel_y_chid
 
     def quit(self):
         self.root.quit()     # stops mainloop
@@ -238,43 +333,3 @@ class Viewer():
         self.cb.draw_all()
         self.canvas.draw()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
-
-if __name__ == "__main__":
-    args = docopt(__doc__)
-    print(args)
-
-    if args["--vmin"] is not None:
-        args["--vmin"] = float(args["--vmin"])
-    if args["--vmax"] is not None:
-        args["--vmax"] = float(args["--vmax"])
-
-    inputfile = h5py.File(args["<inputfile>"], "r")
-    if not args["--group"]:
-        group = inputfile[list(inputfile.keys())[0]]
-    else:
-        group = inputfile[args["--group"]]
-
-    for key in sorted(group.keys()):
-        print(key)
-
-    dataset = group.get(args["--dataset"])
-
-    if args["--pixelset"] is not None:
-        pixelset = group.get(args["--pixelset"])
-    else:
-        pixelset = None
-
-    if args["--vmin"] is not None:
-        args["--vmin"] = float(args["--vmin"])
-    if args["--vmax"] is not None:
-        args["--vmax"] = float(args["--vmax"])
-
-    myViewer = Viewer(dataset,
-                      args["--dataset"],
-                      cmap=args["--cmap"],
-                      vmin=args["--vmin"],
-                      vmax=args["--vmax"],
-                      pixelset=pixelset,
-                      pixelsetcolour=args["--linecolor"],
-                      mapfile=args["--pixelmap"],
-                      )
