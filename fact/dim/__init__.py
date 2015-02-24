@@ -1,23 +1,25 @@
+"""
+Currently this module reads DIS_DNS/SERVER_LIST on startup in order to
+create server instances for the user. But what if a new server comes online later?
+How can we support that?
+And what if existing servers go offline? Do we have any chance to give
+the user some meaningful error messages in case he tries to access a server,
+that went offline???
+"""
+from __future__ import print_function, division
 import types
 from keyword import iskeyword
 import time
 import pydim
 
-# TODO: 
-# Currently this module reads DIS_DNS/SERVER_LIST on startup in order to 
-# create server instances for the user. But what if a new server comes online later?
-# How can we support that? 
-# And what if existing servers go offline? Do we have any chance to give 
-# the user some meaningful error messages in case he tries to access a server,
-# that went offline???
 
 class gl(object):
     """ More a namespace than a class. I misus this class to bundle some
         "module-global" parameters. Actually they are not module global atm.
         But as soon As I moved some classes out of this modul
-        I can make these paramters modul global. 
+        I can make these paramters modul global.
     """
-    timeout = 5 # seconds
+    timeout = 5  # seconds
     dns_name = 'ihp-pc1.ethz.ch'
 
 pydim.dic_set_dns_node(gl.dns_name)
@@ -33,7 +35,7 @@ class DimService(object):
 
     def __init__(self, name, fmt, typ):
         self.name = name
-        self.fmt = fmt # format
+        self.fmt = fmt  # format
         self.typ = typ
 
         self.desc = None
@@ -50,7 +52,7 @@ class DimServer(object):
         self.name = name
         self.pid = pid
         self.host = host
-        
+
         self.timeout = timeout
 
         self.services = self._fetch_services()
@@ -67,40 +69,41 @@ class DimServer(object):
         self.services = {svc.name: svc for svc in self.services}
 
     def _fetch_services(self):
-    
+
         sl_raw = pydim.dic_sync_info_service(self.name + '/SERVICE_LIST','C', timeout=self.timeout)
         # return value is a tuple with only one element
         sl_raw = sl_raw[0]
 
-        if sl_raw == None:
-            raise IOError("{name}/SERVICE_LIST request "
-                          "timed out after {timout} seconds".format(timeout=self.timeout, name=self.name)
-                         )
+        if sl_raw is None:
+            raise IOError(
+                "{name}/SERVICE_LIST request "
+                "timed out after {timout} seconds".format(timeout=self.timeout, name=self.name)
+            )
 
-        # now before parsing, I strip off all ASCII zeroes '\x00' and all 
+        # now before parsing, I strip off all ASCII zeroes '\x00' and all
         # line breaks off the *end* of the long string of both
         # the service list sl
         # and service description sd
         #
-        # I think in sl_raw were alse some '\x00' in the middle .. these 
+        # I think in sl_raw were alse some '\x00' in the middle .. these
         # are replaced by nothing, in case they are there.
         sl_raw = sl_raw.rstrip('\x00\n')
         sl_raw = sl_raw.replace('\x00','')
-        
+
         # The lists are seperated by line breaks, so I split them using this
         sl = sl_raw.split('\n')
-        
+
         # Now I fill ther services dict. Each server gets a nested dict
-        # inside services. 
+        # inside services.
         # Each service is explained in a string with a '|' in between.
-        # I use this for spliting. 
-        # The string look like this 
+        # I use this for spliting.
+        # The string look like this
         # SERVER/SERVICE|format-desc-str(e.g. I:2;C)|-empty- or CMD or RPC|
-        
+
         services = []
         for service in sl:
             service = service.split('|')
-            services.append( DimService(name=service[0], fmt=service[1], typ=service[2]))
+            services.append(DimService(name=service[0], fmt=service[1], typ=service[2]))
 
         return services
 
@@ -109,28 +112,29 @@ class DimServer(object):
         if full_service_name in list_of_service_names:
             return True
         else:
-            return False 
+            return False
 
     def _fetch_service_description(self):
-        """ FACT dim servers often have a special service called SERVICE_DESC, 
-            which further describes services. 
-            
+        """ FACT dim servers often have a special service called SERVICE_DESC,
+            which further describes services.
+
             server : needed to find out if SERVICE_DESC is really available
 
         """
         if self.has_service(self.name+"/SERVICE_DESC"):
             sd_raw = pydim.dic_sync_info_service(self.name+'/SERVICE_DESC','C',timeout=self.timeout)[0]
-            if sd_raw == None:
-                raise IOError("{name}/SERVICE_DESC request "
-                          "timed out after {timout} seconds".format(timeout=self.timeout, name=self.name)
-                         )
+            if sd_raw is None:
+                raise IOError(
+                    "{name}/SERVICE_DESC request "
+                    "timed out after {timout} seconds".format(timeout=self.timeout, name=self.name)
+                    )
         else:
             return None
         sd_raw = sd_raw.rstrip('\x00\n')
         sd = sd_raw.split('\n')
-        
+
         """
-        # First I parse the service descriptons, so I have them available, 
+        # First I parse the service descriptons, so I have them available,
         # when I create the dict full of services.
         # All desciptions look like this
         # 'SERVER/SERVICE=some descriptive text' or
@@ -146,10 +150,10 @@ class DimServer(object):
             dd[service] = desc
 
         # Now I fill ther services dict. Each server gets a nested dict
-        # inside services. 
+        # inside services.
         # Each service is explained in a string with a '|' in between.
-        # I use this for spliting. 
-        # The string look like this 
+        # I use this for spliting.
+        # The string look like this
         # SERVER/SERVICE|format-desc-str(e.g. I:2;C)|-empty- or CMD or RPC|
         services[server] = {}
         for service in sl:
@@ -167,14 +171,14 @@ class DimServer(object):
                 method_name = self.lower_short_service_name(svc)
             except ServiceNameProblem:
                 continue
-            
+
             if svc.typ == 'CMD':
                 def dummy_method(self, args, svc=svc):
                     return self._cmd(svc, *args)
             elif svc.typ == '':
                 def dummy_method(self, svc=svc):
                     return self._get(svc)
-            
+
             dummy_method.__name__ = method_name
             dummy_method.__doc__ = str(svc)
             setattr(self, method_name, types.MethodType(dummy_method, self))
@@ -183,7 +187,7 @@ class DimServer(object):
         """ used by all dynamicly created methods, which call a Dim CMD
         """
         fmt = svc.fmt
-        
+
         # there is a work around for a bug in pydim
         # even if a command needs no argument, and desc is also empty string
         # one has to give one ... need to tell Niko about it.
@@ -195,18 +199,18 @@ class DimServer(object):
         pydim.dic_sync_cmnd_service(svc.name, args, fmt, timeout=self.timeout)
 
     def _get(self, svc):
-        """ used by all dynamicly created methods, which get a service 
+        """ used by all dynamicly created methods, which get a service
         """
         return pydim.dic_sync_info_service(svc.name, svc.fmt, timeout=1)
 
     def lower_short_service_name(self, svc):
         if not svc.name.find(self.name+'/') == 0:
-            raise ServiceNameProblem("not svc.name.find(self.name+'/') == 0: "
-                            "--> svc.name:{0}, server.name:{1}".format(
-                                                                       svc.name, 
-                                                                       self.name
-                                                                       )
-                           )
+            raise ServiceNameProblem(
+                "not svc.name.find(self.name+'/') == 0: "
+                "--> svc.name:{0}, server.name:{1}".format(svc.name,
+                                                           self.name
+                                                           )
+                )
         short_name = svc.name.replace(self.name+'/', '').lower()
         if iskeyword(short_name):
             short_name += '_'
@@ -216,14 +220,14 @@ def make_doc_string(service):
     doc_string = ""
     doc_string += "Dim Service \n"
     if service.desc:
-        doc_string +=  service.desc
+        doc_string += service.desc
     else:
         doc_string += "--- no SERVICE_DESC available for this service ---\n"
     doc_string += '\n'
     doc_string += str(service)
     return doc_string
 
-def make_method_name_from_service( service ):
+def make_method_name_from_service(service):
     meth_name = service.name.split('/')[1].lower()
     if iskeyword(meth_name):
         meth_name += '_get'
@@ -235,31 +239,31 @@ def print_doc_string_to_file(doc_string, f):
         if '|' in line:
             for subline in line.split('|'):
                 if subline:
-                    f.write('            ' + subline + '\n' )
+                    f.write('            ' + subline + '\n')
         else:
-            f.write('            ' + line + '\n' )
+            f.write('            ' + line + '\n')
 
-def print_getter( service, f ):
+def print_getter(service, f):
     meth_name = make_method_name_from_service(service)
     doc_string = make_doc_string(service)
 
-    f.write("    def " + meth_name + "(self):\n" )
+    f.write("    def " + meth_name + "(self):\n")
     f.write('        """ \n')
-    print_doc_string_to_file( doc_string, f)
+    print_doc_string_to_file(doc_string, f)
     f.write('        """ \n')
-    f.write('        return self._get("' + meth_name.upper() + '")\n\n' )
+    f.write('        return self._get("' + meth_name.upper() + '")\n\n')
 
 def print_command(service, f):
     meth_name = make_method_name_from_service(service)
     doc_string = make_doc_string(service)
-        
-    f.write("    def " + meth_name + "(self, *args):\n" )
-    f.write('        """ \n')
-    print_doc_string_to_file( doc_string, f)
-    f.write('        """ \n')
-    f.write('        self._cmd("' + meth_name.upper() + '", *args)\n\n' )
 
-class FactDimServer( object ):
+    f.write("    def " + meth_name + "(self, *args):\n")
+    f.write('        """ \n')
+    print_doc_string_to_file(doc_string, f)
+    f.write('        """ \n')
+    f.write('        self._cmd("' + meth_name.upper() + '", *args)\n\n')
+
+class FactDimServer(object):
     def __init__(self, name, services):
         """ sets name of instance to name of server, all uppercase
         """
@@ -282,7 +286,7 @@ class FactDimServer( object ):
         """
         cmdstr=self.name+'/'+cmdstr.upper()
         desc = self.services[self.name][cmdstr.upper()][0]
-        
+
         # there is a work around for a bug in pydim
         # even if a command needs no argument, and desc is also empty string
         # one has to give one ... need to tell Niko about it.
@@ -295,11 +299,11 @@ class FactDimServer( object ):
             time.sleep(0.5)
         self.__last_cmd_send = time.time()
         pydim.dic_sync_cmnd_service(cmdstr, args, desc, timeout=1)
-        
+
 
 
     def _get(self, service):
-        """ used by all dynamicly created methods, which get a service 
+        """ used by all dynamicly created methods, which get a service
         """
         full_srv_name = self.name+'/'+service.upper()
         desc = self.services[self.name][full_srv_name][0]
@@ -307,10 +311,10 @@ class FactDimServer( object ):
         while not time.time() - self.__last_service_got > self.__delay_between_services:
             time.sleep(0.5)
         self.__last_service_got = time.time()
-        #print 'full_srv_name',full_srv_name
-        #print 'desc', desc
+        # print 'full_srv_name',full_srv_name
+        # print 'desc', desc
         return pydim.dic_sync_info_service(full_srv_name, desc, timeout=1)
-            
+
 
 
     def __call__(self):
@@ -322,7 +326,7 @@ class FactDimServer( object ):
             return self.stn
         else:
             raise TypeError(self.name+' has no CMD called STATE')
-    
+
     def wait(self, state_num, timeout=None):
         """ waits for a certain state
             BLOCKING
@@ -333,7 +337,7 @@ class FactDimServer( object ):
 
         if not hasattr(self, 'stn'):
             raise TypeError(self.name+' has no CMD called STATE')
-        if timeout == None:
+        if timeout is None:
             timeout = float('inf')
         else:
             timeout = float(timeout)
@@ -347,25 +351,25 @@ class FactDimServer( object ):
     def state_callback(self, state):
         self.sts = state
         try:
-            self.stn = int(state[state.find('[')+1 : state.find(']')]) 
+            self.stn = int(state[state.find('[')+1: state.find(']')])
         except ValueError:
             self.stn = None
-            
+
         self.last_st_change = time.time()
-        self.list_of_states.append( (self.last_st_change, self.stn) )
+        self.list_of_states.append((self.last_st_change, self.stn))
         if len(self.list_of_states) > 10000:
-            print "list_of_states too long, truncating..."
+            print("list_of_states too long, truncating...")
             self.list_of_states = self.list_of_states[1000:]
-            
+
         if self.user_func:
-            self.user_func( self.stn )
-        
-        if self.print_state: 
-            print state
+            self.user_func(self.stn)
+
+        if self.print_state:
+            print(state)
 
     def msg_callback(self, msg):
         if self.print_msg:
-            print msg
+            print(msg)
 
     def reg_state_cb(self):
         if not hasattr(self, 'state'):
@@ -403,22 +407,23 @@ def ask_dns_for_servers(dns_name):
     """ create dict of DimServers from DIS_DNS/SERVER_LIST
     """
     server_list_tuple = pydim.dic_sync_info_service(
-                                        'DIS_DNS/SERVER_LIST',
-                                        'C', 
-                                        timeout=gl.timeout)
-    #TODO: all pydim_dic... functions have the 'timeout' parameter. (I think)
+        'DIS_DNS/SERVER_LIST',
+        'C',
+        timeout=gl.timeout
+    )
+    # TODO: all pydim_dic... functions have the 'timeout' parameter. (I think)
     #       and for all of them, I have to check if the return value is None.
-    #       because if it is None, the function call timed out. 
+    #       because if it is None, the function call timed out.
     #       And this often simply shows network problems.
     #       I don't want to write this if ... bla .. raise IOError stuff
     #       everywhere, but I want to write that in one central place...
-    if server_list_tuple == None:
+    if server_list_tuple is None:
         raise IOError(("DIS_DNS/SERVER_LIST request "
-                        "timed out after {0} seconds").format(gl.timeout))
-    
+                       "timed out after {0} seconds").format(gl.timeout))
+
     server_list_string = server_list_tuple[0]
     servers_at_hosts, process_ids, __empty__ = server_list_string.split('\x00')
-    
+
     # servers_at_hosts looks_like "server_name@host1|another_server@host2|..."
     list_of_servers_at_hosts = servers_at_hosts.split('|')
     # process_ids is a string like: "12345|1337|424242|..."
@@ -427,10 +432,10 @@ def ask_dns_for_servers(dns_name):
     servers = {}
     for server_at_host, process_id in zip(list_of_servers_at_hosts, list_of_process_ids):
         server_name, host_name = server_at_host.split('@')
-        
-        servers[server_name] = DimServer(name=server_name, 
-                                        pid=int(process_id), 
-                                        host=host_name)
+
+        servers[server_name] = DimServer(name=server_name,
+                                         pid=int(process_id),
+                                         host=host_name)
 
     return servers
 
