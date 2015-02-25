@@ -10,7 +10,6 @@ setup(
     license='MIT',
     packages=['fact',
               'fact.plotting',
-              # 'fact.dim'
               ],
     package_data={'': ['resources/*']},
     install_requires=[
