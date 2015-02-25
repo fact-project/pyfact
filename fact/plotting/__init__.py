@@ -4,15 +4,18 @@ Most of the functions get added to matplotlib, so you can just use e.g.
 
 import matplotlib.pyplot as plt
 import fact.plotting as fplot
-plt.camerapixel(data)
+plt.factcamera(data)
+plt.show()
 
 The Viewer class starts a GUI with tkinter, that let's you click through
 events
+
+Currently these functions only work with shape (num_events, 1440), so
+on a pixel bases
 """
 
-from fact import __path__
 import matplotlib
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -228,7 +231,6 @@ class Viewer():
         matplotlib.use('TkAgg', warn=False, force=True)
         matplotlib.rcdefaults()
         self.event = 0
-        self.resizing = False
         self.dataset = dataset
         self.numEvents = len(dataset)
         self.pixelset = pixelset
@@ -337,8 +339,7 @@ class Viewer():
             print("Image sucessfully saved to", filename)
 
     def redraw(self):
-        if self.width != self.fig.get_figwidth() and self.height != self.fig.get_figheight():
-            self.resizing = True
+        if self.width != self.fig.get_figwidth() or self.height != self.fig.get_figheight():
             self.size, self.linewidth = calc_marker_size(self.ax)
             self.plot._sizes = np.ones(self.dataset.shape[1])*self.size
             self.plot.set_linewidth(self.linewidth)
@@ -346,7 +347,6 @@ class Viewer():
                 self.pixelsetplot._sizes = np.ones(self.dataset.shape[1]) * self.size
                 self.pixelsetplot.set_linewidth(self.linewidth)
             self.canvas.draw()
-            self.resizing = False
             try:
                 self.fig.tight_layout()
             except ValueError:
