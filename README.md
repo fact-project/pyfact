@@ -1,16 +1,84 @@
-# PyFact
+# pyfact
 
-## A Collection of Python scripts for FACT data analysis
+## A python package with utils to work with the FACT Imaging Cerenkov Telescope
 
-## Slow Data DB
+install with 
+
+```{shell session}
+$ pip install git+https://github.com/maxnoe/pyfact
+```
+This takes automatically care of the dependencies which are installable with pip.
+
+However, you will need to install Tk and lapack/blas __before__ you install `matplotlib` 
+and `scipy` as these are build dependencies for them.
+
+### functions:
+
+`fact` includes several functions to convert the times used in fact data to more 
+standard formats and vice versa.
+
+e.g. :
+
+```{python}
+from fact import run2dt
+
+# convert fact fNight format to python datetime object:
+date = run2dt("20150101")
+```
+
+
+## Submodules
+### plotting
+
+Utils for plotting data into a FACT camera view. Based on matplotlib.
+The function `factcamera` is added to pyplot and matplotlib Axes. 
+So you can do
+
+```{python}
+import matplotlib.pyplot as plt
+import fact.plotting
+from numpy.random import normal
+
+# create some pseudo data with shape (10, 1440):
+data = normal(30, 5, (10, 1440))
+
+plt.factcamera(data)
+plt.show()
+
+```
+
+Or you can start an interactive Viewer which lets you click
+through the events and save the images:
+
+```{python}
+from fact.plotting import Viewer()
+from numpy.random import poisson
+
+# pseudo data:
+data = poisson(30, (10, 1440))
+
+# call the Viewer with data and a label for the colorbar:
+Viewer(data, "label")
+```
+There are also functions to get the camera_geometry from the delivered source file:
+
+```{python}
+from fact.plotting import get_pixel_coords
+
+pixel_x, pixel_y = get_pixel_coords()
+```
+
+## dim
+
+Some functions and classes to work with the fact dim servers
+
+
+## database (not yet integrated)
+
 
 If you like to look at some of the so called "Slow Data" of FACT, but are fed up with opening and closing the thousands of FITS files, you can as well just request the data from a MongoDB we set up for this purpose. 
 
 Dependencies:
-
-* pymongo >2.4 (I think). We are using 2.7.2. The version of the Ubuntu 14.04 python-pymongo is too old, so you will want to install it using pip, I guess.
-* numpy
-* matplotlib
 
 Example:
 
