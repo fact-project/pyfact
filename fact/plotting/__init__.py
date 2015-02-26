@@ -277,8 +277,14 @@ class Viewer():
         self.next_button.pack(side=tk.LEFT)
         self.quit_button.pack(side=tk.RIGHT)
         self.save_button.pack(side=tk.RIGHT)
-        self.root.after(100, self.redraw)
+        self.resizing = False
+        self.root.bind("<Configure>", self.trigger_resize)
         tk.mainloop()
+
+    def trigger_resize(self, event):
+        if not self.resizing:
+            self.resizing = True
+            self.root.after(100, self.redraw)
 
     def init_plot(self):
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
@@ -351,8 +357,8 @@ class Viewer():
                 self.fig.tight_layout()
             except ValueError:
                 pass
+        self.resizing = False
 
-        self.root.after(100, self.redraw)
 
     def quit(self):
         self.root.quit()     # stops mainloop
