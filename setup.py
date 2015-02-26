@@ -16,7 +16,7 @@ setup(
         'numpy',
         'scipy',
         'matplotlib>=1.4',
-        'dateutil',
+        'python-dateutil',
     ],
     zip_safe=False
 )
