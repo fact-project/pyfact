@@ -1,5 +1,5 @@
 # pyfact
-![TravisBuildStatus](https://travis-ci.org/MaxNoe/pyfact.svg?branch=master)
+[![TravisBuildStatus](https://travis-ci.org/MaxNoe/pyfact.svg?branch=master)](https://travis-ci.org/MaxNoe/pyfact)
 ## A python package with utils to work with the FACT Imaging Cerenkov Telescope
 
 install with 
@@ -42,7 +42,7 @@ from numpy.random import normal
 # create some pseudo data with shape (10, 1440):
 data = normal(30, 5, (10, 1440))
 
-plt.factcamera(data)
+plt.factcamera(data[0])
 plt.show()
 
 ```
