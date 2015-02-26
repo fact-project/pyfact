@@ -15,11 +15,15 @@ somehow modified julian dates, of which the MJD is only one.
 So it might be okay, to introduce a new modification, 
 going by the name of FACT Julain Date (FJD).
 """
+from __future__ import print_function
 import time 
 import calendar
 from datetime import datetime
 import logging
 from pytz import utc
+
+import dateutil
+import dateutil.parser
 
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
 
@@ -29,7 +33,7 @@ def fjd(datetime_inst):
     if datetime_inst.tzinfo is None:
         logging.warning("datetime instance is not aware of its timezone."
             "result possibly wrong!")
-    return calendar.timegm(datetime_inst.utctimetuple()) / (24*3600)
+    return calendar.timegm(datetime_inst.utctimetuple()) / (24.*3600.)
 
 def iso2dt(iso_time_string):
     """ parse ISO time string to timezone aware datetime instance
@@ -37,8 +41,11 @@ def iso2dt(iso_time_string):
     example
     2015-01-23T08:08+01:00
     """
-    format_ = "%Y-%m%dT%H:%M%z"
-    datetime_inst = datetime.strptime(iso_time_string, format_)
+    datetime_inst = dateutil.parser.parse(iso_time_string)
+    # make aware at any cost!
+    if datetime_inst.tzinfo is None:
+        print("ISO time string did not contain timezone info. I assume UTC!")
+        datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
     return datetime_inst
 
 def run2dt(run_string):
@@ -53,7 +60,7 @@ def run2dt(run_string):
     """
     format_ = "%Y%m%d"
     datetime_inst = datetime.strptime(run_string, format_)
-    datetime_inst.tzinfo = utc
+    datetime_inst = datetime_inst.replace(tzinfo=tzinfo=dateutil.tz.tzutc())
     return datetime_inst
 
 def facttime(time_string):
