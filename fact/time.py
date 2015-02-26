@@ -20,7 +20,6 @@ import time
 import calendar
 from datetime import datetime
 import logging
-from pytz import utc
 
 import dateutil
 import dateutil.parser
@@ -60,7 +59,7 @@ def run2dt(run_string):
     """
     format_ = "%Y%m%d"
     datetime_inst = datetime.strptime(run_string, format_)
-    datetime_inst = datetime_inst.replace(tzinfo=tzinfo=dateutil.tz.tzutc())
+    datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
     return datetime_inst
 
 def facttime(time_string):
