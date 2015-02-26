@@ -13,6 +13,8 @@ def test_tk():
     from matplotlib.backends import _tkagg
 
 def test_cameraplot():
+    import matplotlib
+    matplotlib.use('agg')
     import matplotlib.pyplot as plt
     import fact.plotting
     from numpy.random import uniform
