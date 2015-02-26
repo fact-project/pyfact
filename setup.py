@@ -16,6 +16,7 @@ setup(
         'numpy',
         'scipy',
         'matplotlib>=1.4',
+        'pytz',
     ],
     zip_safe=False
 )
