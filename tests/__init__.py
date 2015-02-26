@@ -5,7 +5,7 @@ def test_tk():
 
 def test_cameraplot():
     import matplotlib
-    matplotlib.use('agg', warn=False, force=True)
+    matplotlib.use('Agg', warn=False, force=True)
     import matplotlib.pyplot as plt
     import fact.plotting
     from numpy.random import uniform
