@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from fact.plotting import Viewer, get_pixel_coords
 import numpy as np
 
+plt.rcdefaults()
+
 x, y = get_pixel_coords()
 
 x /= 10
@@ -21,8 +23,8 @@ for i in range(N):
         max_photoncharge/(1+amp1*(x1-a)**2 + amp2*(y1-b)**2),
         1440
     )
-
-# Viewer(data, "photoncharge")
+    data[i,:] += np.random.normal(0, 1, 1440)
 
 plt.factcamera(data[0])
+plt.factpixelids(color="red")
 plt.savefig("test.pdf")

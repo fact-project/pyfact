@@ -50,6 +50,31 @@ def factcamera(self,
                pixelset=None,
                pixelsetcolour='g',
                ):
+    """
+    Attributes
+    ----------
+
+    data     : array like with shape 1440
+        the data you want to plot into the pixels
+    pixelset : boolean array with shape 1440
+        the pixels where pixelset is True are marked with 'pixelsetcolour'
+        [default: None]
+    pixelsetcolour : a matplotlib conform colour representation
+        the colour for the pixels in 'pixelset',
+        [default: green]
+    pixelcoords : the coordinates for the pixels in form [x-values, y-values]
+        if None, the package resource is used
+        [default: None]
+    cmap : str or matplotlib colormap instance
+        the colormap to use for plotting the 'dataset'
+        [default: gray]
+    vmin : float
+        the minimum for the colorbar, if None min(dataset[event]) is used
+        [default: None]
+    vmax : float
+        the maximum for the colorbar, if None max(dataset[event]) is used
+        [default: None]
+    """
     self.set_aspect('equal')
     self.set_xlim(-200, 200)
     self.set_ylim(-200, 200)
@@ -57,6 +82,8 @@ def factcamera(self,
 
     if pixelcoords is None:
         pixel_x, pixel_y = get_pixel_coords()
+    else:
+        pixel_x, pixel_y = pixelcoords
 
     if vmin is None:
         vmin = np.min(data)
@@ -94,11 +121,39 @@ def pltfactcamera(*args, **kwargs):
     ax = plt.gca()
     ret = ax.factcamera(*args, **kwargs)
     plt.draw_if_interactive()
+    plt.sci(ret)
     return ret
 
 plt.factcamera = pltfactcamera
 
-def calc_marker_size(ax):
+def ax_pixelids(self, size=None, pixelcoords=None, *args, **kwargs):
+    """
+    plot the chids into the pixels
+    """
+    if pixelcoords is None:
+        pixel_x, pixel_y = get_pixel_coords()
+    else:
+        pixel_x, pixel_y = pixelcoords
+
+    if size is None:
+        size = calc_text_size(self)
+
+    for px, py, chid in zip(pixel_x, pixel_y, range(1440)):
+        self.text(px, py, str(chid), size=size, va="center", ha="center", **kwargs)
+
+Axes.factpixelids = ax_pixelids
+
+def plt_pixelids(*args, **kwargs):
+    ax = plt.gca()
+    ax.factpixelids(*args, **kwargs)
+    ret = plt.draw_if_interactive()
+    return ret
+
+plt.factpixelids = plt_pixelids
+
+
+
+def calc_marker_size(ax=None):
     """
     calculate the correct marker size and linewidth for the fact pixels,
     so that plt.scatter(x, y, s=size, marker='H', linewidth=linewidth)
@@ -115,6 +170,9 @@ def calc_marker_size(ax):
     linewidth : float
     """
 
+    if ax is None:
+        ax = plt.gca()
+
     fig = ax.get_figure()
 
     bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
@@ -129,6 +187,15 @@ def calc_marker_size(ax):
     size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 9.45**2
     linewidth = min(width/x_stretch, height/y_stretch)/5 * 0.5
     return size, linewidth
+
+def calc_text_size(ax=None):
+    if ax is None:
+        ax = plt.gca()
+    size, linewidth = calc_marker_size(ax)
+
+    textsize = np.sqrt(size)/5
+
+    return textsize
 
 def get_pixel_coords(mapfile=None,
                      rotate=True,
