@@ -15,6 +15,10 @@ Currently these functions only work with shape (num_events, 1440), so
 on a pixel bases
 """
 from matplotlib.axes import Axes
+from matplotlib.patches import RegularPolygon
+import matplotlib.colors as colors
+import matplotlib.cm as cmx
+
 import numpy as np
 import pkg_resources as res
 import matplotlib.pyplot as plt
@@ -103,6 +107,117 @@ def factcamera(self,
     return ret
 
 
+def other_factcamera(
+                    self,
+                    data,
+                    pixelcoords=None,
+                    cmap='gray',
+                    vmin=None,
+                    vmax=None,
+                    pixelset=None,
+                    pixelsetcolour='g',
+                    ):
+    """
+    Attributes
+    ----------
+
+    data     : array like with shape 1440
+        the data you want to plot into the pixels
+    pixelset : boolean array with shape 1440
+        the pixels where pixelset is True are marked with 'pixelsetcolour'
+        [default: None]
+    pixelsetcolour : a matplotlib conform colour representation
+        the colour for the pixels in 'pixelset',
+        [default: green]
+    pixelcoords : the coordinates for the pixels in form [x-values, y-values]
+        if None, the package resource is used
+        [default: None]
+    cmap : str or matplotlib colormap instance
+        the colormap to use for plotting the 'dataset'
+        [default: gray]
+    vmin : float
+        the minimum for the colorbar, if None min(dataset[event]) is used
+        [default: None]
+    vmax : float
+        the maximum for the colorbar, if None max(dataset[event]) is used
+        [default: None]
+    """
+
+    if pixelcoords is None:
+        pixel_x, pixel_y = get_pixel_coords()
+    else:
+        pixel_x, pixel_y = pixelcoords
+
+    pixel_r = np.ones_like(pixel_x) * 9.5/2. 
+
+    self.set_aspect('equal')
+    self.set_xlim(-200, 200)
+    self.set_ylim(-200, 200)
+
+    if vmin is None:
+        vmin = np.min(data)
+    if vmax is None:
+        vmax = np.max(data)
+
+    if pixelset is None:
+        pixelset = np.zeros(1440, dtype=np.bool)
+
+    _pixelset = np.array(pixelset)
+    if _pixelset.shape != (1440,):
+        pixelset = np.zeros(1440, dtype=np.bool)
+        print _pixelset, _pixelset.shape
+        pixelset[_pixelset] = True
+    else:
+        pixelset = np.array(_pixelset, dtype=np.bool)
+
+
+    cm = plt.get_cmap(cmap) 
+    cNorm = colors.Normalize(vmin=vmin, vmax=vmax)
+    scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+
+    pixel_colors = scalarMap.to_rgba(data)
+
+
+    for i, stuff in enumerate(zip(pixel_x, pixel_y, pixel_r)):
+        x, y, r = stuff
+        c = pixel_colors[i]
+
+        linewidth = 1.
+        edgecolor = "k"
+        if pixelset[i]:
+            linewidth = 2.
+            edgecolor = pixelsetcolour
+
+        ## AHHh I just found that this might be quicker, when I use
+        # class matplotlib.collections.RegularPolyCollection
+        # But I must go home now ... so I can't test it... :-(
+        self.add_artist(
+            RegularPolygon(
+                        xy=(x, y),
+                        numVertices=6,
+                        radius=r,
+                        orientation=0.,   # in radians
+                        facecolor=c,
+                        edgecolor=edgecolor,
+                        linewidth=linewidth,
+                        )
+            )
+
+
+    # I don't know what I should return here ... ahhh!
+    return self
+
+def pltother_factcamera(*args, **kwargs):
+    ax = plt.gca()
+    ret = ax.other_factcamera(*args, **kwargs)
+    plt.draw_if_interactive()
+    # I didn't know what other_factcamera should return
+    # so this call didn't work :-(
+    #plt.sci(ret)
+    return None
+
+
+
 def pltfactcamera(*args, **kwargs):
     ax = plt.gca()
     ret = ax.factcamera(*args, **kwargs)
@@ -138,3 +253,6 @@ Axes.factcamera = factcamera
 plt.factcamera = pltfactcamera
 Axes.factpixelids = ax_pixelids
 plt.factpixelids = plt_pixelids
+
+Axes.other_factcamera = other_factcamera
+plt.other_factcamera = pltother_factcamera
