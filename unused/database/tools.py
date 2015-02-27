@@ -39,6 +39,8 @@ def make_numpy_dtype_from_cursor(cursor):
     # and we want to stick to the newest format.
     example_document = collection_of_this_cursor.find_one({}, 
                                         sort=[("Time", pymongo.DESCENDING)])
+    example_document = cursor[0]
+    
     if example_document is None:
         # collection is empty
         raise LookupError('associated collection of cursor is empty.')
