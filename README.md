@@ -9,8 +9,7 @@ $ pip install git+https://github.com/maxnoe/pyfact
 ```
 This takes automatically care of the dependencies which are installable with pip.
 
-However, you will need to install Tk and lapack/blas __before__ you install `matplotlib` 
-and `scipy` as these are build dependencies for them.
+However, if you want to use the GUI Event Viewer you will need to install Tk __before__ you install `matplotlib` as it depends on the tkagg backend.
 
 ### functions:
 
