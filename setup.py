@@ -1,4 +1,30 @@
-from distutils.core import setup
+from distutils.core import setup, Extension
+
+dimc_module = Extension('dimc',
+    define_macros = [('PROTOCOL', '1'),
+                     ('unix', None),
+                     ('linux', None),
+                     ('MIPSEL', None), ],
+    include_dirs = ['./unused/dim/dim_src/include'],
+    sources = [
+       './unused/dim/dim_src/wrapper/dimmodule.cpp', 
+       './unused/dim/dim_src/wrapper/pydim_utils.cpp',
+       './unused/dim/dim_src/src/dis.c',
+       './unused/dim/dim_src/src/conn_handler.c',
+       './unused/dim/dim_src/src/dtq.c',
+       './unused/dim/dim_src/src/copy_swap.c',
+       './unused/dim/dim_src/src/open_dns.c',
+       './unused/dim/dim_src/src/dna.c',
+       './unused/dim/dim_src/src/tcpip.c',
+       './unused/dim/dim_src/src/dic.c',
+       './unused/dim/dim_src/src/hash.c',
+       './unused/dim/dim_src/src/utilities.c',
+       './unused/dim/dim_src/src/sll.c',
+       './unused/dim/dim_src/src/dll.c',
+       './unused/dim/dim_src/src/swap.c',
+       './unused/dim/dim_src/src/dim_thr.c',
+      ]
+    )
 
 setup(
     name='fact',
@@ -18,5 +44,7 @@ setup(
         'matplotlib>=1.4',
         'python-dateutil',
     ],
+    ext_modules=[dimc_module],
+    scripts=[],
     zip_safe=False
 )
