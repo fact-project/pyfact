@@ -165,7 +165,6 @@ def other_factcamera(
     _pixelset = np.array(pixelset)
     if _pixelset.shape != (1440,):
         pixelset = np.zeros(1440, dtype=np.bool)
-        print _pixelset, _pixelset.shape
         pixelset[_pixelset] = True
     else:
         pixelset = np.array(_pixelset, dtype=np.bool)
