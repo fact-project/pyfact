@@ -73,6 +73,16 @@ extern "C" {
 #define _DIM_LONG 6
 #define _DIM_LONG_LEN sizeof(long)
 
+#if PY_MAJOR_VERSION >= 3
+  #define PyInt_AsLong PyLong_AsLong
+  #define PyInt_FromLong PyLong_FromLong
+  #define PyString_FromStringAndSize PyUnicode_FromStringAndSize 
+  #define PyString_Check PyUnicode_Check
+  #define PyString_Size PyUnicode_GET_LENGTH
+  #define PyNumber_Int PyNumber_Long
+  #define PyString_AsString PyUnicode_AsUTF8
+#endif
+
 #define MUL_INFINITE -1
 /* multiplicity == MUL_INFINITE  means an arbitrary amount of data types
  *                  (e.g. ..;I)
