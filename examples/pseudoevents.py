@@ -25,6 +25,6 @@ for i in range(N):
     )
     data[i,:] += np.random.normal(0, 1, 1440)
 
-plt.factcamera(data[0])
+plt.factcamera(data[0], pixelset=data[0]>4, linewidth=1)
 plt.factpixelids(color="red")
 plt.savefig("test.pdf")
