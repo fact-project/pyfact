@@ -18,7 +18,7 @@ from matplotlib.axes import Axes
 from matplotlib.patches import RegularPolygon
 from matplotlib.collections import PatchCollection
 import matplotlib.colors as colors
-import matplotlib.cm as cmx
+from matplotlib import docstring
 
 import numpy as np
 import pkg_resources as res
@@ -122,6 +122,7 @@ def factcamera(self,
     self.add_collection(collection)
     return collection
 
+@docstring.copy_dedent(factcamera)
 def pltfactcamera(*args, **kwargs):
     ax = plt.gca()
     ret = ax.factcamera(*args, **kwargs)
@@ -152,7 +153,7 @@ def ax_pixelids(self, size=None, pixelcoords=None, *args, **kwargs):
     for px, py, chid in zip(pixel_x[mask], pixel_y[mask], np.arange(1440)[mask]):
         self.text(px, py, str(chid), size=size, va="center", ha="center", **kwargs)
 
-
+@docstring.copy_dedent(ax_pixelids)
 def plt_pixelids(*args, **kwargs):
     ax = plt.gca()
     ax.factpixelids(*args, **kwargs)
@@ -160,6 +161,7 @@ def plt_pixelids(*args, **kwargs):
     return ret
 
 # add functions to matplotlib
+Axes.factcamera = factcamera
 Axes.factcamera = factcamera
 plt.factcamera = pltfactcamera
 Axes.factpixelids = ax_pixelids
