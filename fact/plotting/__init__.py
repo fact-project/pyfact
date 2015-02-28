@@ -22,6 +22,7 @@ import matplotlib.cm as cmx
 import numpy as np
 import pkg_resources as res
 import matplotlib.pyplot as plt
+import warnings
 
 from .utils import get_pixel_coords, calc_text_size, calc_marker_size
 
@@ -29,7 +30,8 @@ try:
     from .viewer import Viewer
     __all__ = ['Viewer', 'get_pixel_coords', 'calc_marker_size', 'calc_text_size']
 except:
-    print("Matplotlib was build without tkagg support, the Viewer will not be available")
+    warnings.warn("Matplotlib was build without tkagg support" \
+                  ", the Viewer will not be available")
     __all__ = ['get_pixel_coords', 'calc_marker_size', 'calc_text_size']
 
 def factcamera(self,
@@ -67,8 +69,11 @@ def factcamera(self,
         [default: None]
     """
     self.set_aspect('equal')
-    self.set_xlim(-200, 200)
-    self.set_ylim(-200, 200)
+
+    # if the axes limit is still (0,1) assume new axes
+    if self.get_xlim() == (0, 1) and self.get_ylim() == (0, 1):
+        self.set_xlim(-200, 200)
+        self.set_ylim(-200, 200)
     size, linewidth = calc_marker_size(self)
 
     if pixelcoords is None:
@@ -80,6 +85,7 @@ def factcamera(self,
         vmin = np.min(data)
     if vmax is None:
         vmax = np.max(data)
+
 
     ret = self.scatter(pixel_x,
                        pixel_y,
@@ -237,7 +243,14 @@ def ax_pixelids(self, size=None, pixelcoords=None, *args, **kwargs):
     if size is None:
         size = calc_text_size(self)
 
-    for px, py, chid in zip(pixel_x, pixel_y, range(1440)):
+    x1, x2 = self.get_xlim()
+    y1, y2 = self.get_ylim()
+
+    maskx = np.logical_and(pixel_x + 4.5 < x2, pixel_x - 4.5 > x1)
+    masky = np.logical_and(pixel_y + 4.5 < y2, pixel_y - 4.5 > y1)
+    mask = np.logical_and(maskx, masky)
+
+    for px, py, chid in zip(pixel_x[mask], pixel_y[mask], np.arange(1440)[mask]):
         self.text(px, py, str(chid), size=size, va="center", ha="center", **kwargs)
 
 
