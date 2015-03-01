@@ -6,8 +6,21 @@ from matplotlib.figure import Figure
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from . import get_pixel_coords, calc_marker_size
 
-from .utils import calc_marker_size, get_pixel_coords
+# tkinter is named differently in python2 and python3
+try:
+    import tkinter as tk
+    from tkinter import filedialog
+except ImportError:
+    import Tkinter as tk
+    import tkFileDialog as filedialog
+
+# for python2 use imp.reload, for python3 use importlib
+try:
+    from importlib import reload
+except ImportError:
+    from imp import reload
 
 class Viewer():
     """
@@ -53,7 +66,7 @@ class Viewer():
         matplotlib.rcdefaults()
         self.event = 0
         self.dataset = dataset
-        self.numEvents = len(dataset)
+        self.numEvents = dataset.shape[0]
         self.pixelset = pixelset
         self.pixelsetcolour = pixelsetcolour
         self.label = label
@@ -100,12 +113,13 @@ class Viewer():
         self.save_button.pack(side=tk.RIGHT)
         self.resizing = False
         self.root.bind("<Configure>", self.trigger_resize)
+        self.update()
         tk.mainloop()
 
     def trigger_resize(self, event):
         if not self.resizing:
             self.resizing = True
-            self.root.after(100, self.redraw)
+            self.root.after(50, self.redraw)
 
     def init_plot(self):
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
@@ -113,12 +127,7 @@ class Viewer():
         self.ax = self.fig.add_subplot(1,1,1, aspect=1)
         divider = make_axes_locatable(self.ax)
         self.cax = divider.append_axes("right", size="5%", pad=0.1)
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
-        self.ax.set_xlim(-200, 200)
-        self.ax.set_ylim(-200, 200)
-
-        self.size, self.linewidth = calc_marker_size(self.ax)
+        self.ax.set_axis_off()
 
         if self.vmin is None:
             vmin=np.min(self.dataset[self.event])
@@ -129,26 +138,22 @@ class Viewer():
         else:
             vmax = self.vmax
 
-        self.plot = self.ax.scatter(self.pixel_x,
-                                    self.pixel_y,
-                                    c=self.dataset[self.event],
-                                    vmin=vmin,
-                                    vmax=vmax,
-                                    lw=self.linewidth,
-                                    marker='h',
-                                    s=self.size,
-                                    cmap=self.cmap)
-        if self.pixelset is not None:
-            self.pixelsetplot = self.ax.scatter(self.pixel_x[self.pixelset[self.event]],
-                                                self.pixel_y[self.pixelset[self.event]],
-                                                c=self.dataset[self.event][self.pixelset[self.event]],
-                                                lw=self.linewidth,
-                                                edgecolor=self.pixelsetcolour,
-                                                marker='h',
-                                                vmin=vmin,
-                                                vmax=vmax,
-                                                s=self.size,
-                                                cmap=self.cmap)
+        if self.pixelset is None:
+            pixelset = np.zeros(1440, dtype=bool)
+        else:
+            pixelset = self.pixelset[self.event]
+
+        self.plot = self.ax.factcamera(
+            data=self.dataset[self.event],
+            pixelcoords=None,
+            cmap=self.cmap,
+            vmin=vmin,
+            vmax=vmax,
+            pixelset=pixelset,
+            pixelsetcolour=self.pixelsetcolour,
+            linewidth=None,
+        )
+
         self.cb = self.fig.colorbar(self.plot, cax=self.cax, label=self.label)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
         self.cb.draw_all()
@@ -168,16 +173,9 @@ class Viewer():
     def redraw(self):
         if self.width != self.fig.get_figwidth() or self.height != self.fig.get_figheight():
             self.size, self.linewidth = calc_marker_size(self.ax)
-            self.plot._sizes = np.ones(self.dataset.shape[1])*self.size
             self.plot.set_linewidth(self.linewidth)
-            if self.pixelset is not None:
-                self.pixelsetplot._sizes = np.ones(self.dataset.shape[1]) * self.size
-                self.pixelsetplot.set_linewidth(self.linewidth)
             self.canvas.draw()
-            try:
-                self.fig.tight_layout()
-            except ValueError:
-                pass
+            self.fig.tight_layout(pad=0)
         self.resizing = False
 
 
@@ -206,12 +204,11 @@ class Viewer():
 
     def update(self):
         self.plot.set_array(self.dataset[self.event])
-        self.plot.changed()
+        edgecolors = np.array(1440*["k"])
         if self.pixelset is not None:
-            mask = self.pixelset[self.event]
-            self.pixelsetplot.set_array(self.dataset[self.event][mask])
-            self.pixelsetplot.set_offsets(np.transpose([self.pixel_x[mask], self.pixel_y[mask]]))
-            self.pixelsetplot.changed()
+            edgecolors[self.pixelset[self.event]] = self.pixelsetcolour
+        self.plot.set_edgecolors(edgecolors)
+        self.plot.changed()
         if self.vmin is None:
             vmin = np.min(self.dataset[self.event])
         else:
@@ -220,21 +217,9 @@ class Viewer():
             vmax = np.max(self.dataset[self.event])
         else:
             vmax=self.vmax
+        self.size, self.linewidth = calc_marker_size(self.ax)
+        self.plot.set_linewidths(self.linewidth)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
         self.cb.draw_all()
         self.canvas.draw()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
-
-# tkinter is named differently in python2 and python3
-try:
-    import tkinter as tk
-    from tkinter import filedialog
-except ImportError:
-    import Tkinter as tk
-    import tkFileDialog as filedialog
-
-# for python2 use imp.reload, for python3 use importlib
-try:
-    from importlib import reload
-except ImportError:
-    from imp import reload
