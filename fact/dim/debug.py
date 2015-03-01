@@ -1,3 +1,4 @@
+
 #! /usr/bin/python
 # ----------------------------------------------------------------------------
 #
@@ -11,7 +12,7 @@
 # filtering
 #
 # Needs python > 2.0. Might work with 1.5.X and above
-
+from __future__ import print_function
 __version__="1.0"
 __date__="2006"
 __author__="Radu Stoica"
@@ -205,11 +206,11 @@ def parseCommandLine():
 
 def commandLineUsage():
    
-   print """Output options:
+    print("""Output options:
         -f           -> stdout/stderr (foreground mode)
         -l <logfile> -> prints to <logfile>
         -s           -> syslog using the UUCP facility
-    """
+    """)
 
 # ---------------------------------------------------------------------------
 if __name__=='__main__':
@@ -217,7 +218,7 @@ if __name__=='__main__':
     SAY("This is a normal output message")
     ERROR("This is an error message")
     DEBUG("This is a debug message")
-    print "Sending the same messages through syslog"
+    print("Sending the same messages through syslog")
     setSyslog("Test debugging")
     SAY("This is a normal output message")
     ERROR("This is an error message")

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import dimcpp
 import debug
 
@@ -101,7 +102,7 @@ to a string and are returned to the client.
             return
         try:
             funcObj = self.funcs[funcName]
-        except KeyError, e:
+        except KeyError as e:
             debug.ERROR(e)
             self.setData('status=FAIL/error=Could not find function '+str(e))
             return
@@ -112,9 +113,9 @@ to a string and are returned to the client.
 
         try:
             res = funcObj(*pozArgs, **keyArgs)
-        except Exception, e:
+        except Exception as e:
             # catch all convert it to string and return
-            print type(funcObj)
+            print(type(funcObj))
             ret += 'status=FAIL/error='+str(e)
             debug.DEBUG('Returning exception message: %s' % ret)
         else:

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import types
 from keyword import iskeyword
@@ -370,18 +372,21 @@ class FactDimServer(object):
         self.last_st_change = time.time()
         self.list_of_states.append((self.last_st_change, self.stn))
         if len(self.list_of_states) > 10000:
-            print "list_of_states too long, truncating..."
+            # I don't know what I though when writing this. 
+            # Before I just printed a warning, now I raise and die 
+            # Both choices are not good, but I have no time to make it correct right now.
+            raise Exception("list_of_states too long, truncating...")
             self.list_of_states = self.list_of_states[1000:]
 
         if self.user_func:
             self.user_func(self.stn)
 
         if self.print_state:
-            print state
+            print(state)
 
     def msg_callback(self, msg):
         if self.print_msg:
-            print msg
+            print(msg)
 
     def reg_state_cb(self):
         if not hasattr(self, 'state'):
