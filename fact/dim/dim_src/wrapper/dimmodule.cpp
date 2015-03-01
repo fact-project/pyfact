@@ -1596,6 +1596,27 @@ void _dic_info_service_dummy (void* tag, void* buffer, int* size) {
 /** @}
 */
 
+//---------------------- Dom here ... doing strange things:
+// first few lines from https://docs.python.org/3/howto/cporting.html#module-initialization-and-state
+
+struct module_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else // PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif PY_MAJOR_VERSION >= 3
+
+static PyObject *
+error_out(PyObject *m) {
+    struct module_state *st = GETSTATE(m);
+    PyErr_SetString(st->error, "something bad happened");
+    return NULL;
+}
+
 static PyMethodDef DimMethods[] = {
   {    "dis_start_serving"          ,
     dim_dis_start_serving        ,
@@ -1815,39 +1836,97 @@ static PyMethodDef DimMethods[] = {
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+// --- Dom here putting more crazy stuff from here: https://docs.python.org/3/howto/cporting.html#module-initialization-and-state
+
+#if PY_MAJOR_VERSION >= 3
+
+static int myextension_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int myextension_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "dimc",
+        "module dimc docstring ... :-|",
+        sizeof(struct module_state),
+        DimMethods,
+        NULL,
+        myextension_traverse,
+        myextension_clear,
+        NULL
+};
+
+#define INITERROR return NULL
+
+PyObject *
+PyInit_dimc(void)
+
+#else //PY_MAJOR_VERSION >= 3
+
+#define INITERROR return
+
 #ifndef _WIN32
 static pthread_t maintid;
 static pthread_mutex_t pydimlock = PTHREAD_MUTEX_INITIALIZER; 
-#endif
+#endif // _WIN32
   PyMODINIT_FUNC
 initdimc(void)
+#endif // PY_MAJOR_VERSION >= 3
 {
-  PyObject *m;
+
+#if PY_MAJOR_VERSION >= 3
+    PyObject *module = PyModule_Create(&moduledef);
+#else // PY_MAJOR_VERSION >= 3
+
+  PyObject *module;
   PyEval_InitThreads();
   debug("Initializing the C DIM interface... \n");
-  m = Py_InitModule3("dimc", DimMethods, "DIM methods");
+  module = Py_InitModule3("dimc", DimMethods, "DIM methods");
 
-  if (m == NULL)
+  if (module == NULL)
     return;
 #ifndef _WIN32
   maintid = pthread_self();
 #endif
   //Add constants for service type definitions
-  PyModule_AddIntConstant (m, "ONCE_ONLY", ONCE_ONLY);
-  PyModule_AddIntConstant (m, "TIMED", TIMED);
-  PyModule_AddIntConstant (m, "MONITORED", MONITORED);
-  PyModule_AddIntConstant (m, "COMMAND", COMMAND);
-  PyModule_AddIntConstant (m, "DIM_DELETE", DIM_DELETE);
-  PyModule_AddIntConstant (m, "MONIT_ONLY", MONIT_ONLY);
-  PyModule_AddIntConstant (m, "UPDATE", UPDATE);
-  PyModule_AddIntConstant (m, "TIMED_ONLY", TIMED_ONLY);
-  PyModule_AddIntConstant (m, "MONIT_FIRST", MONIT_FIRST);
-  PyModule_AddIntConstant (m, "MAX_TYPE_DEF", MAX_TYPE_DEF);
-  PyModule_AddIntConstant (m, "STAMPED", STAMPED);
+  PyModule_AddIntConstant (module, "ONCE_ONLY", ONCE_ONLY);
+  PyModule_AddIntConstant (module, "TIMED", TIMED);
+  PyModule_AddIntConstant (module, "MONITORED", MONITORED);
+  PyModule_AddIntConstant (module, "COMMAND", COMMAND);
+  PyModule_AddIntConstant (module, "DIM_DELETE", DIM_DELETE);
+  PyModule_AddIntConstant (module, "MONIT_ONLY", MONIT_ONLY);
+  PyModule_AddIntConstant (module, "UPDATE", UPDATE);
+  PyModule_AddIntConstant (module, "TIMED_ONLY", TIMED_ONLY);
+  PyModule_AddIntConstant (module, "MONIT_FIRST", MONIT_FIRST);
+  PyModule_AddIntConstant (module, "MAX_TYPE_DEF", MAX_TYPE_DEF);
+  PyModule_AddIntConstant (module, "STAMPED", STAMPED);
 
   dic_disable_padding();
   dis_disable_padding();
+#endif // PY_MAJOR_VERSION >= 3
+
+    if (module == NULL)
+        INITERROR;
+    struct module_state *st = GETSTATE(module);
+
+    st->error = PyErr_NewException("dimc.Error", NULL, NULL);
+    if (st->error == NULL) {
+        Py_DECREF(module);
+        INITERROR;
+    }
+
+#if PY_MAJOR_VERSION >= 3
+    return module;
+#endif // PY_MAJOR_VERSION >= 3
 }
+
+
 
 #ifdef RINUNX
 #include <stdio.h>
