@@ -13,12 +13,10 @@
 #include <winsock.h>
 #endif
 
-extern "C" {
 #include <Python.h>
 #include "dic.h"
 #include "dis.h"
 #include "dim_common.h"
-}
 #include "pydim_utils.cpp"
 
 using namespace std;
@@ -1608,7 +1606,7 @@ struct module_state {
 #else // PY_MAJOR_VERSION >= 3
 #define GETSTATE(m) (&_state)
 static struct module_state _state;
-#endif PY_MAJOR_VERSION >= 3
+#endif // PY_MAJOR_VERSION >= 3
 
 static PyObject *
 error_out(PyObject *m) {

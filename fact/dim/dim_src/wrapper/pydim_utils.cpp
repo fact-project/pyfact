@@ -16,10 +16,8 @@
  * *************************************************************************/
 
 // includes
-extern "C" {
 #include <Python.h>
 #include "structmember.h"
-}
 #include <cstdlib>
 #include <cstdio>
 
