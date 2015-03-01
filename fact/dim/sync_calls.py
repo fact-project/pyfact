@@ -1,8 +1,8 @@
 import random
 import threading
-
-import dimc
 import debug
+
+from .dimc import dic_info_service, ONCE_ONLY, dic_release_service, dic_cmnd_callback
 
 
 def dic_sync_info_service(name, description, timeout=None, default_value=None):
@@ -38,17 +38,19 @@ def dic_sync_info_service(name, description, timeout=None, default_value=None):
     callback = create_callback(state)
     dim_timeout = 0
     tag = random.randint(0, 100000)
-    sid = dimc.dic_info_service(name,
-                                description,
-                                callback,
-                                dimc.ONCE_ONLY,
-                                dim_timeout,
-                                tag,
-                                default_value)
+    sid = dic_info_service(
+        name,
+        description,
+        callback,
+        ONCE_ONLY,
+        dim_timeout,
+        tag,
+        default_value
+    )
 
     executed.wait(timeout)
 
-    dimc.dic_release_service(sid)
+    dic_release_service(sid)
 
     return state['value']
 
@@ -89,7 +91,7 @@ def dic_sync_cmnd_service(name, arguments, description, timeout=None):
 
     callback = create_callback(state)
     tag = 0
-    dimc.dic_cmnd_callback(name, arguments, description, callback, tag)
+    dic_cmnd_callback(name, arguments, description, callback, tag)
 
     executed.wait(timeout)
 

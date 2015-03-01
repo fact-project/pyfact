@@ -11,4 +11,4 @@ from .sync_calls import dic_sync_info_service, dic_sync_cmnd_service
 from .helpers import dim_service, dim_service_tag
 
 from .dim_servers import Dns
-import dimc
+from .dimc import *
