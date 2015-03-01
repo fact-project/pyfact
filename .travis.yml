@@ -16,7 +16,7 @@ before_install:
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pip
-  - pip install .
+  - python setup.py build_ext --inplace
 # command to run tests
 script: nosetests
 
