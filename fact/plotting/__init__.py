@@ -27,8 +27,8 @@ import warnings
 
 from .utils import get_pixel_coords, calc_text_size, calc_marker_size
 
-from .viewer import Viewer
 try:
+    from .viewer import Viewer
     __all__ = ['Viewer', 'get_pixel_coords', 'calc_marker_size', 'calc_text_size']
 except:
     warnings.warn("Matplotlib was build without tkagg support"
