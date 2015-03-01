@@ -5,8 +5,12 @@ import types
 from keyword import iskeyword
 import time
 
-from sync_calls import dic_sync_info_service, dic_sync_cmnd_service
-import dimc
+from .sync_calls import dic_sync_info_service, dic_sync_cmnd_service
+from .dimc import (dic_set_dns_node,
+                   dic_set_dns_port,
+                   dic_info_service,
+                   dic_release_service,
+                   )
 
 class Dns(object):
     def __init__(self, hostname=None, port=None, timeout=5):
@@ -15,18 +19,18 @@ class Dns(object):
         self.timeout = timeout
 
         if hostname is not None:
-            dimc.dic_set_dns_node(hostname)
+            dic_set_dns_node(hostname)
         elif "DIM_DNS_NODE" in os.environ:
-            dimc.dic_set_dns_node(os.environ["DIM_DNS_NODE"])
+            dic_set_dns_node(os.environ["DIM_DNS_NODE"])
         else:
-            dimc.dic_set_dns_node("localhost")
-        
+            dic_set_dns_node("localhost")
+
         if port is not None:
-            dimc.dic_set_dns_port(port)
+            dic_set_dns_port(port)
         elif "DIM_DNS_PORT" in os.environ:
-            dimc.dic_set_dns_port(int(os.environ["DIM_DNS_PORT"]))
+            dic_set_dns_port(int(os.environ["DIM_DNS_PORT"]))
         else:
-            dimc.dic_set_dns_port(2505)
+            dic_set_dns_port(2505)
 
     def servers(self):
         """ create dict of DimServers from DIS_DNS/SERVER_LIST
@@ -64,7 +68,7 @@ class Dns(object):
                 host=host_name)
 
         return servers
-	
+
 
 class ServiceNameProblem(Exception):
     """ Thrown in case a service has been requested, that does not exist.
@@ -172,7 +176,7 @@ class DimServer(object):
         # the "rest" consists of a description of the service ... I hope
         descr = [[ x for x in r.split("|") if x] for r in rest]
         sd = {x[0]:x[1] for x in zip(service_names, descr)}
-       
+
         for k in self.services:
             service = self.services[k]
             service.desc = sd.get(k)
@@ -372,8 +376,8 @@ class FactDimServer(object):
         self.last_st_change = time.time()
         self.list_of_states.append((self.last_st_change, self.stn))
         if len(self.list_of_states) > 10000:
-            # I don't know what I though when writing this. 
-            # Before I just printed a warning, now I raise and die 
+            # I don't know what I though when writing this.
+            # Before I just printed a warning, now I raise and die
             # Both choices are not good, but I have no time to make it correct right now.
             raise Exception("list_of_states too long, truncating...")
             self.list_of_states = self.list_of_states[1000:]
@@ -392,7 +396,7 @@ class FactDimServer(object):
         if not hasattr(self, 'state'):
             raise TypeError(self.name+' has no CMD called STATE')
         service_name = self.name.upper()+'/STATE'
-        self.state_sid = dimc.dic_info_service(service_name, "C", self.state_callback)
+        self.state_sid = dic_info_service(service_name, "C", self.state_callback)
         if not self.state_sid:
             del self.state_sid
             raise IOError('could not register STATE client')
@@ -401,19 +405,19 @@ class FactDimServer(object):
         if not hasattr(self, 'state'):
             raise TypeError(self.name+' has no CMD called STATE')
         service_name = self.name.upper()+'/MESSAGE'
-        self.msg_sid = dimc.dic_info_service(service_name, "C", self.msg_callback)
+        self.msg_sid = dic_info_service(service_name, "C", self.msg_callback)
         if not self.msg_sid:
             del self.msg_sid
             raise IOError('could not register MESSAGE client')
 
     def unreg_state_cb(self):
         if hasattr(self, 'state_sid'):
-            dimc.dic_release_service(self.state_sid)
+            dic_release_service(self.state_sid)
             del self.state_sid
 
     def unreg_msg_cb(self):
         if hasattr(self, 'msg_sid'):
-            dimc.dic_release_service(self.msg_sid)
+            dic_release_service(self.msg_sid)
             del self.msg_sid
 
     def __del__(self):

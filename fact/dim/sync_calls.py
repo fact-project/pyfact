@@ -1,6 +1,5 @@
 import random
 import threading
-import debug
 
 from .dimc import dic_info_service, ONCE_ONLY, dic_release_service, dic_cmnd_callback
 
