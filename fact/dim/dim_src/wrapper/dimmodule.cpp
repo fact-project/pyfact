@@ -1859,39 +1859,31 @@ static struct PyModuleDef moduledef = {
         myextension_clear,
         NULL
 };
-
-#define INITERROR return NULL
-
-PyObject *
-PyInit_dimc(void)
-
-#else //PY_MAJOR_VERSION >= 3
-
-#define INITERROR return
+#endif // PY_MAJOR_MAJOR_VERSION >= 3
 
 #ifndef _WIN32
 static pthread_t maintid;
 static pthread_mutex_t pydimlock = PTHREAD_MUTEX_INITIALIZER; 
 #endif // _WIN32
-  PyMODINIT_FUNC
-initdimc(void)
-#endif // PY_MAJOR_VERSION >= 3
+
+static PyObject *
+moduleinit(void)
 {
+  PyObject *module;
 
 #if PY_MAJOR_VERSION >= 3
-    PyObject *module = PyModule_Create(&moduledef);
+  module = PyModule_Create(&moduledef);
 #else // PY_MAJOR_VERSION >= 3
-
-  PyObject *module;
-  PyEval_InitThreads();
-  debug("Initializing the C DIM interface... \n");
   module = Py_InitModule3("dimc", DimMethods, "DIM methods");
+#endif //PY_MAJOR_VERSION >= 3
 
   if (module == NULL)
-    return;
+    return NULL;
+
 #ifndef _WIN32
   maintid = pthread_self();
 #endif
+
   //Add constants for service type definitions
   PyModule_AddIntConstant (module, "ONCE_ONLY", ONCE_ONLY);
   PyModule_AddIntConstant (module, "TIMED", TIMED);
@@ -1907,22 +1899,32 @@ initdimc(void)
 
   dic_disable_padding();
   dis_disable_padding();
-#endif // PY_MAJOR_VERSION >= 3
 
-    if (module == NULL)
-        INITERROR;
-    struct module_state *st = GETSTATE(module);
+  struct module_state *st = GETSTATE(module);
 
-    st->error = PyErr_NewException("dimc.Error", NULL, NULL);
-    if (st->error == NULL) {
-        Py_DECREF(module);
-        INITERROR;
-    }
+  st->error = PyErr_NewException("dimc.Error", NULL, NULL);
+  /* if (st->error == NULL) { */
+  /*     Py_DECREF(module); */
+  /*     INITERROR; */
+  /* } */
+
+  return module;
+}
 
 #if PY_MAJOR_VERSION >= 3
-    return module;
-#endif // PY_MAJOR_VERSION >= 3
-}
+  PyMODINIT_FUNC
+  PyInit_dimc(void)
+  {
+	  return moduleinit();
+  }
+#else // PY_MAJOR_VERSION >= 3
+  PyMODINIT_FUNC
+  initdimc(void)
+  {
+	  moduleinit();
+  }
+#endif //PY_MAJOR_VERSION >= 3
+
 
 
 
