@@ -4,13 +4,12 @@ import numpy as np
 import pkg_resources as res
 import matplotlib.pyplot as plt
 
-__all__ = ['get_pixel_coords', 'calc_marker_size', 'calc_text_size']
+__all__ = ['get_pixel_coords', 'calc_linewidth', 'calc_text_size']
 
-def calc_marker_size(ax=None):
+def calc_linewidth(ax=None):
     """
-    calculate the correct marker size and linewidth for the fact pixels,
-    so that plt.scatter(x, y, s=size, marker='H', linewidth=linewidth)
-    produces a nice view of the fact camera
+    calculate the correct linewidth for the fact pixels,
+    so that the patches fit nicely together
 
     Arguments
     ---------
@@ -19,7 +18,6 @@ def calc_marker_size(ax=None):
 
     Returns
     -------
-    size : float
     linewidth : float
     """
 
@@ -37,16 +35,15 @@ def calc_marker_size(ax=None):
     x_stretch = (x2 - x1)/400
     y_stretch = (y2 - y1)/400
 
-    size = (min(width/(x_stretch), height/y_stretch)/5)**2 * 9.45**2
-    linewidth = min(width/x_stretch, height/y_stretch)/5 * 0.5
-    return size, linewidth
+    linewidth = min(width/x_stretch, height/y_stretch)/10
+    return linewidth
 
 def calc_text_size(ax=None):
     if ax is None:
         ax = plt.gca()
-    size, linewidth = calc_marker_size(ax)
+    linewidth = calc_linewidth(ax)
 
-    textsize = np.sqrt(size)/5
+    textsize = linewidth*5
 
     return textsize
 

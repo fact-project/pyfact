@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from . import get_pixel_coords, calc_marker_size
+from . import get_pixel_coords, calc_linewidth
 
 # tkinter is named differently in python2 and python3
 try:
@@ -172,7 +172,7 @@ class Viewer():
 
     def redraw(self):
         if self.width != self.fig.get_figwidth() or self.height != self.fig.get_figheight():
-            self.size, self.linewidth = calc_marker_size(self.ax)
+            self.linewidth = calc_linewidth(self.ax)
             self.plot.set_linewidth(self.linewidth)
             self.canvas.draw()
             self.fig.tight_layout(pad=0)
@@ -217,7 +217,7 @@ class Viewer():
             vmax = np.max(self.dataset[self.event])
         else:
             vmax=self.vmax
-        self.size, self.linewidth = calc_marker_size(self.ax)
+        self.linewidth = calc_linewidth(self.ax)
         self.plot.set_linewidths(self.linewidth)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
         self.cb.draw_all()

@@ -25,7 +25,7 @@ import pkg_resources as res
 import matplotlib.pyplot as plt
 import warnings
 
-from .utils import get_pixel_coords, calc_text_size, calc_marker_size
+from .utils import get_pixel_coords, calc_text_size, calc_linewidth
 
 try:
     from .viewer import Viewer
@@ -43,7 +43,7 @@ def factcamera(self,
                vmax=None,
                pixelset=None,
                pixelsetcolour='g',
-               linewidth=0.5,
+               linewidth=None,
                ):
     """
     Attributes
@@ -111,6 +111,9 @@ def factcamera(self,
                 orientation=0.,   # in radians
             )
         )
+
+    if linewidth is None:
+        linewidth = calc_linewidth(self)
 
     collection = PatchCollection(patches)
     collection.set_linewidth(linewidth)
