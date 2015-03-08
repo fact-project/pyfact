@@ -44,6 +44,7 @@ def factcamera(self,
                pixelset=None,
                pixelsetcolour='g',
                linewidth=None,
+               intersectcolour='b'
                ):
     """
     Attributes
@@ -88,18 +89,34 @@ def factcamera(self,
     if vmax is None:
         vmax = np.max(data)
 
+    edgecolors = np.array(1440*["k"])
+
     if pixelset is None:
         pixelset = np.zeros(1440, dtype=np.bool)
 
     _pixelset = np.array(pixelset)
-    if _pixelset.shape != (1440,):
-        pixelset = np.zeros(1440, dtype=np.bool)
-        pixelset[_pixelset] = True
-    else:
-        pixelset = np.array(_pixelset, dtype=np.bool)
+    if _pixelset.ndim == 1:
+        if _pixelset.shape != (1440,):
+            pixelset = np.zeros(1440, dtype=np.bool)
+            pixelset[_pixelset] = True
+        else:
+            pixelset = np.array(_pixelset, dtype=np.bool)
+        edgecolors[pixelset] = pixelsetcolour
+    elif _pixelset.ndim == 2:
+        for pixelset, colour in zip(_pixelset, pixelsetcolour):
+            edgecolors[pixelset] = colour
+        intersect = np.logical_and(_pixelset[0], _pixelset[1])
+        edgecolors[intersect] = intersectcolour
 
-    edgecolors = np.array(1440*["k"])
-    edgecolors[pixelset] = pixelsetcolour
+    else:
+        raise ValueError(
+            """pixelset needs to be one of:
+            1. list of pixelids
+            2. 1d bool array with shape (1440,)
+            3. 2d bool array with shape (2, 1440)
+            """
+        )
+
 
     patches = []
     for x, y, ec in zip(pixel_x, pixel_y, edgecolors):
