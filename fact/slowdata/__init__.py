@@ -8,7 +8,7 @@ import settings
 import tools
 from .. import time as facttime
 
-__all__ = ['db']
+__all__ = ['connect']
 
 class ServiceField(object):
     """ represents one Field of a Service
@@ -106,7 +106,17 @@ class AuxDataBaseFrontEnd(object):
             if 'system.indexes' not in collection_name:
                 self.__service_names.append(collection_name)
 
-client = MongoClient(settings.host, settings.port)
-_db = getattr(client, settings.database_name)
-db= AuxDataBaseFrontEnd(_db)
+def connect(host=None, port=None, db_name=None):
+    if host is None:
+        host = settings.host
+
+    if port is None:
+        port = settings.port
+
+    if db_name is None:
+        db_name = settings.db_name
+
+    client = MongoClient(host, port)
+    return AuxDataBaseFrontEnd(getattr(client, db_name))
+
 

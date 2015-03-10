@@ -1,3 +1,3 @@
-database_name = 'aux'
+db_name = 'aux'
 host = 'localhost'
 port = 37017
