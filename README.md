@@ -88,8 +88,6 @@ fi
 
 Once you've opened that tunnel, try e.g. this...
 ```{python}
-import matplotlib.pyplot as plt
-from fact.time import iso2dt, fjd, OFFSET
 from fact.slowdata import connect
 
 db = connect()
