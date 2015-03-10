@@ -37,6 +37,7 @@ setup(
     packages=['fact',
               'fact.plotting',
               'fact.dim',
+              'fact.slowdata'
               ],
     package_data={'': ['resources/*']},
     install_requires=[
@@ -44,6 +45,7 @@ setup(
         'scipy',
         'matplotlib>=1.4',
         'python-dateutil',
+        'pymongo>=2.7',
     ],
     ext_modules=[dimc_module],
     scripts=[],
