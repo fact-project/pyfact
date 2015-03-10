@@ -4,8 +4,8 @@ provided for your convenience.
 """
 import numpy as np
 from pymongo import MongoClient
-import settings
-import tools
+from . import settings
+from . import tools
 from .. import time as facttime
 
 __all__ = ['connect']
