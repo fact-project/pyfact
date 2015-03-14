@@ -93,6 +93,9 @@ def factcamera(self,
 
     self.set_aspect('equal')
 
+    fig = self.get_figure()
+    fig.canvas.mpl_connect("pick_event", onpick)
+
     # if the axes limit is still (0,1) assume new axes
     if self.get_xlim() == (0, 1) and self.get_ylim() == (0, 1):
         self.set_xlim(-200, 200)
