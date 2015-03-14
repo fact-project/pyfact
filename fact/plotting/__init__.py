@@ -35,6 +35,25 @@ except:
                   ", the Viewer will not be available")
     __all__ = ['get_pixel_coords', 'calc_marker_size', 'calc_text_size']
 
+lastpixel = -1
+
+def onpick(event):
+    global lastpixel
+    hitpixel = event.ind[0]
+    if hitpixel != lastpixel:
+        lastpixel = hitpixel
+        plot = event.artist
+
+        ecols = plot.get_edgecolors()
+        before = np.array(ecols[hitpixel])
+        ecols[hitpixel] = [1, 0, 0, 1]
+        plot.set_edgecolors(ecols)
+        plt.draw()
+        ecols[hitpixel] = before
+
+        print("chid:", hitpixel)
+        print("value", plot.get_array()[hitpixel])
+
 def factcamera(self,
                data,
                pixelcoords=None,
@@ -132,7 +151,7 @@ def factcamera(self,
     if linewidth is None:
         linewidth = calc_linewidth(self)
 
-    collection = PatchCollection(patches)
+    collection = PatchCollection(patches, picker=0)
     collection.set_linewidth(linewidth)
     collection.set_edgecolors(edgecolors)
     collection.set_cmap(cmap)
@@ -145,6 +164,8 @@ def factcamera(self,
 @docstring.copy_dedent(factcamera)
 def pltfactcamera(*args, **kwargs):
     ax = plt.gca()
+    fig = ax.get_figure()
+    fig.canvas.mpl_connect("pick_event", onpick)
     ret = ax.factcamera(*args, **kwargs)
     plt.draw_if_interactive()
     plt.sci(ret)

@@ -25,8 +25,9 @@ for i in range(N):
     )
     data[i,:] += np.random.normal(0, 1, 1440)
 
-plt.factcamera(data[0], pixelset=data[0]>4)
-plt.factpixelids(color="red")
-plt.savefig("test.pdf")
+# plt.factcamera(data[0], pixelset=data[0]>4)
+# plt.show()
+# plt.factpixelids(color="red")
+# plt.savefig("test.pdf")
 
-Viewer(data, 'label', data>5)
+Viewer(data, 'photoncharge', data>5)

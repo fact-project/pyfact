@@ -39,6 +39,9 @@ class Viewer():
     pixelsetcolour : a matplotlib conform colour representation
         the colour for the pixels in 'pixelset',
         [default: green]
+    clickedcolour: a matplotlib conform colour represantation
+        the coulour for clicked pixel
+        [default: red]
     mapfile : str
         path/to/fact/pixelmap.csv
         [default pixel-map.csv]
@@ -57,6 +60,7 @@ class Viewer():
                  label,
                  pixelset=None,
                  pixelsetcolour="g",
+                 clickedcolour="r",
                  mapfile="pixel-map.csv",
                  cmap="gray",
                  vmin=None,
@@ -69,6 +73,7 @@ class Viewer():
         self.numEvents = dataset.shape[0]
         self.pixelset = pixelset
         self.pixelsetcolour = pixelsetcolour
+        self.clickedcolour = clickedcolour
         self.label = label
         self.cmap = cmap
         self.vmin = vmin
@@ -87,11 +92,15 @@ class Viewer():
 
         buttonFrame = tk.Frame(self.root)
         plotFrame = tk.Frame(self.root)
+        infoFrame = tk.Frame(plotFrame)
 
         buttonFrame.pack(side=tk.TOP)
         plotFrame.pack(side=tk.BOTTOM, expand=True, fill=tk.BOTH)
+        infoFrame.pack(side=tk.BOTTOM)
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=plotFrame)
+        self.canvas.mpl_connect("pick_event", self.onpick)
+        self.canvas.mpl_connect("resize_event", self.redraw)
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
@@ -106,20 +115,20 @@ class Viewer():
         self.eventstring = tk.StringVar()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
         self.eventbox = tk.Label(master=buttonFrame, textvariable=self.eventstring)
+
         self.eventbox.pack(side=tk.LEFT)
         self.previous_button.pack(side=tk.LEFT)
         self.next_button.pack(side=tk.LEFT)
         self.quit_button.pack(side=tk.RIGHT)
         self.save_button.pack(side=tk.RIGHT)
-        self.resizing = False
-        self.root.bind("<Configure>", self.trigger_resize)
+
+        self.infotext = tk.StringVar()
+        self.infotext.set("Click on a Pixel")
+        self.infobox = tk.Label(master=infoFrame, textvariable=self.infotext)
+        self.infobox.pack(side=tk.LEFT)
+
         self.update()
         tk.mainloop()
-
-    def trigger_resize(self, event):
-        if not self.resizing:
-            self.resizing = True
-            self.root.after(50, self.redraw)
 
     def init_plot(self):
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
@@ -153,6 +162,8 @@ class Viewer():
             pixelsetcolour=self.pixelsetcolour,
             linewidth=None,
         )
+        self.plot.set_picker(0)
+        self.clicked_pixel = None
 
         self.cb = self.fig.colorbar(self.plot, cax=self.cax, label=self.label)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
@@ -170,13 +181,11 @@ class Viewer():
             fig.savefig(filename, dpi=300, bbox_inches="tight", transparent=True)
             print("Image sucessfully saved to", filename)
 
-    def redraw(self):
-        if self.width != self.fig.get_figwidth() or self.height != self.fig.get_figheight():
-            self.linewidth = calc_linewidth(self.ax)
-            self.plot.set_linewidth(self.linewidth)
-            self.canvas.draw()
-            self.fig.tight_layout(pad=0)
-        self.resizing = False
+    def redraw(self, event):
+        self.linewidth = calc_linewidth(self.ax)
+        self.plot.set_linewidth(self.linewidth)
+        self.fig.tight_layout(pad=0)
+        self.canvas.draw()
 
 
     def quit(self):
@@ -207,6 +216,8 @@ class Viewer():
         edgecolors = np.array(1440*["k"])
         if self.pixelset is not None:
             edgecolors[self.pixelset[self.event]] = self.pixelsetcolour
+        if self.clicked_pixel is not None:
+            edgecolors[self.clicked_pixel] = self.clickedcolour
         self.plot.set_edgecolors(edgecolors)
         self.plot.changed()
         if self.vmin is None:
@@ -221,5 +232,19 @@ class Viewer():
         self.plot.set_linewidths(self.linewidth)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
         self.cb.draw_all()
+        self.plot.set_picker(0)
         self.canvas.draw()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
+
+    def onpick(self, event):
+        hitpixel = event.ind[0]
+        if hitpixel != self.clicked_pixel:
+            self.clicked_pixel = hitpixel
+            self.update()
+            self.infotext.set(
+                "chid: {:04d}, {} = {:4.2f}".format(
+                    hitpixel,
+                    self.label,
+                    self.plot.get_array()[hitpixel]
+                )
+            )
