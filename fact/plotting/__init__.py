@@ -63,7 +63,8 @@ def factcamera(self,
                pixelset=None,
                pixelsetcolour='g',
                linewidth=None,
-               intersectcolour='b'
+               intersectcolour='b',
+               picker=True,
                ):
     """
     Attributes
@@ -89,12 +90,15 @@ def factcamera(self,
     vmax : float
         the maximum for the colorbar, if None max(dataset[event]) is used
         [default: None]
+    picker: bool
+        if True then the the pixel are made clickable to show information
     """
 
     self.set_aspect('equal')
 
-    fig = self.get_figure()
-    fig.canvas.mpl_connect("pick_event", onpick)
+    if picker is True:
+        fig = self.get_figure()
+        fig.canvas.mpl_connect("pick_event", onpick)
 
     # if the axes limit is still (0,1) assume new axes
     if self.get_xlim() == (0, 1) and self.get_ylim() == (0, 1):
