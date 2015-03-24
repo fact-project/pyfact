@@ -94,6 +94,32 @@ db = connect()
 db.<tab>
 ```
 
+For easily correlating slowdata samples by their timestamps, try this:
+```{python}
+
+import matplotlib.pyplot as plt
+from fact.slowdata import connect
+from fact.slowdata.correlation import CorrelationByInterpolation
+
+db = connect()
+magic_weather_sample = db.MAGIC_WEATHER_DATA.from_until(16400, 16403)
+fact_camera_temp_sample = db.FSC_CONTROL_TEMPERATURE.from_until(16401, 16403)
+coincidence_time_window = 5 # in seconds
+correlation_generator = CorrelationByInterpolation(magic_weather_sample, 
+                                                  fact_camera_temp_sample, coincidence_time_window)
+
+(interpolated_magic_weather_sample , 
+   interpolated_fact_camera_temp_sample) = correlation_generator.correlate()
+
+# The interpolated samples are ensured to have the same "Time" field now.
+# assume, we wanted to know if the temperature measured at MAGIC is correlated to 
+# the temperature in the SiPM sensor area (using sensor 4, because we can)
+plt.hist2d(interpolated_magic_weather_sample["T"], 
+           interpolated_fact_camera_temp_sample["T_sens"][:,4])
+plt.show()
+```
+
+
 For a comple example for requesting data and making a plot, please see `examples/slowdata_db.py`.
 
 ## dim
