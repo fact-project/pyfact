@@ -7,54 +7,57 @@ from pymongo import MongoClient
 from . import settings
 from . import tools
 from .. import time as facttime
+from . import correlation
 
-__all__ = ['connect']
+
+
+__all__ = ['connect', 'correlation']
 
 class ServiceField(object):
     """ represents one Field of a Service
     """
-    
+
     def __init__(self, collection, key):
         self.__collection = collection
         self.__key = key
-    
+
     def from_until(self, start, end):
         """ retrieve field from start to end date as numpy array.
         """
         cursor = self.__collection.find({"Time": {"$gte": start, "$lt": end}})
         return tools.cursor_to_structured_array(cursor)
-        
+
 #------------------------------------------------------------------------------
 class Service(object):
     """ represents a FACT slow data service
     """
-    
+
     def __init__(self, collection):
         self.__collection = collection
         self.__get_service_field_names(collection)
         for key in self.__keys:
             setattr(
-                self, 
-                key, 
+                self,
+                key,
                 ServiceField(collection, key))
 
         self.__keys = None
 
     def __get_service_field_names(self, coll):
-        """ retrieve the field names of this service 
+        """ retrieve the field names of this service
 
-        by  using one example decument. 
+        by  using one example decument.
         """
         self.__keys = coll.find_one()
         del self.__keys['_id']
-        
+
 
 
     def from_until(self, start, end, sample_period=None, skip=None, fields=None):
-        """ retrieve service from start to end date as numpy array. 
+        """ retrieve service from start to end date as numpy array.
 
         start : starttime in FJD
-        end   : end time in FJD 
+        end   : end time in FJD
 
         keyword arguments:
 
@@ -67,14 +70,14 @@ class Service(object):
         else:
             sample_boundaries = np.array([start, end])
 
-        
+
 
         samples_start = sample_boundaries[0:-1:skip]
         samples_end = sample_boundaries[1::skip]
         dict_list = []
         for _start, _end in zip(samples_start, samples_end):
             start_stop_dict = {  "Time":{
-                                         "$gte": float(_start), 
+                                         "$gte": float(_start),
                                          "$lt": float(_end)}}
             dict_list.append(start_stop_dict)
 
@@ -84,22 +87,22 @@ class Service(object):
             cursor = self.__collection.find({"$or": dict_list })
 
         return tools.cursor_to_structured_array(cursor)
-        
-        
+
+
 #------------------------------------------------------------------------------
 class AuxDataBaseFrontEnd(object):
-            
+
     def __init__(self, database):
         self.database = database
         self.__service_names = None # to be initialised in __init_service_names
         self.__fill_in_services()
-        
+
     def __fill_in_services(self):
         self.__init_service_names()
         for service_name in self.__service_names:
-            service = Service(self.database[service_name]) 
-            setattr(self, service_name, service)    
-                
+            service = Service(self.database[service_name])
+            setattr(self, service_name, service)
+
     def __init_service_names(self):
         self.__service_names = list()
         for collection_name in self.database.collection_names():
