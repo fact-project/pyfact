@@ -50,7 +50,7 @@ Or you can start an interactive Viewer which lets you click
 through the events and save the images:
 
 ```{python}
-from fact.plotting import Viewer()
+from fact.plotting import Viewer
 from numpy.random import poisson
 
 # pseudo data:
