@@ -17,11 +17,9 @@ on a pixel bases
 from matplotlib.axes import Axes
 from matplotlib.patches import RegularPolygon
 from matplotlib.collections import PatchCollection
-import matplotlib.colors as colors
 from matplotlib import docstring
 
 import numpy as np
-import pkg_resources as res
 import matplotlib.pyplot as plt
 import warnings
 
@@ -29,13 +27,19 @@ from .utils import get_pixel_coords, calc_text_size, calc_linewidth
 
 try:
     from .viewer import Viewer
-    __all__ = ['Viewer', 'get_pixel_coords', 'calc_marker_size', 'calc_text_size']
-except:
-    warnings.warn("Matplotlib was build without tkagg support"
-                  ", the Viewer will not be available")
+    __all__ = [
+        'Viewer',
+        'get_pixel_coords',
+        'calc_marker_size',
+        'calc_text_size',
+    ]
+except ImportError:
+    warnings.warn("Matplotlib was build without tkagg support,\n"
+                  "the Viewer will not be available")
     __all__ = ['get_pixel_coords', 'calc_marker_size', 'calc_text_size']
 
 lastpixel = -1
+
 
 def onpick(event):
     global lastpixel
