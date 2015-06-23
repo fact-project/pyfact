@@ -1,10 +1,8 @@
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.backend_bases import key_press_handler
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.figure import Figure
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 from . import get_pixel_coords, calc_linewidth
 
@@ -16,11 +14,6 @@ except ImportError:
     import Tkinter as tk
     import tkFileDialog as filedialog
 
-# for python2 use imp.reload, for python3 use importlib
-try:
-    from importlib import reload
-except ImportError:
-    from imp import reload
 
 class Viewer():
     """
