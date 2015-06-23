@@ -79,16 +79,15 @@ class Viewer():
         self.vmin = vmin
         self.vmax = vmax
         self.pixel_x, self.pixel_y = get_pixel_coords()
-        self.fig = Figure(figsize=(7,6), dpi=100)
+        self.fig = Figure(figsize=(7, 6), dpi=100)
 
         self.init_plot()
 
-        #### GUI Stuff ####
+        # ---- GUI Stuff ----
 
         self.root = tk.Tk()
         self.root.geometry(("1024x768"))
         self.root.wm_title("PyFactViewer")
-
 
         buttonFrame = tk.Frame(self.root)
         plotFrame = tk.Frame(self.root)
@@ -107,14 +106,32 @@ class Viewer():
         self.canvas._tkcanvas.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)
         self.root.bind('<Key>', self.on_key_event)
 
-        self.quit_button = tk.Button(master=buttonFrame, text='Quit', command=self.quit, expand=None)
-        self.next_button = tk.Button(master=buttonFrame, text='Next', command=self.next, expand=None)
-        self.previous_button = tk.Button(master=buttonFrame, text='Previous', command=self.previous, expand=None)
-        self.save_button = tk.Button(master=buttonFrame, text='Save Image', command=self.save, expand=None)
+        self.quit_button = tk.Button(master=buttonFrame,
+                                     text='Quit',
+                                     command=self.quit,
+                                     expand=None,
+                                     )
+        self.next_button = tk.Button(master=buttonFrame,
+                                     text='Next',
+                                     command=self.next,
+                                     expand=None,
+                                     )
+        self.previous_button = tk.Button(master=buttonFrame,
+                                         text='Previous',
+                                         command=self.previous,
+                                         expand=None,
+                                         )
+        self.save_button = tk.Button(master=buttonFrame,
+                                     text='Save Image',
+                                     command=self.save,
+                                     expand=None,
+                                     )
 
         self.eventstring = tk.StringVar()
         self.eventstring.set("EventNum: {:05d}".format(self.event))
-        self.eventbox = tk.Label(master=buttonFrame, textvariable=self.eventstring)
+        self.eventbox = tk.Label(master=buttonFrame,
+                                 textvariable=self.eventstring,
+                                 )
 
         self.eventbox.pack(side=tk.LEFT)
         self.previous_button.pack(side=tk.LEFT)
@@ -133,18 +150,18 @@ class Viewer():
     def init_plot(self):
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
         self.fig.clf()
-        self.ax = self.fig.add_subplot(1,1,1, aspect=1)
+        self.ax = self.fig.add_subplot(1, 1, 1, aspect=1)
         print(self.ax.get_figure().canvas)
         divider = make_axes_locatable(self.ax)
         self.cax = divider.append_axes("right", size="5%", pad=0.1)
         self.ax.set_axis_off()
 
         if self.vmin is None:
-            vmin=np.min(self.dataset[self.event])
+            vmin = np.min(self.dataset[self.event])
         else:
             vmin = self.vmin
         if self.vmax is None:
-            vmax=np.max(self.dataset[self.event])
+            vmax = np.max(self.dataset[self.event])
         else:
             vmax = self.vmax
 
@@ -189,13 +206,12 @@ class Viewer():
         self.fig.tight_layout(pad=0)
         self.canvas.draw()
 
-
     def quit(self):
         self.root.quit()     # stops mainloop
         self.root.destroy()  # this is necessary on Windows to prevent
 
     def next(self):
-        self.event = (self.event + 1)%len(self.dataset)
+        self.event = (self.event + 1) % len(self.dataset)
         self.update()
 
     def previous(self):
@@ -225,11 +241,11 @@ class Viewer():
         if self.vmin is None:
             vmin = np.min(self.dataset[self.event])
         else:
-            vmin=self.vmin
+            vmin = self.vmin
         if self.vmax is None:
             vmax = np.max(self.dataset[self.event])
         else:
-            vmax=self.vmax
+            vmax = self.vmax
         self.linewidth = calc_linewidth(self.ax)
         self.plot.set_linewidths(self.linewidth)
         self.cb.set_clim(vmin=vmin, vmax=vmax)
