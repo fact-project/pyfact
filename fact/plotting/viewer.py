@@ -151,7 +151,6 @@ class Viewer():
         self.width, self.height = self.fig.get_figwidth(), self.fig.get_figheight()
         self.fig.clf()
         self.ax = self.fig.add_subplot(1, 1, 1, aspect=1)
-        print(self.ax.get_figure().canvas)
         divider = make_axes_locatable(self.ax)
         self.cax = divider.append_axes("right", size="5%", pad=0.1)
         self.ax.set_axis_off()
