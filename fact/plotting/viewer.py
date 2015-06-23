@@ -62,7 +62,14 @@ class Viewer():
         matplotlib.use('TkAgg', warn=False, force=True)
         matplotlib.rcdefaults()
         self.event = 0
-        self.dataset = dataset
+        if dataset.shape == (1440, ):
+            self.dataset = np.reshape(dataset, (1, 1440))
+        elif dataset.shape[1] == 1440:
+            self.dataset = dataset
+        else:
+            raise ValueError('Viewer expects dataset with shape (1440, )\n'
+                             'or (n_events, 1440)'
+                             )
         self.numEvents = dataset.shape[0]
         self.pixelset = pixelset
         self.pixelsetcolour = pixelsetcolour
