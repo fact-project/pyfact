@@ -2,23 +2,23 @@
 
 The time used most of the time in FACT is the number of days since 01.01.1970
 
-So this time is related to unix time, since it has the same offset 
-(unix time is the number of seconds since 01.01.1970 
+So this time is related to unix time, since it has the same offset
+(unix time is the number of seconds since 01.01.1970
     (what time? noon? midnight??))
-but it is also related to "the" Modified Julian Date (MJD), 
-which is used by astronomers 
+but it is also related to "the" Modified Julian Date (MJD),
+which is used by astronomers
 in the sense, that it also counts days.
 
-According to http://en.wikipedia.org/wiki/Julian_day, 
-there is quite a large number of 
-somehow modified julian dates, of which the MJD is only one. 
-So it might be okay, to introduce a new modification, 
+According to http://en.wikipedia.org/wiki/Julian_day,
+there is quite a large number of
+somehow modified julian dates, of which the MJD is only one.
+So it might be okay, to introduce a new modification,
 going by the name of FACT Julain Date (FJD).
 """
 from __future__ import print_function
-import time 
+import time
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 import dateutil
@@ -50,7 +50,7 @@ def iso2dt(iso_time_string):
 def run2dt(run_string):
     """ parse typical FACT run file path string to datetime instance (UTC)
 
-    example 
+    example
     first you do this:
 
     "/path/to/file/20141231.more_text" --> "20141231"
@@ -79,3 +79,16 @@ def datestr(datetime_inst):
     """ make iso time string from datetime instance
     """
     return datetime_inst.isoformat("T")
+
+
+def night_integer(timestamp=None):
+    """ get the correct night in fact format
+        if it is after 0:00, take the date
+        of yesterday
+    """
+    if timestamp is None:
+        timestamp = datetime.utcnow()
+    if timestamp.hour < 8:
+        timestamp = timestamp - timedelta(days=1)
+    night = int(timestamp.strftime('%Y%m%d'))
+    return night
