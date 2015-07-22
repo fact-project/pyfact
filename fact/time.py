@@ -88,7 +88,7 @@ def night_integer(timestamp=None):
     """
     if timestamp is None:
         timestamp = datetime.utcnow()
-    if timestamp.hour < 8:
+    if timestamp.hour < 12:
         timestamp = timestamp - timedelta(days=1)
     night = int(timestamp.strftime('%Y%m%d'))
     return night
