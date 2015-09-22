@@ -65,10 +65,8 @@ def factcamera(self,
                cmap='gray',
                vmin=None,
                vmax=None,
-               pixelset=None,
-               pixelsetcolour='g',
+               edgecolor='k',
                linewidth=None,
-               intersectcolour='b',
                picker=True,
                ):
     """
@@ -77,12 +75,6 @@ def factcamera(self,
 
     data     : array like with shape 1440
         the data you want to plot into the pixels
-    pixelset : boolean array with shape 1440
-        the pixels where pixelset is True are marked with 'pixelsetcolour'
-        [default: None]
-    pixelsetcolour : a matplotlib conform colour representation
-        the colour for the pixels in 'pixelset',
-        [default: green]
     pixelcoords : the coordinates for the pixels in form [x-values, y-values]
         if None, the package resource is used
         [default: None]
@@ -95,6 +87,8 @@ def factcamera(self,
     vmax : float
         the maximum for the colorbar, if None max(dataset[event]) is used
         [default: None]
+    edgecolor : any matplotlib color
+        the color around the pixel
     picker: bool
         if True then the the pixel are made clickable to show information
     """
@@ -120,53 +114,23 @@ def factcamera(self,
     if vmax is None:
         vmax = np.max(data)
 
-    edgecolors = np.array(1440*["k"])
-
-    if pixelset is None:
-        pixelset = np.zeros(1440, dtype=np.bool)
-
-    _pixelset = np.array(pixelset)
-    if _pixelset.ndim == 1:
-        if _pixelset.shape != (1440,):
-            pixelset = np.zeros(1440, dtype=np.bool)
-            pixelset[_pixelset] = True
-        else:
-            pixelset = np.array(_pixelset, dtype=np.bool)
-        edgecolors[pixelset] = pixelsetcolour
-    elif _pixelset.ndim == 2:
-        for pixelset, colour in zip(_pixelset, pixelsetcolour):
-            edgecolors[pixelset] = colour
-        intersect = np.logical_and(_pixelset[0], _pixelset[1])
-        edgecolors[intersect] = intersectcolour
-
-    else:
-        raise ValueError(
-            """pixelset needs to be one of:
-            1. list of pixelids
-            2. 1d bool array with shape (1440,)
-            3. 2d bool array with shape (2, 1440)
-            """
-        )
-
+    edgecolors = np.array(1440 * [edgecolor])
     patches = []
     for x, y, ec in zip(pixel_x, pixel_y, edgecolors):
         patches.append(
             RegularPolygon(
                 xy=(x, y),
                 numVertices=6,
-                radius=9.5/np.sqrt(3),
+                radius=9.51/np.sqrt(3),
                 orientation=0.,   # in radians
             )
         )
 
-    linewidths = np.zeros(1440)
     if linewidth is None:
-        linewidths[pixelset] = calc_linewidth()
-    else:
-        linewidths[pixelset] = linewidth
+        linewidth = calc_linewidth()
 
     collection = PatchCollection(patches, picker=0)
-    collection.set_linewidth(linewidths)
+    collection.set_linewidth(linewidth)
     collection.set_edgecolors(edgecolors)
     collection.set_cmap(cmap)
     collection.set_array(data)
@@ -225,9 +189,46 @@ def plt_pixelids(*args, **kwargs):
     ret = plt.draw_if_interactive()
     return ret
 
+
+def mark_pixel(ax, pixels, color='g', linewidth=None):
+    ''' surrounds pixels given by pixels with a border '''
+    pixel_x, pixel_y = get_pixel_coords()
+
+    patches = []
+    for xy in zip(pixel_x[pixels], pixel_y[pixels]):
+        patches.append(
+            RegularPolygon(
+                xy=xy,
+                numVertices=6,
+                radius=9.5/np.sqrt(3),
+                orientation=0.,   # in radians
+                fill=False,
+            )
+        )
+
+    if linewidth is None:
+        linewidth = calc_linewidth()
+    collection = PatchCollection(patches, picker=0)
+    collection.set_linewidth(linewidth)
+    collection.set_edgecolors(color)
+    collection.set_facecolor('none')
+
+    ax.add_collection(collection)
+    return collection
+
+
+@docstring.copy_dedent(mark_pixel)
+def plt_mark_pixel(*args, **kwargs):
+    ax = plt.gca()
+    ax.fact_markpixel(*args, **kwargs)
+    ret = plt.draw_if_interactive()
+    return ret
+
+
 # add functions to matplotlib
-Axes.factcamera = factcamera
 Axes.factcamera = factcamera
 plt.factcamera = pltfactcamera
 Axes.factpixelids = ax_pixelids
 plt.factpixelids = plt_pixelids
+Axes.fact_markpixel = mark_pixel
+plt.fact_markpixel = plt_mark_pixel
