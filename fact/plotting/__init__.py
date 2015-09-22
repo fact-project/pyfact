@@ -159,12 +159,14 @@ def factcamera(self,
             )
         )
 
+    linewidths = np.zeros(1440)
     if linewidth is None:
-        linewidth = np.zeros(1440)
-        linewidth[pixelset] = calc_linewidth()
+        linewidths[pixelset] = calc_linewidth()
+    else:
+        linewidths[pixelset] = linewidth
 
     collection = PatchCollection(patches, picker=0)
-    collection.set_linewidth(linewidth)
+    collection.set_linewidth(linewidths)
     collection.set_edgecolors(edgecolors)
     collection.set_cmap(cmap)
     collection.set_array(data)
