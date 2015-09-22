@@ -58,6 +58,7 @@ def onpick(event):
         print("chid:", hitpixel)
         print("value", plot.get_array()[hitpixel])
 
+
 def factcamera(self,
                data,
                pixelcoords=None,
@@ -147,20 +148,20 @@ def factcamera(self,
             """
         )
 
-
     patches = []
     for x, y, ec in zip(pixel_x, pixel_y, edgecolors):
         patches.append(
             RegularPolygon(
                 xy=(x, y),
                 numVertices=6,
-                radius=0.95*9.5/np.sqrt(3),
+                radius=9.5/np.sqrt(3),
                 orientation=0.,   # in radians
             )
         )
 
     if linewidth is None:
-        linewidth = calc_linewidth(self)
+        linewidth = np.zeros(1440)
+        linewidth[pixelset] = calc_linewidth()
 
     collection = PatchCollection(patches, picker=0)
     collection.set_linewidth(linewidth)
@@ -171,6 +172,7 @@ def factcamera(self,
 
     self.add_collection(collection)
     return collection
+
 
 @docstring.copy_dedent(factcamera)
 def pltfactcamera(*args, **kwargs):
@@ -202,8 +204,17 @@ def ax_pixelids(self, size=None, pixelcoords=None, *args, **kwargs):
     masky = np.logical_and(pixel_y + 4.5 < y2, pixel_y - 4.5 > y1)
     mask = np.logical_and(maskx, masky)
 
-    for px, py, chid in zip(pixel_x[mask], pixel_y[mask], np.arange(1440)[mask]):
-        self.text(px, py, str(chid), size=size, va="center", ha="center", **kwargs)
+    chids = np.arange(1440)
+    for px, py, chid in zip(pixel_x[mask], pixel_y[mask], chids[mask]):
+        self.text(
+            px, py,
+            str(chid),
+            size=size,
+            va="center",
+            ha="center",
+            **kwargs
+        )
+
 
 @docstring.copy_dedent(ax_pixelids)
 def plt_pixelids(*args, **kwargs):
