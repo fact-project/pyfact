@@ -7,7 +7,7 @@ dimc_module = Extension('fact.dim.dimc',
                      ('MIPSEL', None), ],
     include_dirs = ['./fact/dim/dim_src/include'],
     sources = [
-       './fact/dim/dim_src/wrapper/dimmodule.cpp', 
+       './fact/dim/dim_src/wrapper/dimmodule.cpp',
        './fact/dim/dim_src/wrapper/pydim_utils.cpp',
        './fact/dim/dim_src/src/dis.c',
        './fact/dim/dim_src/src/conn_handler.c',
@@ -28,7 +28,7 @@ dimc_module = Extension('fact.dim.dimc',
 
 setup(
     name='fact',
-    version='0.2',
+    version='0.3',
     description='a module containing usefull methods for working with fact',
     url='http://bitbucket.org/MaxNoe/pyfact',
     author='Maximilian Noethe, Dominik Neise',
