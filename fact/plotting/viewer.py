@@ -26,12 +26,6 @@ class Viewer():
         the data you want to plot into the pixels
     label    : str
         the label for the colormap
-    pixelset : boolean array with shape (num_events, 1440)
-        the pixels where pixelset is True are marked with 'pixelsetcolour'
-        [default: None]
-    pixelsetcolour : a matplotlib conform colour representation
-        the colour for the pixels in 'pixelset',
-        [default: green]
     clickedcolour: a matplotlib conform colour represantation
         the coulour for clicked pixel
         [default: red]
@@ -51,8 +45,6 @@ class Viewer():
     def __init__(self,
                  dataset,
                  label,
-                 pixelset=None,
-                 pixelsetcolour="g",
                  clickedcolour="r",
                  mapfile="pixel-map.csv",
                  cmap="gray",
@@ -71,8 +63,6 @@ class Viewer():
                              'or (n_events, 1440)'
                              )
         self.numEvents = dataset.shape[0]
-        self.pixelset = pixelset
-        self.pixelsetcolour = pixelsetcolour
         self.clickedcolour = clickedcolour
         self.label = label
         self.cmap = cmap
@@ -164,10 +154,6 @@ class Viewer():
         else:
             vmax = self.vmax
 
-        if self.pixelset is None:
-            pixelset = np.zeros(1440, dtype=bool)
-        else:
-            pixelset = self.pixelset[self.event]
 
         self.plot = self.ax.factcamera(
             data=self.dataset[self.event],
@@ -175,8 +161,6 @@ class Viewer():
             cmap=self.cmap,
             vmin=vmin,
             vmax=vmax,
-            pixelset=pixelset,
-            pixelsetcolour=self.pixelsetcolour,
             linewidth=None,
             picker=False,
         )
@@ -201,7 +185,6 @@ class Viewer():
 
     def redraw(self, event):
         self.linewidth = calc_linewidth(self.ax)
-        self.plot.set_linewidth(self.linewidth)
         self.fig.tight_layout(pad=0)
         self.canvas.draw()
 
@@ -231,11 +214,6 @@ class Viewer():
     def update(self):
         self.plot.set_array(self.dataset[self.event])
         edgecolors = np.array(1440*["k"])
-        if self.pixelset is not None:
-            edgecolors[self.pixelset[self.event]] = self.pixelsetcolour
-        if self.clicked_pixel is not None:
-            edgecolors[self.clicked_pixel] = self.clickedcolour
-        self.plot.set_edgecolors(edgecolors)
         self.plot.changed()
         if self.vmin is None:
             vmin = np.min(self.dataset[self.event])
