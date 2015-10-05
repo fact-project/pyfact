@@ -1,4 +1,5 @@
 from distutils.core import setup, Extension
+from sys import platform
 
 dimc_module = Extension('fact.dim.dimc',
     define_macros = [('PROTOCOL', '1'),
@@ -26,6 +27,17 @@ dimc_module = Extension('fact.dim.dimc',
       ]
     )
 
+packages = [
+    'fact',
+    'fact.plotting',
+    'fact.slowdata'
+    ]
+ext_modules = []
+
+if not platform == 'darwin':
+    packages.append('fact.dim')
+    ext_modules.append(dimc_module)
+
 setup(
     name='fact',
     version='0.3',
@@ -34,11 +46,7 @@ setup(
     author='Maximilian Noethe, Dominik Neise',
     author_email='maximilian.noethe@tu-dortmund.de',
     license='MIT',
-    packages=['fact',
-              'fact.plotting',
-              'fact.dim',
-              'fact.slowdata'
-              ],
+    packages=packages,
     package_data={'': ['resources/*']},
     install_requires=[
         'numpy',
@@ -47,7 +55,7 @@ setup(
         'python-dateutil',
         'pymongo>=2.7',
     ],
-    ext_modules=[dimc_module],
+    ext_modules=ext_modules,
     scripts=[],
-    zip_safe=False
+    zip_safe=False,
 )
