@@ -31,8 +31,8 @@ def calc_linewidth(ax=None):
     x1, x2 = ax.get_xlim()
     y1, y2 = ax.get_ylim()
 
-    x_stretch = (x2 - x1)/400
-    y_stretch = (y2 - y1)/400
+    x_stretch = (x2 - x1) / 400
+    y_stretch = (y2 - y1) / 400
 
     linewidth = min(width/x_stretch, height/y_stretch)/10
     return linewidth
@@ -52,7 +52,7 @@ def get_pixel_coords(mapfile=None,
                      rotate=True,
                      columns=[0, 9, 10, 11],
                      skip_header=1,
-                     skip_footer=None,
+                     skip_footer=0,
                      delimiter=",",
                      unpack=True,
                      ):
