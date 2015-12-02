@@ -1,10 +1,9 @@
-from matplotlib.axes import Axes
-import os
 import numpy as np
 import pkg_resources as res
 import matplotlib.pyplot as plt
 
 __all__ = ['get_pixel_coords', 'calc_linewidth', 'calc_text_size']
+
 
 def calc_linewidth(ax=None):
     """
@@ -38,6 +37,7 @@ def calc_linewidth(ax=None):
     linewidth = min(width/x_stretch, height/y_stretch)/10
     return linewidth
 
+
 def calc_text_size(ax=None):
     if ax is None:
         ax = plt.gca()
@@ -47,10 +47,12 @@ def calc_text_size(ax=None):
 
     return textsize
 
+
 def get_pixel_coords(mapfile=None,
                      rotate=True,
-                     columns=[0,9,10,11],
-                     skiprows=1,
+                     columns=[0, 9, 10, 11],
+                     skip_header=1,
+                     skip_footer=None,
                      delimiter=",",
                      unpack=True,
                      ):
@@ -77,7 +79,8 @@ def get_pixel_coords(mapfile=None,
 
     softID, chid, pixel_x_soft, pixel_y_soft = np.genfromtxt(
         mapfile,
-        skiprows=skiprows,
+        skip_header=skip_header,
+        skip_footer=skip_footer,
         delimiter=delimiter,
         usecols=columns,
         unpack=unpack,
@@ -86,8 +89,8 @@ def get_pixel_coords(mapfile=None,
     pixel_x_chid = np.zeros(1440)
     pixel_y_chid = np.zeros(1440)
 
-    pixel_x_soft*=9.5
-    pixel_y_soft*=9.5
+    pixel_x_soft *= 9.5
+    pixel_y_soft *= 9.5
 
     for i in range(1440):
         pixel_x_chid[chid[i]] = pixel_x_soft[i]
