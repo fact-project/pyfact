@@ -1,5 +1,5 @@
 # pyfact
-[![TravisBuildStatus](https://travis-ci.org/MaxNoe/pyfact.svg?branch=master)](https://travis-ci.org/MaxNoe/pyfact)
+[![TravisBuildStatus](https://travis-ci.org/fact-project/pyfact.svg?branch=master)](https://travis-ci.org/fact-project/pyfact)
 ## A python package with utils to work with the FACT Imaging Cerenkov Telescope
 
 install with 
