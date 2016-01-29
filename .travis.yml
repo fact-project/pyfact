@@ -17,8 +17,11 @@ before_install:
   - sudo ln -s /run/shm /dev/shm
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pip pymongo
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pip pymongo flake8
   - python setup.py build_ext --inplace
+
+before_script:
+  - flake8 --max-line-length=90 .
 # command to run tests
 script: nosetests
 
