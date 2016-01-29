@@ -2,6 +2,12 @@ import random
 import threading
 
 from .dimc import dic_info_service, ONCE_ONLY, dic_release_service, dic_cmnd_callback
+from .dimc import (
+    dic_get_timestamp,
+    dic_get_quality,
+    dic_get_server,
+    dic_get_format
+    )
 
 
 def dic_sync_info_service(name, description, timeout=None, default_value=None):
@@ -25,11 +31,16 @@ def dic_sync_info_service(name, description, timeout=None, default_value=None):
         doesn't succeed. Optional, default is `None`.
     """
     executed = threading.Event()
-    state = dict(value=None)
+    state = dict()
 
     def create_callback(st):
         def _callback(*args):
+
             st['value'] = args
+            st['timestamp'] = dic_get_timestamp(0)
+            st['quality'] = dic_get_quality(0)
+            st['format'] = dic_get_format(0)
+            st['server'] = dic_get_server()
             executed.set()
 
         return _callback
@@ -51,7 +62,7 @@ def dic_sync_info_service(name, description, timeout=None, default_value=None):
 
     dic_release_service(sid)
 
-    return state['value']
+    return state
 
 
 def dic_sync_cmnd_service(name, arguments, description, timeout=None):

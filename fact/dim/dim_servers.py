@@ -38,7 +38,7 @@ class Dns(object):
         server_list_tuple = dic_sync_info_service(
             'DIS_DNS/SERVER_LIST',
             'C',
-            timeout=self.timeout)
+            timeout=self.timeout)['value']
         #TODO: all pydim_dic... functions have the 'timeout' parameter. (I think)
         #       and for all of them, I have to check if the return value is None.
         #       because if it is None, the function call timed out.
@@ -114,7 +114,7 @@ class DimServer(object):
         return self.__str__()
 
     def _fetch_services(self):
-        sl_raw = dic_sync_info_service(self.name + '/SERVICE_LIST', 'C', timeout=self.timeout)
+        sl_raw = dic_sync_info_service(self.name + '/SERVICE_LIST', 'C', timeout=self.timeout)['value']
         # return value is a tuple with only one element
         sl_raw = sl_raw[0]
 
@@ -167,7 +167,7 @@ class DimServer(object):
         if not self.has_service(self.name+"/SERVICE_DESC"):
             return {}
 
-        sd_raw = self.service_desc()[0]
+        sd_raw = self.service_desc()['value'][0]
         sd_raw = sd_raw.rstrip('\x00\n')
         sd = sd_raw.split('\n')
 
@@ -206,7 +206,7 @@ class DimServer(object):
 
         # there is a work around for a bug in pydim
         # even if a command needs no argument, and desc is also empty string
-        # one has to give one ... need to tell Niko about it.
+        # one still needs to give any argument ... need to tell Niko about it.
         if not fmt:
             fmt = 'I'
             args = (1, )
@@ -333,7 +333,7 @@ class FactDimServer(object):
         self.__last_service_got = time.time()
         #print 'full_srv_name',full_srv_name
         #print 'desc', desc
-        return dic_sync_info_service(full_srv_name, desc, timeout=1)
+        return dic_sync_info_service(full_srv_name, desc, timeout=1)['value']
 
     def __call__(self):
         """ Wrapper / For Convenience
