@@ -5,7 +5,7 @@
 install with 
 
 ```{shell session}
-$ pip install git+https://github.com/maxnoe/pyfact
+$ pip install git+https://github.com/fact-project/pyfact
 ```
 This takes automatically care of the dependencies which are installable with pip.
 
