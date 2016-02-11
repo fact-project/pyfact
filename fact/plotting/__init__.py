@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import warnings
 
 from .utils import get_pixel_coords, calc_text_size, calc_linewidth
+from .mapping import bias_to_trigger_patch_map
 
 try:
     from .viewer import Viewer
