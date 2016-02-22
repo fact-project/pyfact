@@ -127,7 +127,7 @@ def camera(
         )
 
     if linewidth is None:
-        linewidth = calc_linewidth()
+        linewidth = calc_linewidth(ax=ax)
 
     collection = PatchCollection(patches, picker=0)
     collection.set_linewidth(linewidth)
@@ -197,7 +197,8 @@ def mark_pixel(pixels, color='g', ax=None, linewidth=None):
         )
 
     if linewidth is None:
-        linewidth = calc_linewidth()
+        linewidth = calc_linewidth(ax=ax)
+
     collection = PatchCollection(patches, picker=0)
     collection.set_linewidth(linewidth)
     collection.set_edgecolors(color)
