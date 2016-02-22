@@ -19,11 +19,7 @@ Options:
 """
 
 import h5py
-import os
-import os.path
 from docopt import docopt
-import matplotlib
-import numpy as np
 from fact.plotting import Viewer
 
 if __name__ == "__main__":
