@@ -26,13 +26,15 @@ import dateutil.parser
 
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
 
+
 def fjd(datetime_inst):
     """ convert datetime instance to FJD
     """
     if datetime_inst.tzinfo is None:
         logging.warning("datetime instance is not aware of its timezone."
-            "result possibly wrong!")
-    return calendar.timegm(datetime_inst.utctimetuple()) / (24.*3600.)
+                        "result possibly wrong!")
+    return calendar.timegm(datetime_inst.utctimetuple()) / (24. * 3600.)
+
 
 def iso2dt(iso_time_string):
     """ parse ISO time string to timezone aware datetime instance
@@ -46,6 +48,7 @@ def iso2dt(iso_time_string):
         print("ISO time string did not contain timezone info. I assume UTC!")
         datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
     return datetime_inst
+
 
 def run2dt(run_string):
     """ parse typical FACT run file path string to datetime instance (UTC)
@@ -62,18 +65,21 @@ def run2dt(run_string):
     datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
     return datetime_inst
 
+
 def facttime(time_string):
     """ conver time-string to fact time
     """
     return calendar.timegm(time.strptime(
-        time_string,"%Y%m%d %H:%M")) / (24.*3600.)
+        time_string, "%Y%m%d %H:%M")) / (24. * 3600.)
+
 
 def to_datetime(fact_julian_date):
     """ convert facttime to datetime instance
     """
-    unix_time = fact_julian_date*24*3600
+    unix_time = fact_julian_date * 24 * 3600
     datetime_inst = datetime.utcfromtimestamp(unix_time)
     return datetime_inst
+
 
 def datestr(datetime_inst):
     """ make iso time string from datetime instance

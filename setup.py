@@ -1,13 +1,16 @@
 from distutils.core import setup, Extension
 from sys import platform
 
-dimc_module = Extension('fact.dim.dimc',
-    define_macros = [('PROTOCOL', '1'),
-                     ('unix', None),
-                     ('linux', None),
-                     ('MIPSEL', None), ],
-    include_dirs = ['./fact/dim/dim_src/include'],
-    sources = [
+dimc_module = Extension(
+    'fact.dim.dimc',
+    define_macros=[
+        ('PROTOCOL', '1'),
+        ('unix', None),
+        ('linux', None),
+        ('MIPSEL', None),
+    ],
+    include_dirs=['./fact/dim/dim_src/include'],
+    sources=[
        './fact/dim/dim_src/wrapper/dimmodule.cpp',
        './fact/dim/dim_src/wrapper/pydim_utils.cpp',
        './fact/dim/dim_src/src/dis.c',
@@ -41,8 +44,8 @@ if not platform == 'darwin':
 setup(
     name='fact',
     version='0.3',
-    description='a module containing usefull methods for working with fact',
-    url='http://bitbucket.org/MaxNoe/pyfact',
+    description='A module containing useful methods for working with fact',
+    url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',
     author_email='maximilian.noethe@tu-dortmund.de',
     license='MIT',
