@@ -30,20 +30,17 @@ date = run2dt("20150101")
 ### plotting
 
 Utils for plotting data into a FACT camera view. Based on matplotlib.
-The function `factcamera` is added to pyplot and matplotlib Axes. 
-So you can do
 
 ```{python}
 import matplotlib.pyplot as plt
-import fact.plotting
+import fact.plotting as factplot
 from numpy.random import normal
 
 # create some pseudo data with shape (10, 1440):
 data = normal(30, 5, (10, 1440))
 
-plt.factcamera(data[0])
+factplot.camera(data[0])
 plt.show()
-
 ```
 
 Or you can start an interactive Viewer which lets you click
