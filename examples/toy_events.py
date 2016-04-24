@@ -23,7 +23,7 @@ def muon_ring(psf=5, mirror_radius=1.75, max_impact=None):
     mx, my = np.random.uniform(-100, 100, 2)
     r = np.random.uniform(60, 102)
 
-    photon_theta = np.random.uniform(0, 2*np.pi, n_photons)
+    photon_theta = np.random.uniform(0, 2 * np.pi, n_photons)
 
     photon_x = r * np.cos(photon_theta) + mx
     photon_y = r * np.sin(photon_theta) + my
@@ -38,9 +38,9 @@ def muon_ring(psf=5, mirror_radius=1.75, max_impact=None):
 def gamma(psf=5):
     n_photons = rand_power()
 
-    length = np.random.normal(6.5*np.log10(n_photons), 0.2*np.log10(n_photons))
-    width = np.random.uniform(0.4*length, 0.8*length)
-    delta = np.random.uniform(0, 2*np.pi)
+    length = np.random.normal(6.5 * np.log10(n_photons), 0.2 * np.log10(n_photons))
+    width = np.random.uniform(0.4 * length, 0.8 * length)
+    delta = np.random.uniform(0, 2 * np.pi)
 
     cov = [[length**2, 0], [0, width**2]]
     cov = rotate_cov(cov, delta)
@@ -78,7 +78,7 @@ def rand_power(N=1, gamma=2.7, a=500, b=1000):
     assert gamma > 2, 'gamma has to be > 2'
     x = np.random.rand(N)
     exp = 1 - gamma
-    return (a**exp - x * (a**exp - b**exp))**(1/exp)
+    return (a**exp - x * (a**exp - b**exp))**(1 / exp)
 
 
 def noise(sigma=0.5, n_pix=1440):

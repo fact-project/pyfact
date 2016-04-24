@@ -214,7 +214,6 @@ class Viewer():
 
     def update(self):
         self.plot.set_array(self.dataset[self.event])
-        edgecolors = np.array(1440*["k"])
         self.plot.changed()
         if self.vmin is None:
             vmin = np.min(self.dataset[self.event])

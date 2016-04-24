@@ -11,30 +11,30 @@ dimc_module = Extension(
     ],
     include_dirs=['./fact/dim/dim_src/include'],
     sources=[
-       './fact/dim/dim_src/wrapper/dimmodule.cpp',
-       './fact/dim/dim_src/wrapper/pydim_utils.cpp',
-       './fact/dim/dim_src/src/dis.c',
-       './fact/dim/dim_src/src/conn_handler.c',
-       './fact/dim/dim_src/src/dtq.c',
-       './fact/dim/dim_src/src/copy_swap.c',
-       './fact/dim/dim_src/src/open_dns.c',
-       './fact/dim/dim_src/src/dna.c',
-       './fact/dim/dim_src/src/tcpip.c',
-       './fact/dim/dim_src/src/dic.c',
-       './fact/dim/dim_src/src/hash.c',
-       './fact/dim/dim_src/src/utilities.c',
-       './fact/dim/dim_src/src/sll.c',
-       './fact/dim/dim_src/src/dll.c',
-       './fact/dim/dim_src/src/swap.c',
-       './fact/dim/dim_src/src/dim_thr.c',
-      ]
-    )
+        './fact/dim/dim_src/wrapper/dimmodule.cpp',
+        './fact/dim/dim_src/wrapper/pydim_utils.cpp',
+        './fact/dim/dim_src/src/dis.c',
+        './fact/dim/dim_src/src/conn_handler.c',
+        './fact/dim/dim_src/src/dtq.c',
+        './fact/dim/dim_src/src/copy_swap.c',
+        './fact/dim/dim_src/src/open_dns.c',
+        './fact/dim/dim_src/src/dna.c',
+        './fact/dim/dim_src/src/tcpip.c',
+        './fact/dim/dim_src/src/dic.c',
+        './fact/dim/dim_src/src/hash.c',
+        './fact/dim/dim_src/src/utilities.c',
+        './fact/dim/dim_src/src/sll.c',
+        './fact/dim/dim_src/src/dll.c',
+        './fact/dim/dim_src/src/swap.c',
+        './fact/dim/dim_src/src/dim_thr.c',
+    ]
+)
 
 packages = [
     'fact',
     'fact.plotting',
     'fact.slowdata'
-    ]
+]
 ext_modules = []
 
 if not platform == 'darwin':
