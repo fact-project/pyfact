@@ -15,7 +15,6 @@ Currently these functions only work with shape (num_events, 1440), so
 on a pixel bases
 '''
 import warnings
-from .utils import get_pixel_coords
 from .core import mark_pixel, camera, pixelids
 
 
@@ -23,7 +22,6 @@ __all__ = [
     'camera',
     'mark_pixel',
     'pixelids',
-    'get_pixel_coords',
 ]
 
 try:
