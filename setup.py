@@ -50,13 +50,17 @@ setup(
     author_email='maximilian.noethe@tu-dortmund.de',
     license='MIT',
     packages=packages,
-    package_data={'': ['resources/*']},
+    package_data={
+        '': ['resources/*', 'credentials/credentials.encrypted']},
     install_requires=[
         'numpy',
         'scipy',
         'matplotlib>=1.4',
         'python-dateutil',
         'pymongo>=2.7',
+        'simple-crypt',
+        'setuptools',
+        'sqlalchemy',
     ],
     ext_modules=ext_modules,
     scripts=[],
