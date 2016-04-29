@@ -34,7 +34,7 @@ def calc_linewidth(ax=None):
     x_stretch = (x2 - x1) / 400
     y_stretch = (y2 - y1) / 400
 
-    linewidth = min(width/x_stretch, height/y_stretch)/10
+    linewidth = min(width / x_stretch, height / y_stretch) / 10
     return linewidth
 
 

@@ -21,7 +21,7 @@ install:
   - python setup.py build_ext --inplace
 
 before_script:
-  - flake8 --max-line-length=90 .
+  - flake8 --max-line-length=90 fact
 # command to run tests
 script: nosetests
 

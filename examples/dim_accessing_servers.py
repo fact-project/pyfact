@@ -1,9 +1,10 @@
 from __future__ import print_function
 import fact.dim
 
+
 def main():
 
-	print("""
+    print("""
 		Welcome to the first fact.dim example --- accessing servers
 
 		fact.dim tries to give you a somewhat easy access to FACTs
@@ -24,28 +25,29 @@ def main():
 		of your DIM DNS server. Otherwise type 'q'
 		""")
 
-	dim_dns_hostname = raw_input("DIM_DNS_HOST [default:newdaq]")
-	if not dim_dns_hostname.split():
-		dim_dns_hostname = 'newdaq'
-	elif dim_dns_hostname.split()[0].lower() == 'q':
-		return
-	
-	dns = fact.dim.Dns(dim_dns_hostname)
+    dim_dns_hostname = raw_input("DIM_DNS_HOST [default:newdaq]")
+    if not dim_dns_hostname.split():
+        dim_dns_hostname = 'newdaq'
+    elif dim_dns_hostname.split()[0].lower() == 'q':
+        return
 
-	print("Requesting dict of DIM servers, which are currently online ...")
-	online_servers = dns.servers()
-	print(online_servers.keys())
+    dns = fact.dim.Dns(dim_dns_hostname)
 
-	raw_input("\n -- press any key to go on --")
-	
-	print("We are going to talk to CHAT as an example \n     chat = online_servers['CHAT']")
-	chat = online_servers['CHAT']
-	raw_input("\n -- press any key to go on --")
-	print ("Let's see what services this server provides:")
-	print(chat.services.keys())
-	raw_input("\n -- press any key to go on --")
+    print("Requesting dict of DIM servers, which are currently online ...")
+    online_servers = dns.servers()
+    print(online_servers.keys())
 
-	print("""All (UPPERCASE) services of a server are provided to you as (lowercase) methods.
+    raw_input("\n -- press any key to go on --")
+
+    print(
+        "We are going to talk to CHAT as an example \n     chat = online_servers['CHAT']")
+    chat = online_servers['CHAT']
+    raw_input("\n -- press any key to go on --")
+    print("Let's see what services this server provides:")
+    print(chat.services.keys())
+    raw_input("\n -- press any key to go on --")
+
+    print("""All (UPPERCASE) services of a server are provided to you as (lowercase) methods.
 
 		So, in order to send a chat message to the CHAT server, 
 		feel free to call it's msg() method.
@@ -80,7 +82,7 @@ def main():
 		We're also working on that ;-)
 		""")
 
-	return chat
-	
+    return chat
+
 if __name__ == '__main__':
-	chat = main()
+    chat = main()

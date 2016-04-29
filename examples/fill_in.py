@@ -28,6 +28,7 @@ def get_mongo_db_collection_by_name(database, collection_name):
     """
     return getattr(database, collection_name)
 
+
 def delete_all_collections_from(database, omit=('system.indexes')):
     """ delete all collections from a database
 
@@ -42,10 +43,10 @@ def delete_all_collections_from(database, omit=('system.indexes')):
         try:
             coll.drop()
         except pymongo.errors.OperationFailure as exeption:
-            print ("Was not able to drop collection {}\n"
-                    "Exception Details:\n"
-                    "args:{ex.args} | details:{ex.details} "
-                    "| message:{ex.message} | code:{ex.code}"
+            print("Was not able to drop collection {}\n"
+                  "Exception Details:\n"
+                  "args:{ex.args} | details:{ex.details} "
+                  "| message:{ex.message} | code:{ex.code}"
                   ).format(coll_name, ex=exeption)
 
 
@@ -148,17 +149,17 @@ class Filler(object):
         """ insert data from fits file into the database
         """
         fits_start_time = (self.fits_file.header['TSTARTI']
-                          + self.fits_file.header['TSTARTF'])
+                           + self.fits_file.header['TSTARTF'])
         fits_stop_time = (self.fits_file.header['TSTOPI']
-                         + self.fits_file.header['TSTOPF'])
+                          + self.fits_file.header['TSTOPF'])
         collection = get_mongo_db_collection_by_name(database,
-            self.aux_file.service_name)
+                                                     self.aux_file.service_name)
 
         start_found = False
         stop_found = False
-        if not collection.find_one({"Time" : fits_start_time}) is None:
+        if not collection.find_one({"Time": fits_start_time}) is None:
             start_found = True
-        if not collection.find_one({"Time" : fits_stop_time})  is None:
+        if not collection.find_one({"Time": fits_stop_time}) is None:
             stop_found = True
         if start_found and stop_found:
             return
@@ -172,7 +173,7 @@ class Filler(object):
         coll = database.service_descriptions
 
         # only insert this, if it has never been inserted before
-        if coll.find_one({'_id':service_name}) is not None:
+        if coll.find_one({'_id': service_name}) is not None:
             return
 
         # document should contain the header information from the fits file.
@@ -194,12 +195,12 @@ class Filler(object):
         fits_file = pyfact.Fits(fits_file_path)
         report = ("{time_str} : {date.year}/{date.month}/{date.day}:"
                   " {svc_name:.<40} : {len:6d} : {dura:2.3f}".format(
-            date=self.aux_file.date,
-            svc_name=self.aux_file.service_name,
-            dura=time.time() - starttime,
-            len=fits_file.header["NAXIS2"],
-            time_str=time.strftime("%Y/%m/%d-%H:%M:%S")
-            ))
+                      date=self.aux_file.date,
+                      svc_name=self.aux_file.service_name,
+                      dura=time.time() - starttime,
+                      len=fits_file.header["NAXIS2"],
+                      time_str=time.strftime("%Y/%m/%d-%H:%M:%S")
+                  ))
 
         return report
 
@@ -211,7 +212,7 @@ class AuxFile(object):
         if it is_interesting at all.
     """
     cwd = os.path.dirname(os.path.realpath(__file__))
-    whitelist = open(cwd+"/service_whitelist.txt").read().splitlines()
+    whitelist = open(cwd + "/service_whitelist.txt").read().splitlines()
 
     def __init__(self, path):
         self.path = path
@@ -239,7 +240,6 @@ class AuxFile(object):
         match = re.match(r"^(\d{8})\.([A-Z_]+)", filename)
         return fact.run2dt(match.group(1))
 
-
     @property
     def is_interesting(self):
         """ check if service_name of file is in whitelist
@@ -259,6 +259,7 @@ def interesting_files_under(base):
         aux_file = AuxFile(path)
         if aux_file.is_interesting:
             yield aux_file
+
 
 def main(opts):
     """ main function of this filler

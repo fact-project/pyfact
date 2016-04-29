@@ -5,6 +5,7 @@ from matplotlib.figure import Figure
 import numpy as np
 import os
 from .utils import get_pixel_coords, calc_linewidth
+from . import camera
 
 # tkinter is named differently in python2 and python3
 try:
@@ -154,8 +155,8 @@ class Viewer():
         else:
             vmax = self.vmax
 
-
-        self.plot = self.ax.factcamera(
+        self.plot = camera(
+            ax=self.ax,
             data=self.dataset[self.event],
             pixelcoords=None,
             cmap=self.cmap,
@@ -213,7 +214,6 @@ class Viewer():
 
     def update(self):
         self.plot.set_array(self.dataset[self.event])
-        edgecolors = np.array(1440*["k"])
         self.plot.changed()
         if self.vmin is None:
             vmin = np.min(self.dataset[self.event])
