@@ -17,9 +17,7 @@ on a pixel bases
 import warnings
 from .utils import calc_text_size, calc_linewidth
 from .core import mark_pixel, camera, pixelids
-
-from .mapping import bias_to_trigger_patch_map
-from ..pixels import get_pixel_coords
+from ..pixels import get_pixel_coords, bias_to_trigger_patch_map
 
 __all__ = [
     'camera',

@@ -4,7 +4,8 @@ from matplotlib.collections import PatchCollection
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .utils import get_pixel_coords, calc_linewidth, calc_text_size
+from ..pixels import get_pixel_coords
+from .utils import calc_linewidth, calc_text_size
 
 lastpixel = -1
 

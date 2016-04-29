@@ -107,3 +107,25 @@ def get_pixel_coords(mapfile=None,
         pixel_y = pixel_y_chid
 
     return pixel_x, pixel_y
+
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def bias_to_trigger_patch_map():
+    mapfile = res.resource_filename("fact", "resources/FACTmap111030.txt")
+
+    a = np.genfromtxt(
+        mapfile,
+        skip_header=14,
+        names=True)
+    a = a[a["hardID"].argsort()]
+
+    bias_channel = a["HV_B"].astype(int) * 32 + a["HV_C"].astype(int)
+    #hardID = a["hardID"].astype(int)
+    #softID = a["softID"].astype(int)
+    #chid = np.arange(len(a))
+    #cont_patch_id = chid // 9
+
+    _, idx = np.unique(bias_channel, return_index=True)
+
+    return bias_channel[np.sort(idx)]
