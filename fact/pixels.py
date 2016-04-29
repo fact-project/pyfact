@@ -112,15 +112,9 @@ def get_pixel_coords(mapfile=None,
 
 @lru_cache(maxsize=1)
 def bias_to_trigger_patch_map():
-    mapfile = res.resource_filename("fact", "resources/FACTmap111030.txt")
+    by_chid = pixel_mapping['hardID'].argsort()
 
-    a = np.genfromtxt(
-        mapfile,
-        skip_header=14,
-        names=True)
-    a = a[a["hardID"].argsort()]
-
-    bias_channel = a["HV_B"].astype(int) * 32 + a["HV_C"].astype(int)
+    bias_channel = pixel_mapping[by_chid]['HV_B'] * 32 + pixel_mapping[by_chid]['HV_C']
 
     _, idx = np.unique(bias_channel, return_index=True)
 
