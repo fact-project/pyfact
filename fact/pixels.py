@@ -1,5 +1,6 @@
 import pkg_resources as res
 import numpy as np
+from functools import lru_cache
 
 
 pixel_mapping = np.genfromtxt(
@@ -108,7 +109,6 @@ def get_pixel_coords(mapfile=None,
 
     return pixel_x, pixel_y
 
-from functools import lru_cache
 
 @lru_cache(maxsize=1)
 def bias_to_trigger_patch_map():
@@ -121,10 +121,6 @@ def bias_to_trigger_patch_map():
     a = a[a["hardID"].argsort()]
 
     bias_channel = a["HV_B"].astype(int) * 32 + a["HV_C"].astype(int)
-    #hardID = a["hardID"].astype(int)
-    #softID = a["softID"].astype(int)
-    #chid = np.arange(len(a))
-    #cont_patch_id = chid // 9
 
     _, idx = np.unique(bias_channel, return_index=True)
 

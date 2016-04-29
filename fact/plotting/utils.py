@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 
 __all__ = ['calc_linewidth', 'calc_text_size']
