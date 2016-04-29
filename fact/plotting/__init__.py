@@ -15,16 +15,16 @@ Currently these functions only work with shape (num_events, 1440), so
 on a pixel bases
 '''
 import warnings
-from .utils import get_pixel_coords, calc_text_size, calc_linewidth
+from .utils import calc_text_size, calc_linewidth
 from .core import mark_pixel, camera, pixelids
 
 from .mapping import bias_to_trigger_patch_map
+from ..pixels import get_pixel_coords
 
 __all__ = [
     'camera',
     'mark_pixel',
     'pixelids',
-    'get_pixel_coords',
 ]
 
 try:

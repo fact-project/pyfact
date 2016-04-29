@@ -4,7 +4,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.figure import Figure
 import numpy as np
 import os
-from .utils import get_pixel_coords, calc_linewidth
+from .utils import calc_linewidth
+from ..pixels import get_pixel_coords
 from . import camera
 
 # tkinter is named differently in python2 and python3
