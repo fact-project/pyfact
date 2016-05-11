@@ -8,13 +8,8 @@ from .utils import calc_linewidth
 from ..pixels import get_pixel_coords
 from . import camera
 
-# tkinter is named differently in python2 and python3
-try:
-    import tkinter as tk
-    from tkinter import filedialog
-except ImportError:
-    import Tkinter as tk
-    import tkFileDialog as filedialog
+import tkinter as tk
+from tkinter import filedialog
 
 
 class Viewer():
