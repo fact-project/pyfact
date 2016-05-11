@@ -33,7 +33,8 @@ dimc_module = Extension(
 packages = [
     'fact',
     'fact.plotting',
-    'fact.slowdata'
+    'fact.slowdata',
+    'fact.credentials',
 ]
 ext_modules = []
 

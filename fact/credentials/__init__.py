@@ -8,9 +8,10 @@ from simplecrypt import decrypt
 from io import StringIO
 from pkg_resources import resource_stream
 from sqlalchemy import create_engine
+import socket
 
 
-__all__ = ['get_credentials']
+__all__ = ['get_credentials', 'create_factdb_engine']
 
 
 @lru_cache(1)
@@ -46,14 +47,18 @@ def get_credentials():
 
     return config
 
-@lru_cache(2)
-def rundb(isdc=False):
 
+def create_factdb_engine():
+    '''
+    returns a sqlalchemy.Engine pointing to the factdata database
+
+    The different hostname on isdc machines is handled correctly.
+    '''
     creds = get_credentials()
-    if isdc:
+
+    if socket.get_hostname().startswith('isdc'):
         spec = 'mysql+pymysql://{user}:{password}@lp-fact/{database}'
     else:
         spec = 'mysql+pymysql://{user}:{password}@{host}/{database}'
-    
-    return create_engine(spec.format(**creds['database']))
 
+    return create_engine(spec.format(**creds['database']))
