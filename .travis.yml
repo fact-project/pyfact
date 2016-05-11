@@ -20,8 +20,6 @@ install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pip pymongo flake8
   - python setup.py build_ext --inplace
 
-before_script:
-  - flake8 --max-line-length=90 fact
 # command to run tests
 script: nosetests
 
