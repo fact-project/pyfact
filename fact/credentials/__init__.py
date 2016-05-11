@@ -56,7 +56,7 @@ def create_factdb_engine():
     '''
     creds = get_credentials()
 
-    if socket.get_hostname().startswith('isdc'):
+    if socket.gethostname().startswith('isdc'):
         spec = 'mysql+pymysql://{user}:{password}@lp-fact/{database}'
     else:
         spec = 'mysql+pymysql://{user}:{password}@{host}/{database}'
