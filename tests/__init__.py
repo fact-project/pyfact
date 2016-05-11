@@ -8,7 +8,3 @@ def test_cameraplot():
 
     data = uniform(0, 20, 1440)
     camera(data)
-
-
-def test_dim_import():
-    import fact.dim
