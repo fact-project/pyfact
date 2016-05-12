@@ -26,6 +26,7 @@ setup(
         'simple-crypt',
         'setuptools',
         'sqlalchemy',
+        'pymysql',
     ],
     zip_safe=False,
 )
