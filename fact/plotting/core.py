@@ -183,3 +183,35 @@ def mark_pixel(pixels, color='g', ax=None, linewidth=None):
 
     plt.draw_if_interactive()
     return collection
+
+def fill_pixel(pixels, color='g', edgecolor='k', ax=None, linewidth=None):
+    ''' surrounds pixels given by pixels with a border '''
+    pixel_x, pixel_y = get_pixel_coords()
+
+    if ax is None:
+        ax = plt.gca()
+
+    patches = []
+    for xy in zip(pixel_x[pixels], pixel_y[pixels]):
+        patches.append(
+            RegularPolygon(
+                xy=xy,
+                numVertices=6,
+                radius=9.5 / np.sqrt(3),
+                orientation=0.,   # in radians
+                fill=False,
+            )
+        )
+
+    if linewidth is None:
+        linewidth = calc_linewidth(ax=ax)
+
+    collection = PatchCollection(patches, picker=0)
+    collection.set_linewidth(linewidth)
+    collection.set_edgecolors(edgecolor)
+    collection.set_facecolor(color)
+
+    ax.add_collection(collection)
+
+    plt.draw_if_interactive()
+    return collection
