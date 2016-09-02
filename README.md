@@ -63,3 +63,17 @@ from fact.plotting import get_pixel_coords
 
 pixel_x, pixel_y = get_pixel_coords()
 ```
+
+## auxservices
+
+Utilities to read in our aux fits files into pandas dataframes.
+
+```{python}
+
+from fact.auxservices import MagicWeather
+from datetime import date
+
+weather = MagicWeather(auxdir='/fact/aux/')
+
+df = weather.read_date(date(2016, 1, 1))
+```
