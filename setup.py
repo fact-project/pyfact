@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='fact',
-    version='0.5.0',
+    version='0.6.0',
     description='A module containing useful methods for working with fact',
     url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',
