@@ -14,6 +14,7 @@ setup(
         'fact.plotting',
         'fact.slowdata',
         'fact.credentials',
+        'fact.auxservices',
     ],
     package_data={
         '': ['resources/*', 'credentials/credentials.encrypted']},
@@ -27,6 +28,8 @@ setup(
         'setuptools',
         'sqlalchemy',
         'pymysql',
+        'pandas',
+        'astropy',
     ],
     zip_safe=False,
 )
