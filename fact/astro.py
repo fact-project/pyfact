@@ -55,7 +55,7 @@ def calc_start_of(period, day):
 
 def calc_end_of(period, day):
     '''
-    Calculate the start of astronomical periods for a given day
+    Calculate the end of astronomical periods for a given day
 
     Parameter
     ---------
