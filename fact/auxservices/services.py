@@ -17,6 +17,7 @@ __all__ = [
     'FSCTemperature',
     'FTMTriggerRates',
     'BiasVoltage',
+    'FADTemperature',
 ]
 
 
@@ -152,6 +153,19 @@ class BiasVoltage(AuxService):
     renames = {
         'Time': 'timestamp',
         'Uout': 'bias_voltage',
+    }
+    transforms = {
+        'timestamp': fact_mjd_to_datetime,
+    }
+    ignored_columns = ['QoS', ]
+
+
+class FADTemperature(AuxService):
+    basename = "FAD_CONTROL_TEMPERATURES"
+    renames = {
+        'Time': 'timestamp',
+        'cnt': 'count',
+        'temp': 'temperature',
     }
     transforms = {
         'timestamp': fact_mjd_to_datetime,
