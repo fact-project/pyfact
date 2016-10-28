@@ -18,17 +18,18 @@ class AuxService:
             '{date:%Y%m%d}.' + self.basename + '.fits'
         )
 
-    def read_file(self, filename):
+    @classmethod
+    def read_file(cls, filename):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', category=UnitsWarning)
             table = Table.read(filename)
 
         for column in table.columns.keys():
-            if column in self.ignored_columns:
+            if column in cls.ignored_columns:
                 table.remove_column(column)
 
-            elif column in self.renames:
-                table[column].name = self.renames[column]
+            elif column in cls.renames:
+                table[column].name = cls.renames[column]
 
         for column in table.columns.keys():
             shape = table[column].shape
@@ -39,7 +40,7 @@ class AuxService:
 
         df = table.to_pandas()
 
-        for key, transform in self.transforms.items():
+        for key, transform in cls.transforms.items():
             df[key] = transform(df[key])
 
         return df
