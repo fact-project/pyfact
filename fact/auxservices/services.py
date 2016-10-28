@@ -161,7 +161,7 @@ class BiasVoltage(AuxService):
 
 
 class FADTemperature(AuxService):
-    basename = "FAD_CONTROL_TEMPERATURES"
+    basename = "FAD_CONTROL_TEMPERATURE"
     renames = {
         'Time': 'timestamp',
         'cnt': 'count',
