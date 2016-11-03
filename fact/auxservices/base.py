@@ -13,7 +13,10 @@ class AuxService:
 
     def __init__(self, auxdir='/fact/aux'):
         self.auxdir = auxdir
-        self.filename_template = os.path.join(
+
+    @property
+    def filename_template(self):
+        return os.path.join(
             self.auxdir, '{date:%Y}',  '{date:%m}', '{date:%d}',
             '{date:%Y%m%d}.' + self.basename + '.fits'
         )
