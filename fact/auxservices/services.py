@@ -14,7 +14,10 @@ __all__ = [
     'DrivePointing',
     'DriveSource',
     'FSCHumidity',
-    'FSCTemperature'
+    'FSCTemperature',
+    'FTMTriggerRates',
+    'BiasVoltage',
+    'FADTemperature',
 ]
 
 
@@ -121,4 +124,50 @@ class FSCTemperature(AuxService):
         'T_eth': 'ethernet_temperature',
     }
     transforms = {'timestamp': fact_mjd_to_datetime}
+    ignored_columns = ['QoS', ]
+
+
+class FTMTriggerRates(AuxService):
+    basename = 'FTM_CONTROL_TRIGGER_RATES'
+    renames = {
+        'Time': 'timestamp',
+        'FTMtimeStamp': 'ftm_timestamp',
+        'OnTimeCounter': 'effective_ontime',
+        'TriggerCounter': 'trigger_counter',
+        'TriggerRate': 'trigger_rate',
+        'BoardRate': 'board_rate',
+        'PatchRate': 'patch_rate',
+        'OnTime': 'ontime',
+        'ElapsedTime': 'elapsed_time',
+    }
+    transforms = {
+        'timestamp': fact_mjd_to_datetime,
+        'ftm_timestamp': lambda x: x/1e6,
+        'effective_ontime': lambda x: x/1e6,
+    }
+    ignored_columns = ['QoS', ]
+
+
+class BiasVoltage(AuxService):
+    basename = "BIAS_CONTROL_VOLTAGE"
+    renames = {
+        'Time': 'timestamp',
+        'Uout': 'bias_voltage',
+    }
+    transforms = {
+        'timestamp': fact_mjd_to_datetime,
+    }
+    ignored_columns = ['QoS', ]
+
+
+class FADTemperature(AuxService):
+    basename = "FAD_CONTROL_TEMPERATURE"
+    renames = {
+        'Time': 'timestamp',
+        'cnt': 'count',
+        'temp': 'temperature',
+    }
+    transforms = {
+        'timestamp': fact_mjd_to_datetime,
+    }
     ignored_columns = ['QoS', ]
