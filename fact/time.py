@@ -24,6 +24,8 @@ import logging
 import dateutil
 import dateutil.parser
 
+import pandas as pd
+
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
 
 
@@ -98,14 +100,9 @@ def night(timestamp=None):
     return timestamp
 
 
-def night_integer(timestamp=None):
-    ''' get the correct night in fact format
-        if it is after 0:00, take the date
-        of yesterday
+def night_integer(date):
+    ''' return FACT night integer for date
     '''
-    if timestamp is None:
-        timestamp = datetime.utcnow()
-    if timestamp.hour < 12:
-        timestamp = timestamp - timedelta(days=1)
-    night = int(timestamp.strftime('%Y%m%d'))
-    return night
+    date -= pd.Timedelta(days=0.5)
+    night_int = date.year * 10000 + date.month * 100 + date.day
+    return night_int
