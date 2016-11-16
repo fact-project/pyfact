@@ -101,6 +101,8 @@ def night(timestamp=None):
 
 
 def night_integer(date):
+    ''' return FACT night integer for date
+    '''
     date -= pd.Timedelta(days=0.5)
     night_int = date.year * 10000 + date.month * 100 + date.day
     return night_int
