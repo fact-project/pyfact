@@ -14,7 +14,7 @@ before_install:
   - sudo ln -s /run/shm /dev/shm
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pip pymongo flake8 pandas astropy
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib pip pymongo flake8 pandas astropy
   - pip install .
 
 script: python setup.py test
