@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.3"
   - "3.4"
   - "3.5"
 before_install:
@@ -13,14 +12,12 @@ before_install:
   # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
-# Install packages
+
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pip pymongo flake8 pandas astropy
   - pip install .
-  - python setup.py build_ext --inplace
 
-# command to run tests
-script: nosetests
+script: python setup.py test
 
 # virtualenv:
 #   system_site_packages: true
