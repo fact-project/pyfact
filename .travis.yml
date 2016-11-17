@@ -25,7 +25,7 @@ deploy:
     server: "https://testpypi.python.org/pypi"
     user: fact-deploybot
     password:
-      secure: "Zk1PFwdQR0c0rOnceWr6Rs+iECVRfjugJW2DCV/3K0NohY6OPMAWvaw8TAm1QeeQxZ8JD4wc0lYGQYctFrNqXfsPrmfsSoAqg4F1yVJt5/3B/+nWgzLP2BZhVQ5TfqEd4x5TP/3KR1b4HYA/it47IrIicfzszRLO7wXRVXf+pMzmw87mHyrai2YZt2oq8xOltWMc3FxsZY5C/1XRLQ0OSeqdN7OXHIPH4w+9vlp7ameDaAMbMLBzOZcuYrYguYhvduAGBpzncv1ZhKBdvsmUNbVPF3wyy1ggfrcU3ssS4NFn9Qm20busNY4A+CtiKzPHZ++mlaygCQxTg023n3r0Sx5absM0gPDwjsJLWp3oHF+5TbW3yzmpHgNyuyrUc6l8hw1i82Rayss0T7LCLeua5gUG/FquNmB/OVSnxGatlK0xE7MNLtIxqLscjUc8mz6lwgIN8xKowJ3ircGYXIS2fJhWbg5ku2G+kd1EIQ2InBTDPCR4g3x/XBLhG2PY5LViWYuzSymym1ncHcFRtaFmricuZES/Mg1R9PX2lkYp2ajhgj2pyTrhahmyE2d9gAY9Xj0fcmg842Y3/0NPPXyKMrjIAobwamay+AHhDPS2Rsgv1kNNL9oTZxy2IE1S/6FTfO+R8+shyff8UeDHIq49KrWsEf+gNRCxgsrR9UJXH3U="
+      secure: "HjD8z63sITDhK4TwcnF/q1K+nF3nIslpoVUdJhSKlX/Hv8NaFajt0bM32KqIEADMAj510dcuHlZtcyDCX/9TTF4U9fAPkZSsoAa4yyD7BwcY2arwHDBgYSvGAHTqCzMwZvNcE+k0A7ZhfqjwwW+dtMM7Hx+vS+MfqhXy6ZrLbEg="
     on:
       branch: master
       tags: true
