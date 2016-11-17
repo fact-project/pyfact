@@ -19,11 +19,31 @@ GEOM_2_SOFTID = {
     )}
 
 
+@lru_cache(maxsize=1)
+def pixel_dataframe():
+    ''' return pixel mapping as pd.DataFrame
+
+    '''
+    pm = pd.DataFrame(pixel_mapping)
+    pm.sort_values('hardID', inplace=True)
+    # after sorting the CHID is in principle the index
+    # of pm, but I'll like to have it explicitely
+    pm['CHID'] = np.arange(len(pm))
+
+    pm['trigger_patch_id'] = pm['CHID'] // 9
+    pm['bias_patch_id'] = (
+        pm['HV_B'] * 32 + pm['HV_C'] )
+
+    bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
+    pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
+
+    return pm
+
 patch_indices = pixel_dataframe()[[
         'trigger_patch_id',
         'bias_patch_id',
         'bias_patch_size',
-    ]].drop_duplicates().reset_index(drop=True, inplace=True)
+    ]].drop_duplicates().reset_index(drop=True)
 
 
 @np.vectorize
@@ -127,25 +147,6 @@ def bias_to_trigger_patch_map():
 
     return bias_channel[np.sort(idx)]
 
-@lru_cache(maxsize=1)
-def pixel_dataframe():
-    ''' return pixel mapping as pd.DataFrame
-
-    '''
-    pm = pd.DataFrame(pixel_mapping)
-    pm.sort_values('hardID', inplace=True)
-    # after sorting the CHID is in principle the index
-    # of pm, but I'll like to have it explicitely
-    pm['CHID'] = np.arange(len(pm))
-
-    pm['trigger_patch_id'] = pm['CHID'] // 9
-    pm['bias_patch_id'] = (
-        pm['HV_B'] * 32 + pm['HV_C'] )
-
-    bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
-    pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
-
-    return pm
 
 
 
