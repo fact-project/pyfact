@@ -1,7 +1,7 @@
 import pkg_resources as res
 import numpy as np
 from functools import lru_cache
-
+import pandas as pd
 
 pixel_mapping = np.genfromtxt(
     res.resource_filename('fact', 'resources/FACTmap111030.txt'),
@@ -119,3 +119,69 @@ def bias_to_trigger_patch_map():
     _, idx = np.unique(bias_channel, return_index=True)
 
     return bias_channel[np.sort(idx)]
+
+@lru_cache(maxsize=1)
+def pixel_dataframe():
+    ''' return pixel mapping as pd.DataFrame
+
+    '''
+    pm = pd.DataFrame(pixel_mapping)
+    pm.sort_values('hardID', inplace=True)
+    # after sorting the CHID is in principle the index
+    # of pm, but I'll like to have it explicitely
+    pm['CHID'] = np.arange(len(pm))
+
+    pm['trigger_patch_id'] = pm['CHID'] // 9
+    pm['bias_patch_id'] = (
+        pm['HV_B'] * 32 + pm['HV_C'] )
+
+    bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
+    pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
+
+    return pm
+
+@lru_cache(maxsize=1)
+def patch_indices():
+    pi = pixel_dataframe()[[
+        'trigger_patch_id',
+        'bias_patch_id',
+        'bias_patch_size',
+    ]]
+    pi = pi.drop_duplicates()
+    pi.reset_index(drop=True, inplace=True)
+    return pi
+
+def combine_bias_patch_current_to_trigger_patch_current(bias_patch_currents):
+    """
+    For this to work, you need to know that the calibrated currents in FACT
+    which are delivered by the program FEEDBACK for all 320 bias patches
+    are given as "uA per pixel per bias patch", not as "uA per bias patch"
+    So if you want to combine these currents into one value given as:
+    "uA per trigger patch" or "uA per pixel per trigger patch", you need to know
+    the number of pixels in a bias patch.
+
+    Luckily this is given by our patch_indices() DataFrame
+    """
+
+    pi = patch_indices()
+    fourers = pi[pi.bias_patch_size == 4].sort_values('trigger_patch_id')
+    fivers = pi[pi.bias_patch_size == 5].sort_values('trigger_patch_id')
+
+    b_c = bias_patch_currents  # just to shorten the name
+    t_c = b_c[fourers.bias_patch_id.values] * 4/9 + b_c[fivers.bias_patch_id.values] * 5/9
+
+    trigger_patch_currents = t_c # unshorten the name
+    return  trigger_patch_currents
+
+def take_apart_trigger_values_for_bias_patches(trigger_rates):
+    """
+    Assumption is you have 160 values from trigger patches,
+    such as the trigger rates per patch, or the trigger threshold per patch
+    or whatever else you cant find per patch.
+
+    And for some reason you say: Well this is valid for the entire trigger
+    patch really, but I believe it also correlates with the bias patch
+    """
+    pi = patch_indices().sort_values('bias_patch_id')
+
+    return trigger_rates[pi.trigger_patch_id.values]
