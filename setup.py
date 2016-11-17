@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 
 setup(
@@ -17,7 +17,10 @@ setup(
         'fact.auxservices',
     ],
     package_data={
-        '': ['resources/*', 'credentials/credentials.encrypted']},
+        '': ['resources/*', 'credentials/credentials.encrypted']
+    },
+    tests_require=['pytest>=3.0.0'],
+    setup_requires=['pytest-runner'],
     install_requires=[
         'numpy',
         'scipy',
