@@ -6,7 +6,7 @@ A python package with utils to work with the FACT Imaging Cerenkov Telescope
 
 install with
 
-.. code:: {shell session} 
+.. code:: {none} 
 
      $ pip install git+https://github.com/fact-project/pyfact
 
