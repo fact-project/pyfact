@@ -31,7 +31,7 @@ GEOM_2_SOFTID = {
 
 
 @lru_cache(maxsize=1)
-def pixel_dataframe():
+def get_pixel_dataframe():
     ''' return pixel mapping as pd.DataFrame
 
     '''
@@ -50,7 +50,7 @@ def pixel_dataframe():
 
     return pm
 
-patch_indices = pixel_dataframe()[[
+patch_indices = get_pixel_dataframe()[[
         'trigger_patch_id',
         'bias_patch_id',
         'bias_patch_size',
