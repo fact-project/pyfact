@@ -1,0 +1,59 @@
+= New Bad Pixel =
+
+For small time periods, two other pixels showed a wrong signal (seems to be the underflow value of the ADC)
+
+|| Soft ID || continuous Hard ID || Bias Ch(B/C) || Time Period ||
+||  ||  ||  ||  ||
+||  || 729 ||  || only on 8.1.2015 ||
+||  || 750 ||  || 8.1.2015 - 31.1.2015 ||
+
+Logbook entry of 8.1.2015:
+https://www.fact-project.org/logbook/showthread.php?tid=2943
+
+== Patch with slightly higher rate
+
+* 2|5|3 aka 103 aka 40
+
+The current readout of bias channel 262 is identical to the readout of 263. Apart from that, it seems to work fine.
+
+== Broken Drs Board ==
+
+first occurrence: 2014/11/15[[BR]]
+repaired: 2015/05/26[[BR]]
+
+pixels in affected board: [[BR]]
+SOFTIDs: 1193 1194 1195 1391 1392 1393 1304 1305 1306[[BR]]
+CHIDs: 720, 721, 722, 723, 724, 725, 726, 727, 728 (not the same order as the SOFTIDs!)
+
+Important threads:
+
+https://www.fact-project.org/logbook/showthread.php?tid=3521
+
+== Dead (and suspicious bias channels) ==
+
+With beginning of February 2015 two bias patches got some problems.
+I spot-checked the voltage curves (at interleaved lightpulser events) of the pixels and got two different behaviours:
+
+- Sometimes the pixels showed no signal at all, except for electronic noise.
+- Sometimes the pixels showed lowered signals.
+
+|| Patch CHIDs || no Bias voltage || lowered bias voltage || normal signal || comments ||
+||  ||  ||  ||  ||
+|| 171,172,173,174 || 6.2.-11.2. ; 16.2. - now || 12.2. - 14.2. || beginning - 31.1. || checked one day each month, until 2.11. ||
+|| 184,185,186,187,188 || no run found || 11.2.-13.2. ; 16.2. ; 20.2. ; 15.3. ; 20.5. ; 15.8. ; 2.11. || beginning - 15.2. ; 22.2. ; 23.2. ; 26.2. ; 10.4. ; 15.6. ; 15.7. ; 15.9. ; 14.10. || checked one day each month, until 2.11. ||
+
+Dominik showed the bias voltage of the two suspicious channels in this thread:
+
+https://www.fact-project.org/logbook/showthread.php?tid=3564&pid=19495
+
+The following two telcons have had the bias patches on the agenda:
+
+09.09.2015: https://www.fact-project.org/logbook/showthread.php?tid=3568
+
+23.09.2015: https://www.fact-project.org/logbook/showthread.php?tid=3583
+
+
+Since 13.03.2016:
+
+ * bias channel 272 (i.e. board 8, channel 16) has a shortcut ( approx 1.3 k ohms)
+
