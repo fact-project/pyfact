@@ -1,35 +1,3 @@
-= Old Bad Pixel =
-
-== Dead Pixels
-|| Soft ID || continuous Hard ID || Bias Ch (B/C) ||
-|| ||  ||  ||
-|| 424 || 927 || 206 (6/14) ||
-|| 923 || 80 ||  17 (0/17) ||
-|| 1208 || 873 || 194 (6/2) ||
-
-
-== Crazy Pixel
-|| Soft ID || continuous Hard ID || Bias Ch (B/C) ||
-||  ||  ||  ||
-|| 583 || 863 || 191 (5/31) ||
-|| 830 || 297 || 66 (2/2) ||
-|| 1399 || 868 || 193 (6/1) ||
-
-== Twin Pixel
-|| Soft ID || continuous Hard ID || Bias Ch(B/C) ||
-||  ||  ||  ||
-|| 113 || 1093 || 291 (9/3) ||
-|| 115 || 1094 || 291 (9/3) ||
-||  || || ||
-|| 354 || 527 || 101 (3/5) ||
-|| 423 || 528 || 101 (3/5) ||
-||  || || ||
-|| 1195 || 721 || 160 (5/0) ||
-|| 1393 || 722 || 160 (5/0) ||
-
-
-if one compares the signals of these pairs of pixels, one sees their signals only differ in their ADC digitization.
-
 = New Bad Pixel =
 
 For small time periods, two other pixels showed a wrong signal (seems to be the underflow value of the ADC)
