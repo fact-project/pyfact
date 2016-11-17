@@ -13,6 +13,17 @@ pixel_mapping = np.genfromtxt(
     dtype=None,
 )
 
+non_standard_pixel_chids = dict(
+    dead=[927, 80, 873],
+    crazy=[863, 297, 868],
+    twins=[            # the signals of these pairs of pixels are the same
+        (1093, 1094),
+        (527, 528),
+        (721, 722),
+    ]
+)
+
+
 GEOM_2_SOFTID = {
     (i, j): soft for i, j, soft in zip(
         pixel_mapping['geom_i'], pixel_mapping['geom_j'], pixel_mapping['softID']
