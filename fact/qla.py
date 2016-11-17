@@ -125,7 +125,13 @@ def li_ma_significance(N_on, N_off, alpha=0.2):
     return significance
 
 
-def plot_qla(qla_data, outputfile=None):
+def plot_qla(binned_qla_data, outputfile=None):
+    '''
+    Create a plot of the binned qla results
+
+    returns the two axes used: ax_rate is the upper axes for the rates
+    and ax_sig is the lower axes for the significance
+    '''
     plt.style.use('ggplot')
 
     fig = plt.figure(figsize=(15/2.54, 10/2.54))
@@ -134,7 +140,7 @@ def plot_qla(qla_data, outputfile=None):
     ax_rate = fig.add_axes([0.12, 0.4, 0.85, 0.40], sharex=ax_sig)
 
     colors = [e['color'] for e in plt.rcParams['axes.prop_cycle']]
-    for (name, group), color in zip(qla_data.groupby('fSourceName'), colors):
+    for (name, group), color in zip(binned_qla_data.groupby('fSourceName'), colors):
         if len(group.index) == 0:
             continue
 
@@ -179,5 +185,8 @@ def plot_qla(qla_data, outputfile=None):
 
     plt.setp(ax_sig.get_xticklabels(), rotation=30, va='top', ha='right')
     ax_sig.xaxis.set_major_formatter(DateFormatter('%H:%M'))
+
     if outputfile is not None:
         fig.savefig(outputfile)
+
+    return ax_rate, ax_sig
