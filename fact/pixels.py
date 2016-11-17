@@ -19,6 +19,13 @@ GEOM_2_SOFTID = {
     )}
 
 
+patch_indices = pixel_dataframe()[[
+        'trigger_patch_id',
+        'bias_patch_id',
+        'bias_patch_size',
+    ]].drop_duplicates().reset_index(drop=True, inplace=True)
+
+
 @np.vectorize
 def geom2soft(i, j):
     return GEOM_2_SOFTID[(i, j)]
@@ -140,16 +147,7 @@ def pixel_dataframe():
 
     return pm
 
-@lru_cache(maxsize=1)
-def patch_indices():
-    pi = pixel_dataframe()[[
-        'trigger_patch_id',
-        'bias_patch_id',
-        'bias_patch_size',
-    ]]
-    pi = pi.drop_duplicates()
-    pi.reset_index(drop=True, inplace=True)
-    return pi
+
 
 def combine_bias_patch_current_to_trigger_patch_current(bias_patch_currents):
     """
