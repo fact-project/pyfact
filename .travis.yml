@@ -15,9 +15,12 @@ before_install:
 
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib pip pymongo flake8 pandas astropy
+  - pip install restructuredtext-lint
   - pip install .
 
-script: python setup.py test
+script:
+  - python setup.py test
+  - rst-lint README.rst
 
 deploy:
   - provider: pypi
