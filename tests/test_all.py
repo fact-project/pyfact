@@ -93,8 +93,6 @@ def test_bias_patch_values_into_trigger_patches():
     # value for this trigger patch.
 
 
-
-
 def test_coords_relation_to_pos_from_dataframe():
 
     from fact.pixels import get_pixel_dataframe
