@@ -40,7 +40,7 @@ def test_night_integer_pandas_datetimeindex():
 def test_patch_indices():
     from fact.pixels import patch_indices
 
-    pi = patch_indices()
+    pi = patch_indices
     assert pi[pi.bias_patch_id==1].trigger_patch_id.iloc[0] == 0
     assert pi[pi.bias_patch_id==128].trigger_patch_id.iloc[0] == 40
     assert pi[pi.bias_patch_id==129].trigger_patch_id.iloc[0] == 40
@@ -52,7 +52,7 @@ def test_patch_indices():
 
 def test_easier_use_of_patch_indices():
     from fact.pixels import patch_indices
-    pi = patch_indices()
+    pi = patch_indices
 
     bias_patch_ids = pi.bias_patch_id.values
 
@@ -74,7 +74,7 @@ def test_bias_patch_values_into_trigger_patches():
     # so you might start by sorting by the index you have and get the one you
     # want, like this:
     from fact.pixels import patch_indices
-    pi = patch_indices()
+    pi = patch_indices
 
     t_id_BY_b_id = pi.sort_values('bias_patch_id').trigger_patch_id.values
 
@@ -95,3 +95,14 @@ def test_bias_patch_values_into_trigger_patches():
 
 
 
+def test_coords_relation_to_pos_from_dataframe():
+
+    from fact.pixels import get_pixel_dataframe
+    from fact.pixels import get_pixel_coords
+    import numpy as np
+
+    pc = get_pixel_coords()
+    pd = get_pixel_dataframe()
+
+    assert np.allclose(pc[0], -pd.pos_Y.values*9.5)
+    assert np.allclose(pc[1], pd.pos_X.values*9.5)
