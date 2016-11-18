@@ -49,8 +49,8 @@ def get_pixel_dataframe():
     pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
 
 
-    pm['x'] = -pd.pos_Y.values*9.5
-    pm['y'] = pd.pos_X.values*9.5
+    pm['x'] = -pm.pos_Y.values*9.5
+    pm['y'] = pm.pos_X.values*9.5
 
 
 
