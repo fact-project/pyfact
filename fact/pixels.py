@@ -48,6 +48,12 @@ def get_pixel_dataframe():
     bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
     pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
 
+
+    pm['x'] = -pd.pos_Y.values*9.5
+    pm['y'] = pd.pos_X.values*9.5
+
+
+
     return pm
 
 patch_indices = get_pixel_dataframe()[[
@@ -101,7 +107,7 @@ def get_pixel_coords():
     '''
     pd = get_pixel_dataframe()
 
-    return -pd.pos_Y.values*9.5, pd.pos_X.values*9.5
+    return pd.x, pd.y
 
 
 @lru_cache(maxsize=1)
