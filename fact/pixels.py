@@ -93,59 +93,15 @@ def hardid2softid(hardid):
     return chid2softid(hardid2chid(hardid))
 
 
-def get_pixel_coords(mapfile=None,
-                     rotate=True,
-                     columns=[0, 9, 10, 11],
-                     skip_header=1,
-                     skip_footer=0,
-                     delimiter=',',
-                     unpack=True,
-                     ):
+def get_pixel_coords():
     '''
     Calculate the pixel coordinates from the standard pixel-map file
     by default it gets rotated by 90 degrees clockwise to show the same
     orientation as MARS and fact-tools
-
-    Arguments
-    ---------
-    mapfile : str
-        path/to/pixelmap.csv, if None than the package resource is used
-        [defailt: None]
-    rotate : bool
-        if True the view is rotated by 90 degrees counter-clockwise
-        [default: True]
-    colums : list-like
-        the columns in the file for softID, chid, x, y
-        default: [0, 9, 10, 11]
     '''
+    pd = get_pixel_dataframe()
 
-    if mapfile is None:
-        mapfile = res.resource_filename('fact', 'resources/pixel-map.csv')
-
-    softID, chid, pixel_x_soft, pixel_y_soft = np.genfromtxt(
-        mapfile,
-        skip_header=skip_header,
-        skip_footer=skip_footer,
-        delimiter=delimiter,
-        usecols=columns,
-        unpack=unpack,
-    )
-
-    pixel_x_soft *= 9.5
-    pixel_y_soft *= 9.5
-
-    pixel_x_chid = pixel_x_soft[chid2softid(np.arange(1440))]
-    pixel_y_chid = pixel_y_soft[chid2softid(np.arange(1440))]
-
-    # rotate by 90 degrees to show correct orientation
-    if rotate is True:
-        pixel_x = - pixel_y_chid
-        pixel_y = pixel_x_chid
-    else:
-        pixel_x = pixel_x_chid
-        pixel_y = pixel_y_chid
-
-    return pixel_x, pixel_y
+    return -pd.pos_Y.values*9.5, pd.pos_X.values*9.5
 
 
 @lru_cache(maxsize=1)
