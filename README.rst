@@ -94,5 +94,5 @@ Utilities to read in our aux fits files into pandas dataframes.
    :target: https://travis-ci.org/fact-project/pyfact
    
 .. |PyPIStatus| image:: https://badge.fury.io/py/pyfact.svg
-   :target: https://badge.fury.io/py/pyfact.svg
+   :target: https://pypi.python.org/pypi/pyfact
 
