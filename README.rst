@@ -1,5 +1,5 @@
-pyfact |TravisBuildStatus|
-==========================
+pyfact |TravisBuildStatus| |PyPIStatus|
+=======================================
 
 A python package with utils to work with the FACT Imaging Cerenkov Telescope
 ----------------------------------------------------------------------------
@@ -8,7 +8,7 @@ install with
 
 .. code:: 
 
-     $ pip install git+https://github.com/fact-project/pyfact
+     $ pip install pyfact
 
 This takes automatically care of the dependencies which are installable
 with pip.
@@ -92,3 +92,7 @@ Utilities to read in our aux fits files into pandas dataframes.
 
 .. |TravisBuildStatus| image:: https://travis-ci.org/fact-project/pyfact.svg?branch=master
    :target: https://travis-ci.org/fact-project/pyfact
+   
+.. |PyPIStatus| image:: https://badge.fury.io/py/pyfact.svg
+   :target: https://pypi.python.org/pypi/pyfact
+
