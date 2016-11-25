@@ -20,9 +20,8 @@ def dorner_binning(data, bin_width_minutes=20):
 def groupby_observation_blocks(runs):
     ''' Groupby for consecutive runs of the same source'''
     runs = runs.sort_values('fRunStart')
-    next_is_different = runs.fSourceName != runs.fSourceName.shift(-1)
-    next_is_different.iloc[-1] = False
-    observation_blocks = next_is_different.cumsum()
+    new_source = runs.fSourceName != runs.fSourceName.shift(1)
+    observation_blocks = new_source.cumsum()
     return runs.groupby(observation_blocks)
 
 
