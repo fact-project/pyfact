@@ -8,7 +8,7 @@ install with
 
 .. code:: 
 
-     $ pip install git+https://github.com/fact-project/pyfact
+     $ pip install pyfact
 
 This takes automatically care of the dependencies which are installable
 with pip.
