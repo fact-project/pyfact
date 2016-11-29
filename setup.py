@@ -33,6 +33,7 @@ setup(
         'pymysql',
         'pandas',
         'astropy',
+        'peewee',
     ],
     zip_safe=False,
 )
