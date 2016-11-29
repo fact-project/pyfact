@@ -1,14 +1,12 @@
 from functools import lru_cache
-try:
-    from configparser import SafeConfigParser
-except ImportError:
-    from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from getpass import getpass
 from simplecrypt import decrypt
 from io import StringIO
 from pkg_resources import resource_stream
 from sqlalchemy import create_engine
 import socket
+import os
 
 
 __all__ = ['get_credentials', 'create_factdb_engine']
@@ -37,9 +35,12 @@ def get_credentials():
 
     use get_credentials().get(group, element) to retrieve elements
     '''
+    if 'FACT_PASSWORD' in os.environ:
+        passwd = os.environ['FACT_PASSWORD']
+    else:
+        passwd = getpass('Please enter the current, universal FACT password: ')
+
     with resource_stream('fact', 'credentials/credentials.encrypted') as f:
-        print('Please enter the current, universal FACT password')
-        passwd = getpass()
         decrypted = decrypt(passwd, f.read()).decode('utf-8')
 
     config = SafeConfigParser()
