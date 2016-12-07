@@ -1,19 +1,10 @@
 from peewee import (
-    MySQLDatabase, Model,
+    Model,
     FloatField, IntegerField, DateTimeField, CharField, BigIntegerField,
     PrimaryKeyField, CompositeKey
 )
-from .credentials import get_credentials
 
-factdata_db = MySQLDatabase(None)
-
-
-def connect_database(config=None):
-    if config is None:
-        config = get_credentials()['database']
-    factdata_db.init(**config)
-    factdata_db.connect()
-
+from .database import factdata_db
 
 class FactDataModel(Model):
     class Meta:

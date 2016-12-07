@@ -15,6 +15,7 @@ setup(
         'fact.slowdata',
         'fact.credentials',
         'fact.auxservices',
+        'fact.factdb',
     ],
     package_data={
         '': ['resources/*', 'credentials/credentials.encrypted']
