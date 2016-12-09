@@ -49,17 +49,21 @@ def get_credentials():
     return config
 
 
-def create_factdb_engine():
+def create_factdb_engine(database=None):
     '''
     returns a sqlalchemy.Engine pointing to the factdata database
 
     The different hostname on isdc machines is handled correctly.
     '''
+    spec = 'mysql+pymysql://{user}:{password}@{host}/{database}'
+
     creds = get_credentials()
+    config = dict(creds['database'])
 
     if socket.gethostname().startswith('isdc'):
-        spec = 'mysql+pymysql://{user}:{password}@lp-fact/{database}'
-    else:
-        spec = 'mysql+pymysql://{user}:{password}@{host}/{database}'
+        config['host'] = 'lp-fact'
 
-    return create_engine(spec.format(**creds['database']))
+    if database is not None:
+        config['database'] = database
+
+    return create_engine(spec.format(**config))
