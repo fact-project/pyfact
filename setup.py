@@ -15,6 +15,7 @@ setup(
         'fact.slowdata',
         'fact.credentials',
         'fact.auxservices',
+        'fact.factdb',
     ],
     package_data={
         '': ['resources/*', 'credentials/credentials.encrypted']
@@ -33,6 +34,7 @@ setup(
         'pymysql',
         'pandas',
         'astropy',
+        'peewee',
     ],
     zip_safe=False,
 )

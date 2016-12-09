@@ -75,6 +75,37 @@ source file:
 
     pixel_x, pixel_y = get_pixel_coords()
 
+factdb
+------
+
+This module contains ``peewee`` ``Models`` for our ``factdata`` MySQL database.
+These were automatically created by ``peewee`` and provide means to query this database in python without writing raw sql queries.
+
+For example, to get the total number of runs take by FACT you can do:
+
+.. code:: python
+
+    from fact.factdb import connect_database, RunInfo
+
+    connect_database()  # this uses the credentials module if no config is given
+
+    num_runs = RunInfo.select().count()
+
+A few convenience functions are already implemented.
+To get a ``pandas.DataFrame`` containing the observation time per source and runtype, you can do:
+
+
+.. code:: python
+
+    from fact.factdb import connect_database, get_ontime_per_source_and_runtype
+
+    connect_database()
+
+    num_runs = RunInfo.select().count()
+    print(get_ontime_by_source_and_runtype())
+
+
+
 auxservices
 -----------
 
