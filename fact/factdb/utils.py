@@ -1,13 +1,11 @@
 import pandas as pd
 import peewee
 from .models import RunInfo, Source, RunType
-from .database import factdata_db, connect_database
+from ..credentials import create_factdb_engine
 
 
-def get_ontime_by_source_and_runtype(config=None):
-    if factdata_db.is_closed():
-        connect_database(config=config)
-    df = pd.DataFrame(list(
+def get_ontime_by_source_and_runtype(engine=None):
+    query, params = (
         RunInfo
         .select(
             peewee.fn.SUM(RunInfo.fontime).alias('ontime'),
@@ -18,17 +16,15 @@ def get_ontime_by_source_and_runtype(config=None):
         .switch(RunInfo)
         .join(RunType, on=RunType.fruntypekey == RunInfo.fruntypekey)
         .group_by(Source.fsourcename, RunType.fruntypename)
-        .dicts()
-        .naive()  # put selected foreign key attributes directly into the objects
-    ))
+        .sql()
+    )
+    df = pd.read_sql(query, engine or create_factdb_engine(), params=params)
     df.set_index(['source', 'runtype'], inplace=True)
 
     return df
 
 
-def get_ontime_by_source(runtype=None, config=None):
-    if factdata_db.is_closed():
-        connect_database(config=config)
+def get_ontime_by_source(runtype=None, engine=None):
     query = (
         RunInfo
         .select(
@@ -42,13 +38,8 @@ def get_ontime_by_source(runtype=None, config=None):
     if runtype is not None:
         query = query.where(RunType.fruntypename == runtype)
 
-    query = (
-        query
-        .group_by(Source.fsourcename)
-        .dicts()
-        .naive()  # put selected foreign key attributes directly into the objects
-    )
-    df = pd.DataFrame(list(query))
+    query, params = query.group_by(Source.fsourcename).sql()
+    df = pd.read_sql(query, engine or create_factdb_engine(), params=params)
     df.set_index('source', inplace=True)
 
     return df
