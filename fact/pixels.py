@@ -23,6 +23,9 @@ non_standard_pixel_chids = dict(
     ]
 )
 
+FOCAL_LENGTH_IN_M = 4.889
+DISTORTION_SLOPE = 0.031/1.5  # only Sebastian can explain this number.
+PIXEL_SPACING_IN_M = 0.0095
 
 GEOM_2_SOFTID = {
     (i, j): soft for i, j, soft in zip(
@@ -48,13 +51,22 @@ def get_pixel_dataframe():
     bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
     pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
 
+    pm['x'] = -pm.pos_Y.values * PIXEL_SPACING_IN_M
+    pm['y'] = pm.pos_X.values * PIXEL_SPACING_IN_M
 
-    pm['x'] = -pm.pos_Y.values*9.5
-    pm['y'] = pm.pos_X.values*9.5
-
-
+    pm['azimuth'] = np.rad2deg(
+        np.arctan(pm.x / FOCAL_LENGTH_IN_M) * (1 + DISTORTION_SLOPE)
+    )
+    pm['zenith'] = np.rad2deg(
+        np.arctan(pm.y / FOCAL_LENGTH_IN_M) * (1 + DISTORTION_SLOPE)
+    )
 
     return pm
+
+FOV_RADIUS = np.hypot(
+    get_pixel_dataframe().azimuth, get_pixel_dataframe().zenith
+).max()
+
 
 patch_indices = get_pixel_dataframe()[[
         'trigger_patch_id',
