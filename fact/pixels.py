@@ -33,6 +33,14 @@ GEOM_2_SOFTID = {
     )}
 
 
+def reorder_softid2chid(array):
+    '''
+    Returns view to the given array, remapped from softid order
+    to chid order (e.g. MARS ordering to fact-tools ordering)
+    '''
+    return array[CHID_2_SOFTID]
+
+
 @lru_cache(maxsize=1)
 def get_pixel_dataframe():
     ''' return pixel mapping as pd.DataFrame
@@ -45,8 +53,7 @@ def get_pixel_dataframe():
     pm['CHID'] = np.arange(len(pm))
 
     pm['trigger_patch_id'] = pm['CHID'] // 9
-    pm['bias_patch_id'] = (
-        pm['HV_B'] * 32 + pm['HV_C'] )
+    pm['bias_patch_id'] = pm['HV_B'] * 32 + pm['HV_C']
 
     bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
     pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
@@ -133,8 +140,6 @@ def bias_to_trigger_patch_map():
     return bias_channel[np.sort(idx)]
 
 
-
-
 def combine_bias_patch_current_to_trigger_patch_current(bias_patch_currents):
     """
     For this to work, you need to know that the calibrated currents in FACT
@@ -154,8 +159,9 @@ def combine_bias_patch_current_to_trigger_patch_current(bias_patch_currents):
     b_c = bias_patch_currents  # just to shorten the name
     t_c = b_c[fourers.bias_patch_id.values] * 4/9 + b_c[fivers.bias_patch_id.values] * 5/9
 
-    trigger_patch_currents = t_c # unshorten the name
-    return  trigger_patch_currents
+    trigger_patch_currents = t_c  # unshorten the name
+    return trigger_patch_currents
+
 
 def take_apart_trigger_values_for_bias_patches(trigger_rates):
     """
