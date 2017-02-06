@@ -7,6 +7,7 @@ from sklearn2pmml import sklearn2pmml
 import h5py
 import sys
 import logging
+import numpy as np
 
 log = logging.getLogger(__name__)
 
@@ -16,13 +17,18 @@ native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
 def write_data(df, file_path, hdf_key='table'):
+
     name, extension = path.splitext(file_path)
+
     if extension in ['.hdf', '.hdf5', '.h5']:
         df.to_hdf(file_path, key=hdf_key)
+
     elif extension == '.json':
         df.to_json(file_path)
+
     elif extension == '.csv':
         df.to_csv(file_path, delimiter=',', index=False)
+
     else:
         raise IOError(
             'cannot write tabular data with format {}. Allowed formats: {}'.format(
@@ -31,7 +37,16 @@ def write_data(df, file_path, hdf_key='table'):
         )
 
 
-def read_h5py(file_path, group_name='events', columns=None):
+def to_native_byteorder(array):
+    ''' Convert numpy array to native byteorder '''
+
+    if array.dtype.byteorder not in ('=', native_byteorder):
+        return array.byteswap().newbyteorder()
+
+    return array
+
+
+def read_h5py(file_path, key='events', columns=None, chunksize=None):
     '''
     Read a hdf5 file written with h5py into a dataframe
 
@@ -39,42 +54,61 @@ def read_h5py(file_path, group_name='events', columns=None):
     ----------
     file_path: str
         file to read in
-    group_name: str
+    key: str
         name of the hdf5 group to read in
     columns: iterable[str]
         Names of the datasets to read in. If not given read all 1d datasets
     '''
-    df = pd.DataFrame()
 
     with h5py.File(file_path) as f:
-        group = f.get(group_name)
+        group = f.get(key)
+        if group is None:
+            raise IOError('File does not contain group "{}"'.format(key))
         # get all columns of which don't have more than one value per row
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
 
-        for col in columns:
-            if group[col].dtype.byteorder not in ('=', native_byteorder):
-                df[col] = group[col][:].byteswap().newbyteorder()
-            else:
-                df[col] = group[col]
+        # read all columns and rows in one dataframe if now chunksize given
+        if chunksize is None:
+            df = pd.DataFrame()
+            for col in columns:
+                df[col] = to_native_byteorder(group[col][:])
 
+            return df
+
+        # read data in chunks if chunksize is given
+        n_events = group[next(iter(group.keys()))].shape[0]
+        chunks = int(np.ceil(n_events / chunksize))
+
+        for chunk in range(chunks):
+
+            start = chunk * chunksize
+            end = min(n_events, (chunk + 1) * chunksize)
+
+            df = pd.DataFrame(index=np.arange(start, end))
+
+            for col in columns:
+                df[col] = to_native_byteorder(group[col][start:end])
+
+            yield df
+
+
+def read_pandas_hdf5(file_path, key=None, columns=None, chunksize=None):
+    df = pd.read_hdf(file_path, key=key, columns=columns, chunksize=chunksize)
     return df
 
 
-def read_pandas_hdf5(file_path, key=None, columns=None):
-    df = pd.read_hdf(file_path, key=key, columns=columns)
-    return df
-
-
-def read_data(file_path, query=None, sample=-1, key=None, columns=None):
+def read_data(file_path, query=None, sample=-1, key=None, columns=None, chunksize=None):
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
         try:
-            df = read_pandas_hdf5(file_path, key=key, columns=columns)
+            df = read_pandas_hdf5(
+                file_path, key=key, columns=columns, chunksize=chunksize
+            )
         except (TypeError, ValueError):
 
-            df = read_h5py(file_path, columns=columns)
+            df = read_h5py(file_path, key=key, columns=columns, chunksize=chunksize)
 
     elif extension == '.json':
         with open(file_path, 'r') as j:
