@@ -114,7 +114,7 @@ def read_pandas_hdf5(file_path, key=None, columns=None, chunksize=None):
     return df
 
 
-def read_data(file_path, query=None, sample=-1, key=None, columns=None, chunksize=None):
+def read_data(file_path, key=None, columns=None, chunksize=None):
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
@@ -140,14 +140,6 @@ def read_data(file_path, query=None, sample=-1, key=None, columns=None, chunksiz
             df = pd.DataFrame(d)
     else:
         raise NotImplementedError('Unknown data file extension {}'.format(extension))
-
-    if sample > 0:
-        print('Taking {} random samples'.format(sample))
-        df = df.sample(sample)
-
-    if query:
-        print('Quering with string: {}'.format(query))
-        df = df.copy().query(query)
 
     return df
 
