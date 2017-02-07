@@ -60,23 +60,39 @@ def read_h5py(file_path, key='events', columns=None, chunksize=None):
         Names of the datasets to read in. If not given read all 1d datasets
     '''
 
-    with h5py.File(file_path) as f:
-        group = f.get(key)
-        if group is None:
-            raise IOError('File does not contain group "{}"'.format(key))
-        # get all columns of which don't have more than one value per row
-        if columns is None:
-            columns = [col for col in group.keys() if group[col].ndim == 1]
+    # read all columns and rows in one dataframe if no chunksize given
+    if chunksize is None:
+        with h5py.File(file_path) as f:
+            group = f.get(key)
+            if group is None:
+                raise IOError('File does not contain group "{}"'.format(key))
 
-        # read all columns and rows in one dataframe if now chunksize given
-        if chunksize is None:
+            # get all columns of which don't have more than one value per row
+            if columns is None:
+                columns = [col for col in group.keys() if group[col].ndim == 1]
+
             df = pd.DataFrame()
             for col in columns:
                 df[col] = to_native_byteorder(group[col][:])
 
-            return df
+        return df
 
-        # read data in chunks if chunksize is given
+    # read data in chunks if chunksize is given
+    return read_h5py_chunked(
+        file_path, key=key, columns=columns, chunksize=chunksize
+    )
+
+
+def read_h5py_chunked(file_path, key='events', columns=None, chunksize=10000):
+    with h5py.File(file_path) as f:
+        group = f.get(key)
+        if group is None:
+            raise IOError('File does not contain group "{}"'.format(key))
+
+        # get all columns of which don't have more than one value per row
+        if columns is None:
+            columns = [col for col in group.keys() if group[col].ndim == 1]
+
         n_events = group[next(iter(group.keys()))].shape[0]
         chunks = int(np.ceil(n_events / chunksize))
 
@@ -104,11 +120,19 @@ def read_data(file_path, query=None, sample=-1, key=None, columns=None, chunksiz
     if extension in ['.hdf', '.hdf5', '.h5']:
         try:
             df = read_pandas_hdf5(
-                file_path, key=key, columns=columns, chunksize=chunksize
+                file_path,
+                key=key or 'table',
+                columns=columns,
+                chunksize=chunksize,
             )
         except (TypeError, ValueError):
 
-            df = read_h5py(file_path, key=key, columns=columns, chunksize=chunksize)
+            df = read_h5py(
+                file_path,
+                key=key or 'events',
+                columns=columns,
+                chunksize=chunksize,
+            )
 
     elif extension == '.json':
         with open(file_path, 'r') as j:
