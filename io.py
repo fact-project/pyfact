@@ -46,7 +46,7 @@ def to_native_byteorder(array):
     return array
 
 
-def read_h5py(file_path, key='events', columns=None, chunksize=None):
+def read_h5py(file_path, key='events', columns=None):
     '''
     Read a hdf5 file written with h5py into a dataframe
 
@@ -59,31 +59,29 @@ def read_h5py(file_path, key='events', columns=None, chunksize=None):
     columns: iterable[str]
         Names of the datasets to read in. If not given read all 1d datasets
     '''
+    with h5py.File(file_path) as f:
+        group = f.get(key)
+        if group is None:
+            raise IOError('File does not contain group "{}"'.format(key))
 
-    # read all columns and rows in one dataframe if no chunksize given
-    if chunksize is None:
-        with h5py.File(file_path) as f:
-            group = f.get(key)
-            if group is None:
-                raise IOError('File does not contain group "{}"'.format(key))
+        # get all columns of which don't have more than one value per row
+        if columns is None:
+            columns = [col for col in group.keys() if group[col].ndim == 1]
 
-            # get all columns of which don't have more than one value per row
-            if columns is None:
-                columns = [col for col in group.keys() if group[col].ndim == 1]
+        df = pd.DataFrame()
+        for col in columns:
+            df[col] = to_native_byteorder(group[col][:])
 
-            df = pd.DataFrame()
-            for col in columns:
-                df[col] = to_native_byteorder(group[col][:])
-
-        return df
-
-    # read data in chunks if chunksize is given
-    return read_h5py_chunked(
-        file_path, key=key, columns=columns, chunksize=chunksize
-    )
+    return df
 
 
-def read_h5py_chunked(file_path, key='events', columns=None, chunksize=10000):
+def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
+    '''
+    Generator function to read from h5py hdf5 in chunks,
+    returns an iterator over pandas dataframes.
+
+    When chunksize is None, use 1 chunk
+    '''
     with h5py.File(file_path) as f:
         group = f.get(key)
         if group is None:
@@ -94,9 +92,15 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=10000):
             columns = [col for col in group.keys() if group[col].ndim == 1]
 
         n_events = group[next(iter(group.keys()))].shape[0]
-        chunks = int(np.ceil(n_events / chunksize))
 
-        for chunk in range(chunks):
+        if chunksize is None:
+            n_chunks = 1
+            chunksize = n_events
+        else:
+            n_chunks = int(np.ceil(n_events / chunksize))
+            log.info('Splitting data into {} chunks'.format(n_chunks))
+
+        for chunk in range(n_chunks):
 
             start = chunk * chunksize
             end = min(n_events, (chunk + 1) * chunksize)
@@ -106,7 +110,7 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=10000):
             for col in columns:
                 df[col] = to_native_byteorder(group[col][start:end])
 
-            yield df
+            yield df, start, end
 
 
 def read_pandas_hdf5(file_path, key=None, columns=None, chunksize=None):
@@ -114,7 +118,7 @@ def read_pandas_hdf5(file_path, key=None, columns=None, chunksize=None):
     return df
 
 
-def read_data(file_path, key=None, columns=None, chunksize=None):
+def read_data(file_path, key=None, columns=None):
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
@@ -123,7 +127,6 @@ def read_data(file_path, key=None, columns=None, chunksize=None):
                 file_path,
                 key=key or 'table',
                 columns=columns,
-                chunksize=chunksize,
             )
         except (TypeError, ValueError):
 
@@ -131,7 +134,6 @@ def read_data(file_path, key=None, columns=None, chunksize=None):
                 file_path,
                 key=key or 'events',
                 columns=columns,
-                chunksize=chunksize,
             )
 
     elif extension == '.json':
