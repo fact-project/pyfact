@@ -80,6 +80,17 @@ def read_h5py(file_path, key='events', columns=None):
     return df
 
 
+def h5py_get_n_events(file_path, key='events'):
+
+    with h5py.File(file_path) as f:
+        group = f.get(key)
+
+        if group is None:
+            raise IOError('File does not contain group "{}"'.format(key))
+
+        return group[next(iter(group.keys()))].shape[0]
+
+
 def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
     '''
     Generator function to read from h5py hdf5 in chunks,
@@ -96,7 +107,7 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
 
-        n_events = group[next(iter(group.keys()))].shape[0]
+        n_events = h5py_get_n_events(file_path, key=key)
 
         if chunksize is None:
             n_chunks = 1
