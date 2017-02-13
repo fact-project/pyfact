@@ -2,6 +2,10 @@ import pandas as pd
 import peewee
 from .models import RunInfo, Source, RunType
 from ..credentials import create_factdb_engine
+from ..time import night_integer
+
+
+SECOND = peewee.SQL('SECOND')
 
 
 def read_into_dataframe(query, engine=None):
@@ -9,6 +13,40 @@ def read_into_dataframe(query, engine=None):
 
     sql, params = query.sql()
     df = pd.read_sql_query(sql, engine or create_factdb_engine(), params=params)
+
+    return df
+
+
+def get_correct_ontime(start=None, end=None, engine=None):
+    '''
+    The database field fOnTime underestimates the real ontime by about 5 seconds
+    because of how the number is calculated from the FTM auxfiles.
+    A better estimate can be obtained by taking (fRunStop - fRunStart) * fEffectiveOn.
+
+    Source: D. Neise, A. Biland. Also see github.com/dneise/about_fact_ontime
+    '''
+
+    duration = (peewee.fn.TIMESTAMPDIFF(SECOND, RunInfo.frunstart, RunInfo.frunstop))
+
+    query = RunInfo.select(
+        RunInfo.fnight.alias('night'),
+        RunInfo.frunid.alias('run_id'),
+        RunInfo.frunstart.alias('start'),
+        RunInfo.frunstart.alias('stop'),
+        duration.alias('duration'),
+        RunInfo.feffectiveon.alias('relative_ontime'),
+    )
+
+    if start is not None:
+        start = night_integer(start) if not isinstance(start, int) else start
+        query = query.where(RunInfo.fnight >= start)
+
+    if end is not None:
+        end = night_integer(end) if not isinstance(end, int) else end
+        query = query.where(RunInfo.fnight <= end)
+
+    df = read_into_dataframe(query, engine=engine)
+    df['ontime'] = df['duration'] * df['relative_ontime']
 
     return df
 
