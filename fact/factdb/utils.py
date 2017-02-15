@@ -23,6 +23,16 @@ def get_correct_ontime(start=None, end=None, engine=None):
     because of how the number is calculated from the FTM auxfiles.
     A better estimate can be obtained by taking (fRunStop - fRunStart) * fEffectiveOn.
 
+    Parameters
+    ----------
+    start : int or datetime.date
+        First night to select, either in fact int format or as date
+    end : int or datetime.date
+        Last night to select, either in fact int format or as date
+    engine: sqlalchemy.Engine
+        The engine connected to the database.
+        If None, fact.credentials.create_factdb_engine will be used to create one.
+
     Source: D. Neise, A. Biland. Also see github.com/dneise/about_fact_ontime
     '''
 
