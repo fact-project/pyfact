@@ -1,10 +1,18 @@
 from getpass import getpass
-from simplecrypt import encrypt
+import simplecrypt
 
-
-with open('credentials.ini', 'rb') as infile:
-    config = infile.read()
-
-with open('fact_credentials/credentials.encrypted', 'wb') as outfile:
+def decrypt(inpath, outpath):
     password = getpass()
-    outfile.write(encrypt(password, config))
+    with open(inpath, 'rb') as infile, open(outpath, 'wb') as outfile:
+        outfile.write(
+            simplecrypt.decrypt(password, infile.read())
+            )
+
+
+def encrypt(inpath, outpath):
+    password = getpass()
+    with open(inpath, 'rb') as infile, open(outpath, 'wb') as outfile:
+        outfile.write(
+            simplecrypt.encrypt(password, infile.read())
+        )
+
