@@ -97,7 +97,7 @@ To get a ``pandas.DataFrame`` containing the observation time per source and run
 
 .. code:: python
 
-    from fact.factdb import connect_database, get_ontime_per_source_and_runtype
+    from fact.factdb import connect_database, get_ontime_by_source_and_runtype, RunInfo
 
     connect_database()
 
