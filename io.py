@@ -64,7 +64,7 @@ def read_h5py(file_path, key='events', columns=None):
     columns: iterable[str]
         Names of the datasets to read in. If not given read all 1d datasets
     '''
-    with h5py.File(file_path, 'r') as f:
+    with h5py.File(file_path, 'r+') as f:
         group = f.get(key)
         if group is None:
             raise IOError('File does not contain group "{}"'.format(key))
@@ -82,7 +82,7 @@ def read_h5py(file_path, key='events', columns=None):
 
 def h5py_get_n_events(file_path, key='events'):
 
-    with h5py.File(file_path, 'r') as f:
+    with h5py.File(file_path, 'r+') as f:
         group = f.get(key)
 
         if group is None:
@@ -98,7 +98,7 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
 
     When chunksize is None, use 1 chunk
     '''
-    with h5py.File(file_path, 'r') as f:
+    with h5py.File(file_path, 'r+') as f:
         group = f.get(key)
         if group is None:
             raise IOError('File does not contain group "{}"'.format(key))
