@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pyfact',
-    version='0.8.7',
+    version='0.8.8',
     description='A module containing useful methods for working with fact',
     url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',

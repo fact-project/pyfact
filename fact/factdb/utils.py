@@ -6,6 +6,10 @@ from ..time import night_integer
 
 
 SECOND = peewee.SQL('SECOND')
+run_duration = peewee.fn.TIMESTAMPDIFF(
+    SECOND, RunInfo.frunstart, RunInfo.frunstop
+)
+ontime = (run_duration * RunInfo.feffectiveon)
 
 
 def read_into_dataframe(query, engine=None):
@@ -36,15 +40,12 @@ def get_correct_ontime(start=None, end=None, engine=None):
     Source: D. Neise, A. Biland. Also see github.com/dneise/about_fact_ontime
     '''
 
-    duration = (peewee.fn.TIMESTAMPDIFF(SECOND, RunInfo.frunstart, RunInfo.frunstop))
-
     query = RunInfo.select(
         RunInfo.fnight.alias('night'),
         RunInfo.frunid.alias('run_id'),
         RunInfo.frunstart.alias('start'),
         RunInfo.frunstart.alias('stop'),
-        duration.alias('duration'),
-        RunInfo.feffectiveon.alias('relative_ontime'),
+        ontime.alias('ontime'),
     )
 
     if start is not None:
@@ -56,7 +57,6 @@ def get_correct_ontime(start=None, end=None, engine=None):
         query = query.where(RunInfo.fnight <= end)
 
     df = read_into_dataframe(query, engine=engine)
-    df['ontime'] = df['duration'] * df['relative_ontime']
 
     return df
 
@@ -65,7 +65,7 @@ def get_ontime_by_source_and_runtype(engine=None):
     query = (
         RunInfo
         .select(
-            peewee.fn.SUM(RunInfo.fontime).alias('ontime'),
+            peewee.fn.SUM(ontime).alias('ontime'),
             Source.fsourcename.alias('source'),
             RunType.fruntypename.alias('runtype')
         )
@@ -84,7 +84,7 @@ def get_ontime_by_source(runtype=None, engine=None):
     query = (
         RunInfo
         .select(
-            peewee.fn.SUM(RunInfo.fontime).alias('ontime'),
+            peewee.fn.SUM(ontime).alias('ontime'),
             Source.fsourcename.alias('source'),
         )
         .join(Source, on=Source.fsourcekey == RunInfo.fsourcekey)
