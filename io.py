@@ -78,7 +78,7 @@ def read_h5py(file_path, key='events', columns=None):
         for col in columns:
             array = to_native_byteorder(group[col][:])
             if array.ndim == 1:
-                df[col] == array
+                df[col] = array
             elif array.ndim == 2:
                 for i in range(array.shape[1]):
                     df[col + '_{}'.format(i)] = array[:, i]
@@ -140,7 +140,7 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
                 array = to_native_byteorder(group[col][start:end])
 
                 if array.ndim == 1:
-                    df[col] == array
+                    df[col] = array
 
                 else:
                     for i in range(array.shape[1]):
