@@ -8,6 +8,7 @@ import h5py
 import sys
 import logging
 import numpy as np
+from copy import copy
 
 __all__ = [
     'write_data', 'to_native_byteorder', 'read_h5py', 'read_h5py_chunked',
@@ -75,7 +76,14 @@ def read_h5py(file_path, key='events', columns=None):
 
         df = pd.DataFrame()
         for col in columns:
-            df[col] = to_native_byteorder(group[col][:])
+            array = to_native_byteorder(group[col][:])
+            if array.ndim == 1:
+                df[col] == array
+            elif array.ndim == 2:
+                for i in range(array.shape[1]):
+                    df[col + '_{}'.format(i)] = array[:, i]
+            else:
+                log.warning('Skipping column {}, not 1d or 2d'.format(col))
 
     return df
 
@@ -116,6 +124,11 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
             n_chunks = int(np.ceil(n_events / chunksize))
             log.info('Splitting data into {} chunks'.format(n_chunks))
 
+        for col in copy(columns):
+            if group[col].ndim > 2:
+                columns.remove(col)
+                log.warning('Ignoring column {}, not 1d or 2d'.format(col))
+
         for chunk in range(n_chunks):
 
             start = chunk * chunksize
@@ -124,7 +137,14 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
             df = pd.DataFrame(index=np.arange(start, end))
 
             for col in columns:
-                df[col] = to_native_byteorder(group[col][start:end])
+                array = to_native_byteorder(group[col][start:end])
+
+                if array.ndim == 1:
+                    df[col] == array
+
+                else:
+                    for i in range(array.shape[1]):
+                        df[col + '_{}'.format(i)] = array[:, i]
 
             yield df, start, end
 
