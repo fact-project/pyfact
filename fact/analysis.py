@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-
 import datetime
 
 
@@ -132,8 +131,8 @@ def bin_runs(
         })
         binned['n_excess'] = binned.n_on - binned.n_off * alpha
         binned['excess_rate_per_h'] = binned.n_excess / binned.ontime * 3600
-        binned['xerr'] = (binned.run_stop - binned.run_start) / 2
-        binned['time_mean'] = binned.run_start + binned.xerr
+        binned['time_width'] = binned.run_stop - binned.run_start
+        binned['time_mean'] = binned.run_start + 0.5 * binned.time_width
         binned['excess_rate_err'] = np.sqrt(binned.n_on + alpha**2 * binned.n_off)
         binned['excess_rate_err'] /= binned.ontime / 3600
         binned['significance'] = li_ma_significance(

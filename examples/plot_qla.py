@@ -1,5 +1,6 @@
-from fact.qla import get_qla_data, plot_qla
+from fact.qla import get_qla_data
 from fact.analysis import bin_runs
+from fact.plotting import plot_excess_rate
 import matplotlib.pyplot as plt
 
 runs = get_qla_data(
@@ -12,6 +13,7 @@ qla_results = bin_runs(
     bin_width_minutes=20,
     discard_ontime_fraction=0.9,
 )
-plot_qla(qla_results)
+ax1, ax2 = plot_excess_rate(qla_results)
+ax1.grid()
 
 plt.show()
