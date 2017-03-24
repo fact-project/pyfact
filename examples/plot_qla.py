@@ -1,14 +1,13 @@
-from fact import qla
-from fact.credentials import create_factdb_engine
+from fact.qla import get_qla_data, plot_qla
+from fact.analysis import bin_runs
 import matplotlib.pyplot as plt
 
+runs = get_qla_data(
+    20140622, 20140624,
+    sources=['Mrk 501', '1ES 1959+650', 'Crab', 'Mrk 421'],
+)
 
-db = create_factdb_engine()
-
-data = qla.get_qla_data(20161124, database=db)
-binned = qla.bin_qla_data(data, bin_width_minutes=20)
-
-qla.plot_qla(binned)
+qla_results = bin_runs(runs, 20, discard_ontime_fraction=0.9)
+plot_qla(qla_results)
 
 plt.show()
-
