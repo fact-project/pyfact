@@ -9,7 +9,7 @@ from .factdb import (
 
 
 def get_qla_data(
-        first_night,
+        first_night=None,
         last_night=None,
         sources=None,
         database_engine=None
@@ -17,9 +17,6 @@ def get_qla_data(
     '''
     Request QLA results from our database
     '''
-
-    if last_night is None:
-        last_night = first_night
 
     query = QLA.select(
         QLA.frunid.alias('run_id'),
@@ -37,8 +34,11 @@ def get_qla_data(
     on = (RunInfo.fnight == QLA.fnight) & (RunInfo.frunid == QLA.frunid)
     query = query.join(RunInfo, on=on)
     query = query.join(Source, on=RunInfo.fsourcekey == Source.fsourcekey)
-    query = query.where(QLA.fnight >= first_night)
-    query = query.where(QLA.fnight <= last_night)
+
+    if first_night is not None:
+        query = query.where(QLA.fnight >= first_night)
+    if last_night is not None:
+        query = query.where(QLA.fnight <= last_night)
 
     if sources is not None:
         query = query.where(Source.fsourcename.in_(sources))
