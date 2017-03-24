@@ -35,6 +35,7 @@ setup(
         'pandas',
         'astropy',
         'peewee',
+        'wrapt',
     ],
     zip_safe=False,
 )
