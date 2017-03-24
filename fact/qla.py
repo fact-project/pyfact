@@ -16,6 +16,17 @@ def get_qla_data(
         ):
     '''
     Request QLA results from our database
+
+    first_night: int or None
+        If given, first night to query as FACT night integer.
+    last_night: int or None
+        If given, last night to query as FACT night integer.
+    sources: iterable[str]
+        If given, only these sources will be requested.
+        Names have to match Source.fSourceName in our db.
+    database_engine: sqlalchmey.Engine
+        If given, the connection to use for the query.
+        Else, `fact.credentials.create_factdb_engine` will be used to create it.
     '''
 
     query = QLA.select(
