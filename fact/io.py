@@ -20,7 +20,7 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.csv')
+allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.jsonl', '.jsonlines', '.csv')
 native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
@@ -34,13 +34,16 @@ def write_data(df, file_path, key='table'):
     elif extension == '.json':
         df.to_json(file_path)
 
+    elif extension in ('.jsonl', '.jsonline'):
+        df.to_json(file_path, lines=True, orient='records')
+
     elif extension == '.csv':
         df.to_csv(file_path, delimiter=',', index=False)
 
     else:
         raise IOError(
             'cannot write tabular data with format {}. Allowed formats: {}'.format(
-                extension, 'hdf5, json, csv'
+                extension, allowed_extensions,
             )
         )
 
