@@ -327,7 +327,6 @@ def append_to_h5py(f, array, key='events'):
     group = f.get(key)
 
     for column in array.dtype.names:
-        print(column)
         dataset = group.get(column)
 
         n_existing_rows = dataset.shape[0]
@@ -343,8 +342,6 @@ def append_to_h5py(f, array, key='events'):
 
         if data.dtype.type == np.datetime64:
             data = data.astype('S')
-
-        print(data.dtype, dataset.dtype)
 
         if data.ndim == 1:
             dataset[n_existing_rows:] = data
