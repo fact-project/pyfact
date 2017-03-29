@@ -7,6 +7,7 @@ import logging
 import numpy as np
 from copy import copy
 
+
 __all__ = [
     'write_data',
     'to_native_byteorder',
@@ -15,6 +16,7 @@ __all__ = [
     'read_h5py_chunked',
     'read_pandas_hdf5',
     'check_extension',
+    'to_h5py',
 ]
 
 log = logging.getLogger(__name__)
@@ -230,7 +232,9 @@ def to_h5py(filename, df, key='table', mode='w', dtypes=None, index=True, **kwar
         array = change_recarray_dtype(array, dtypes)
 
     with h5py.File(filename, mode=mode) as f:
-        initialize_h5py(f, array.dtype, key=key, **kwargs)
+        if mode == 'w':
+            initialize_h5py(f, array.dtype, key=key, **kwargs)
+
         append_to_h5py(f, array, key=key)
 
 
