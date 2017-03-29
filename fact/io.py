@@ -34,7 +34,7 @@ def write_data(df, file_path, key='table', hdf_format='pandas'):
         if hdf_format == 'pandas':
             df.to_hdf(file_path, key=key, format='table')
         else:
-            to_h5py(file_path, key=key)
+            to_h5py(file_path, df, key=key)
 
     elif extension == '.json':
         df.to_json(file_path)
