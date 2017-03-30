@@ -18,6 +18,9 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
         Scaling factor for the off observations, for wobble observations
         this is 1 / number of off regions
     '''
+
+    scalar = np.isscalar(n_on)
+
     n_on = np.array(n_on, copy=False, ndmin=1)
     n_off = np.array(n_off, copy=False, ndmin=1)
 
@@ -33,6 +36,9 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
 
     significance[np.isnan(significance)] = 0
     significance[n_on < alpha * n_off] = 0
+
+    if scalar:
+        return significance[0]
 
     return significance
 
