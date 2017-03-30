@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pyfact',
-    version='0.9.0',
+    version='0.9.1',
     description='A module containing useful methods for working with fact',
     url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',
@@ -35,6 +35,7 @@ setup(
         'pandas',
         'astropy',
         'peewee',
+        'wrapt',
     ],
     zip_safe=False,
 )
