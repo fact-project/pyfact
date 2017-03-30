@@ -25,15 +25,15 @@ allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.jsonl', '.jsonlines', '
 native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
-def write_data(df, file_path, key='data', hdf_format='pandas'):
+def write_data(df, file_path, key='data', use_hp5y=False):
 
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
-        if hdf_format == 'pandas':
-            df.to_hdf(file_path, key=key, format='table')
-        else:
+        if use_hp5y is True:
             to_h5py(file_path, df, key=key)
+        else:
+            df.to_hdf(file_path, key=key, format='table')
 
     elif extension == '.json':
         df.to_json(file_path)
