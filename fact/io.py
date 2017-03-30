@@ -25,7 +25,7 @@ allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.jsonl', '.jsonlines', '
 native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
-def write_data(df, file_path, key='table', hdf_format='pandas'):
+def write_data(df, file_path, key='data', hdf_format='pandas'):
 
     name, extension = path.splitext(file_path)
 
@@ -61,7 +61,7 @@ def to_native_byteorder(array):
     return array
 
 
-def read_h5py(file_path, key='events', columns=None):
+def read_h5py(file_path, key='data', columns=None):
     '''
     Read a hdf5 file written with h5py into a dataframe
 
@@ -100,7 +100,7 @@ def read_h5py(file_path, key='events', columns=None):
     return df
 
 
-def h5py_get_n_events(file_path, key='events'):
+def h5py_get_n_rows(file_path, key='data'):
 
     with h5py.File(file_path, 'r+') as f:
         group = f.get(key)
@@ -111,7 +111,7 @@ def h5py_get_n_events(file_path, key='events'):
         return group[next(iter(group.keys()))].shape[0]
 
 
-def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
+def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None):
     '''
     Generator function to read from h5py hdf5 in chunks,
     returns an iterator over pandas dataframes.
@@ -127,13 +127,13 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
 
-        n_events = h5py_get_n_events(file_path, key=key)
+        n_rows = h5py_get_n_rows(file_path, key=key)
 
         if chunksize is None:
             n_chunks = 1
-            chunksize = n_events
+            chunksize = n_rows
         else:
-            n_chunks = int(np.ceil(n_events / chunksize))
+            n_chunks = int(np.ceil(n_rows / chunksize))
             log.info('Splitting data into {} chunks'.format(n_chunks))
 
         for col in copy(columns):
@@ -144,7 +144,7 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
         for chunk in range(n_chunks):
 
             start = chunk * chunksize
-            end = min(n_events, (chunk + 1) * chunksize)
+            end = min(n_rows, (chunk + 1) * chunksize)
 
             df = pd.DataFrame(index=np.arange(start, end))
 
@@ -213,7 +213,7 @@ def check_extension(file_path, allowed_extensions=allowed_extensions):
         raise IOError('Allowed formats: {}'.format(allowed_extensions))
 
 
-def to_h5py(filename, df, key='table', mode='w', dtypes=None, index=True, **kwargs):
+def to_h5py(filename, df, key='data', mode='w', dtypes=None, index=True, **kwargs):
     '''
     Write pandas dataframe to h5py style hdf5 file
 
@@ -224,7 +224,7 @@ def to_h5py(filename, df, key='table', mode='w', dtypes=None, index=True, **kwar
     df: pd.DataFrame
         The data to write out
     key: str
-        the name for the hdf5 group to hold all datasets, default: table
+        the name for the hdf5 group to hold all datasets, default: data
     mode: str
         'w' to overwrite existing files, 'a' to append
     dtypes: dict
