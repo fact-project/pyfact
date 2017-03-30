@@ -103,7 +103,7 @@ def bin_runs(
 
     Parameters
     ----------
-    runs: pandas.runsFrame
+    runs: pandas.DataFrame
         The analysis results and necessary metadata for each run.
         Required are: ontime, n_on, n_off, run_start, run_stop, source_name
     bin_width_minutes: float
