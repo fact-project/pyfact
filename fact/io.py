@@ -14,7 +14,6 @@ __all__ = [
     'read_data',
     'read_h5py',
     'read_h5py_chunked',
-    'read_pandas_hdf5',
     'check_extension',
     'to_h5py',
 ]
@@ -162,35 +161,46 @@ def read_h5py_chunked(file_path, key='events', columns=None, chunksize=None):
             yield df, start, end
 
 
-def read_pandas_hdf5(file_path, key=None, columns=None, chunksize=None):
-    df = pd.read_hdf(file_path, key=key, columns=columns, chunksize=chunksize)
-    return df
+def read_data(file_path, **kwargs):
+    '''
+    This is a utility wrapper for other reading functions.
+    It will look for the file extension and try to use the correct
+    reader and return a dataframe.
 
+    Currently supported are hdf5 (pandas and h5py), json, jsonlines and csv
 
-def read_data(file_path, key=None, columns=None):
+    Parameters
+    ----------
+    file_path: str
+        Path to the input file
+
+    All kwargs are passed to the individual reading function:
+
+    pandas hdf5:   pd.read_hdf
+    h5py hdf5:     fact.io.read_h5py
+    json:          pd.DataFrame(json.load(file))
+    jsonlines:     pd.read_json
+    csv:           pd.read_csv
+    '''
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
         try:
-            df = read_pandas_hdf5(
-                file_path,
-                key=key or 'table',
-                columns=columns,
-            )
+            df = pd.read_hdf(file_path, **kwargs)
         except (TypeError, ValueError):
-
-            df = read_h5py(
-                file_path,
-                key=key or 'events',
-                columns=columns,
-            )
+            df = read_h5py(file_path, **kwargs)
 
     elif extension == '.json':
         with open(file_path, 'r') as j:
             d = json.load(j)
             df = pd.DataFrame(d)
+
     elif extension in ('.jsonl', '.jsonlines'):
-        df = pd.read_json(file_path, lines=True)
+        df = pd.read_json(file_path, lines=True, **kwargs)
+
+    elif extension == '.csv':
+        df = pd.read_csv(file_path, **kwargs)
+
     else:
         raise NotImplementedError('Unknown data file extension {}'.format(extension))
 
