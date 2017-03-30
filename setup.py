@@ -36,6 +36,7 @@ setup(
         'astropy',
         'peewee',
         'h5py',
+        'wrapt',
     ],
     zip_safe=False,
 )
