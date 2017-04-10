@@ -33,7 +33,7 @@ def write_data(df, file_path, key='data', use_hp5y=False):
         if use_hp5y is True:
             to_h5py(file_path, df, key=key)
         else:
-            df.to_hdf(file_path, key=key, format='table')
+            df.to_hdf(file_path, key=key)
 
     elif extension == '.json':
         df.to_json(file_path)
@@ -42,7 +42,7 @@ def write_data(df, file_path, key='data', use_hp5y=False):
         df.to_json(file_path, lines=True, orient='records')
 
     elif extension == '.csv':
-        df.to_csv(file_path, delimiter=',', index=False)
+        df.to_csv(file_path, index=False)
 
     else:
         raise IOError(
