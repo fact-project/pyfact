@@ -37,7 +37,7 @@ setup(
         'peewee',
         'h5py',
         'wrapt',
-        'tables'.  # pytables in anaconda
+        'tables',  # pytables in anaconda
     ],
     zip_safe=False,
 )
