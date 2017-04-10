@@ -2,6 +2,7 @@ import pandas as pd
 import tempfile
 import numpy as np
 import h5py
+import pytest
 
 
 def test_to_h5py():
@@ -89,3 +90,76 @@ def test_to_h5py_append():
 
         for col in df_written.columns:
             assert all(df_read[col] == df_written[col])
+
+
+def test_write_data_csv():
+    from fact.io import write_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.csv') as f:
+        write_data(df, f.name)
+
+
+def test_write_data_json():
+    from fact.io import write_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.json') as f:
+        write_data(df, f.name)
+
+
+def test_write_data_jsonlines():
+    from fact.io import write_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.jsonl') as f:
+        write_data(df, f.name)
+
+
+def test_write_data_pandas_hdf():
+    from fact.io import write_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        write_data(df, f.name, use_h5py=False)
+
+
+def test_write_data_h5py():
+    from fact.io import write_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        write_data(df, f.name, use_h5py=True)
+
+
+def test_write_data_root():
+    from fact.io import write_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with pytest.raises(IOError):
+        with tempfile.NamedTemporaryFile(suffix='.root') as f:
+            write_data(df, f.name)
