@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='pyfact',
-    version='0.9.1',
+    version='0.9.2',
     description='A module containing useful methods for working with fact',
     url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',
@@ -37,6 +37,7 @@ setup(
         'peewee',
         'h5py',
         'wrapt',
+        'tables',  # pytables in anaconda
     ],
     zip_safe=False,
 )
