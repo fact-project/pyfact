@@ -233,7 +233,7 @@ def to_h5py(filename, df, key='data', mode='w', dtypes=None, index=True, **kwarg
     index: bool
         If bool, also save the index of the dataframe
 
-    All **kwargs are passed to h5py.create_dataset
+    All `**kwargs` are passed to h5py.create_dataset
     '''
     assert mode in ('w', 'a'), 'mode has to be either "a" or "w"'
 

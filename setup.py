@@ -1,9 +1,10 @@
 from setuptools import setup
+from fact import __version__
 
 
 setup(
     name='pyfact',
-    version='0.9.2',
+    version=__version__,
     description='A module containing useful methods for working with fact',
     url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',

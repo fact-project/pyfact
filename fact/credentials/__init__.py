@@ -19,6 +19,7 @@ def get_credentials():
     On the first call, you will be prompted for the FACT password
 
     The folling credentials are stored:
+
     - telegram
         - token
 

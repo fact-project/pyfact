@@ -4,7 +4,7 @@ The time used most of the time in FACT is the number of days since 01.01.1970
 
 So this time is related to unix time, since it has the same offset
 (unix time is the number of seconds since 01.01.1970
-    (what time? noon? midnight??))
+(what time? noon? midnight??))
 but it is also related to 'the' Modified Julian Date (MJD),
 which is used by astronomers
 in the sense, that it also counts days.
