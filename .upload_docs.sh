@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ["$TRAVIS_PYTHON_VERSION" == "3.6" ];
+if [ "$TRAVIS_PYTHON_VERSION" == "3.6" ];
 then
 
 	openssl aes-256-cbc -K $encrypted_51741ccedff4_key -iv $encrypted_51741ccedff4_iv -in github_deploy_key.enc -out github_deploy_key -d
