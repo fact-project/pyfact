@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.slowdata package &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="setup module" href="setup.html" />
+    <link rel="prev" title="fact.plotting package" href="fact.plotting.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-fact.slowdata">
+<span id="fact-slowdata-package"></span><h1>fact.slowdata package<a class="headerlink" href="#module-fact.slowdata" title="Permalink to this headline">¶</a></h1>
+<p>FACT slow database frontent</p>
+<p>provided for your convenience.</p>
+<dl class="function">
+<dt id="fact.slowdata.connect">
+<code class="descclassname">fact.slowdata.</code><code class="descname">connect</code><span class="sig-paren">(</span><em>host=None</em>, <em>port=None</em>, <em>db_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata.html#connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fact.slowdata.correlation">
+<span id="fact-slowdata-correlation-module"></span><h2>fact.slowdata.correlation module<a class="headerlink" href="#module-fact.slowdata.correlation" title="Permalink to this headline">¶</a></h2>
+<p>library of functions for correlating services</p>
+<dl class="class">
+<dt id="fact.slowdata.correlation.CorrelationByIdentification">
+<em class="property">class </em><code class="descclassname">fact.slowdata.correlation.</code><code class="descname">CorrelationByIdentification</code><span class="sig-paren">(</span><em>service_1</em>, <em>service_2</em>, <em>delta_in_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/correlation.html#CorrelationByIdentification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.correlation.CorrelationByIdentification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="fact.slowdata.correlation.CorrelationByIdentification.correlate">
+<code class="descname">correlate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/correlation.html#CorrelationByIdentification.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.correlation.CorrelationByIdentification.correlate" title="Permalink to this definition">¶</a></dt>
+<dd><p>make parts of service_1 and service_2 of equal length and timestamps</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.slowdata.correlation.CorrelationByInterpolation">
+<em class="property">class </em><code class="descclassname">fact.slowdata.correlation.</code><code class="descname">CorrelationByInterpolation</code><span class="sig-paren">(</span><em>service_1</em>, <em>service_2</em>, <em>delta_in_seconds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/correlation.html#CorrelationByInterpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.correlation.CorrelationByInterpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="fact.slowdata.correlation.CorrelationByInterpolation.correlate">
+<code class="descname">correlate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/correlation.html#CorrelationByInterpolation.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.correlation.CorrelationByInterpolation.correlate" title="Permalink to this definition">¶</a></dt>
+<dd><p>correlate by interpolation</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.slowdata.correlation.interpolator">
+<code class="descclassname">fact.slowdata.correlation.</code><code class="descname">interpolator</code><span class="sig-paren">(</span><em>support</em>, <em>times_to_be_evaluated</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/correlation.html#interpolator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.correlation.interpolator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>support <span class="classifier-delimiter">:</span> <span class="classifier">is  a structured array with, &#8216;Time&#8217;</span></dt>
+<dd>and a lot of other fields, to be interpolated.</dd>
+<dt>times_to_be_evaluated <span class="classifier-delimiter">:</span> <span class="classifier">is a 1D array-like holding the times,</span></dt>
+<dd>where the interpolation should be done</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.slowdata.settings">
+<span id="fact-slowdata-settings-module"></span><h2>fact.slowdata.settings module<a class="headerlink" href="#module-fact.slowdata.settings" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fact.slowdata.tools">
+<span id="fact-slowdata-tools-module"></span><h2>fact.slowdata.tools module<a class="headerlink" href="#module-fact.slowdata.tools" title="Permalink to this headline">¶</a></h2>
+<p>library of (hopefully) useful functions for the slow data DB interface</p>
+<dl class="function">
+<dt id="fact.slowdata.tools.cursor_to_rec_array">
+<code class="descclassname">fact.slowdata.tools.</code><code class="descname">cursor_to_rec_array</code><span class="sig-paren">(</span><em>cursor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/tools.html#cursor_to_rec_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.tools.cursor_to_rec_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a pymongo.cursor.Cursor to an numpz recarray</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.slowdata.tools.cursor_to_structured_array">
+<code class="descclassname">fact.slowdata.tools.</code><code class="descname">cursor_to_structured_array</code><span class="sig-paren">(</span><em>cursor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/tools.html#cursor_to_structured_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.tools.cursor_to_structured_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a pymongo.cursor.Cursor to an numpy structured array</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.slowdata.tools.make_numpy_dtype_from_cursor">
+<code class="descclassname">fact.slowdata.tools.</code><code class="descname">make_numpy_dtype_from_cursor</code><span class="sig-paren">(</span><em>cursor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/tools.html#make_numpy_dtype_from_cursor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.tools.make_numpy_dtype_from_cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>infer datatype of structured array from document(s) from a cursor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.slowdata.tools.make_numpy_dtype_from_document">
+<code class="descclassname">fact.slowdata.tools.</code><code class="descname">make_numpy_dtype_from_document</code><span class="sig-paren">(</span><em>doc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/slowdata/tools.html#make_numpy_dtype_from_document"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.slowdata.tools.make_numpy_dtype_from_document" title="Permalink to this definition">¶</a></dt>
+<dd><p>infer datatype of structured array from document</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fact.slowdata package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-fact.slowdata.correlation">fact.slowdata.correlation module</a></li>
+<li><a class="reference internal" href="#module-fact.slowdata.settings">fact.slowdata.settings module</a></li>
+<li><a class="reference internal" href="#module-fact.slowdata.tools">fact.slowdata.tools module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="fact.html">fact package</a><ul>
+      <li>Previous: <a href="fact.plotting.html" title="previous chapter">fact.plotting package</a></li>
+      <li>Next: <a href="setup.html" title="next chapter">setup module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fact.slowdata.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/fact.slowdata.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

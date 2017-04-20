@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.slowdata.tools &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fact.slowdata.tools</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; library of (hopefully) useful functions for the slow data DB interface</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pymongo</span>
+
+
+<div class="viewcode-block" id="cursor_to_rec_array"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.tools.cursor_to_rec_array">[docs]</a><span class="k">def</span> <span class="nf">cursor_to_rec_array</span><span class="p">(</span><span class="n">cursor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; convert a pymongo.cursor.Cursor to an numpz recarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">cursor_to_structured_array</span><span class="p">(</span><span class="n">cursor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cursor_to_structured_array"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.tools.cursor_to_structured_array">[docs]</a><span class="k">def</span> <span class="nf">cursor_to_structured_array</span><span class="p">(</span><span class="n">cursor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; convert a pymongo.cursor.Cursor to an numpy structured array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">number_of_docs</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="c1"># if number_of_docs &gt; 1000:</span>
+    <span class="c1">#    logging.warning(&quot;loading {} documents form database&quot;</span>
+    <span class="c1">#                 &quot; .. might take a while&quot;.format(number_of_docs))</span>
+
+    <span class="n">structured_array_dtype</span> <span class="o">=</span> <span class="n">make_numpy_dtype_from_cursor</span><span class="p">(</span><span class="n">cursor</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">number_of_docs</span><span class="p">,</span> <span class="n">structured_array_dtype</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">counter</span><span class="p">,</span> <span class="n">document</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cursor</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">structured_array_dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">array</span><span class="p">[</span><span class="n">field_name</span><span class="p">][</span><span class="n">counter</span><span class="p">]</span> <span class="o">=</span> <span class="n">document</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">array</span><span class="p">[</span><span class="n">field_name</span><span class="p">][</span><span class="n">counter</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">array</span></div>
+
+
+<div class="viewcode-block" id="make_numpy_dtype_from_cursor"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.tools.make_numpy_dtype_from_cursor">[docs]</a><span class="k">def</span> <span class="nf">make_numpy_dtype_from_cursor</span><span class="p">(</span><span class="n">cursor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; infer datatype of structured array from document(s) from a cursor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">collection_of_this_cursor</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">collection</span>
+    <span class="c1"># get the newest entry from this collection</span>
+    <span class="c1"># this one defines the dtype of the numpy array,</span>
+    <span class="c1"># and we want to stick to the newest format.</span>
+    <span class="n">example_document</span> <span class="o">=</span> <span class="n">collection_of_this_cursor</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
+        <span class="p">{},</span>
+        <span class="n">sort</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;Time&quot;</span><span class="p">,</span> <span class="n">pymongo</span><span class="o">.</span><span class="n">DESCENDING</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="n">example_document</span> <span class="o">=</span> <span class="n">cursor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">example_document</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># collection is empty</span>
+        <span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span><span class="s1">&#39;associated collection of cursor is empty.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">make_numpy_dtype_from_document</span><span class="p">(</span><span class="n">example_document</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_numpy_dtype_from_document"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.tools.make_numpy_dtype_from_document">[docs]</a><span class="k">def</span> <span class="nf">make_numpy_dtype_from_document</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; infer datatype of structured array from document</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">list_of_names_n_types</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;_id&#39;</span> <span class="ow">in</span> <span class="n">field_name</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="n">element_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+        <span class="n">list_of_names_n_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">field_name</span><span class="p">),</span>
+             <span class="n">element_array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">str</span><span class="p">,</span>
+             <span class="n">element_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">list_of_names_n_types</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../slowdata.html">fact.slowdata</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.plotting package &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="fact.slowdata package" href="fact.slowdata.html" />
+    <link rel="prev" title="fact.factdb package" href="fact.factdb.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-fact.plotting">
+<span id="fact-plotting-package"></span><h1>fact.plotting package<a class="headerlink" href="#module-fact.plotting" title="Permalink to this headline">¶</a></h1>
+<p>This module contains functions to plot fact data into the camera view.</p>
+<p>The Viewer class starts a GUI with tkinter, that let&#8217;s you click through
+events. You will only have access to the Viewer if you have installed
+matplotlib with tcl/tk support</p>
+<p>Currently these functions only work with shape (num_events, 1440), so
+on a pixel bases</p>
+<dl class="function">
+<dt id="fact.plotting.camera">
+<code class="descclassname">fact.plotting.</code><code class="descname">camera</code><span class="sig-paren">(</span><em>data</em>, <em>ax=None</em>, <em>cmap='gray'</em>, <em>vmin=None</em>, <em>vmax=None</em>, <em>pixelcoords=None</em>, <em>edgecolor='k'</em>, <em>linewidth=None</em>, <em>picker=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#camera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.camera" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>array like with shape 1440</em>) &#8211; the data you want to plot into the pixels</li>
+<li><strong>ax</strong> (<em>a matplotlib.axes.Axes instace</em><em> or </em><em>None</em>) &#8211; The matplotlib axes in which to plot. If None, plt.gca() is used</li>
+<li><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib colormap instance</em>) &#8211; the colormap to use for plotting the &#8216;dataset&#8217;
+[default: gray]</li>
+<li><strong>vmin</strong> (<em>float</em>) &#8211; the minimum for the colorbar, if None min(data) is used
+[default: None]</li>
+<li><strong>vmax</strong> (<em>float</em>) &#8211; the maximum for the colorbar, if None max(data) is used
+[default: None]</li>
+<li><strong>pixelcoords</strong> (<em>the coordinates for the pixels in form</em><em> [</em><em>x-values</em><em>, </em><em>y-values</em><em>]</em><em></em>) &#8211; if None, the package resource is used
+[default: None]</li>
+<li><strong>edgecolor</strong> (<em>any matplotlib color</em>) &#8211; the color around the pixel</li>
+<li><strong>picker</strong> (<em>bool</em>) &#8211; if True then the the pixel are made clickable to show information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.mark_pixel">
+<code class="descclassname">fact.plotting.</code><code class="descname">mark_pixel</code><span class="sig-paren">(</span><em>pixels</em>, <em>color='g'</em>, <em>ax=None</em>, <em>linewidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#mark_pixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.mark_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>surrounds pixels given by pixels with a border</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.pixelids">
+<code class="descclassname">fact.plotting.</code><code class="descname">pixelids</code><span class="sig-paren">(</span><em>ax=None</em>, <em>size=None</em>, <em>pixelcoords=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#pixelids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.pixelids" title="Permalink to this definition">¶</a></dt>
+<dd><p>plot the chids into the pixels</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.plot_excess_rate">
+<code class="descclassname">fact.plotting.</code><code class="descname">plot_excess_rate</code><span class="sig-paren">(</span><em>binned_runs</em>, <em>outputfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/analysis.html#plot_excess_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.plot_excess_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an excess rate plot from given data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>binned_runs</strong> (<em>pd.DataFrame</em>) &#8211; Binned data as returned by <cite>fact.analysis.bin_runs</cite></li>
+<li><strong>outputfile</strong> (<em>path</em>) &#8211; if not None, the plot is saved to this file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>ax_excess</strong> (<em>matplotlib.axes.Axes</em>) &#8211; the matplotlib Axes for the excess rate plot</li>
+<li><strong>ax_significance</strong> (<em>matplotlib.axes.Axes</em>) &#8211; the matplotlib Axes for the significance plot</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.plotting.Viewer">
+<em class="property">class </em><code class="descclassname">fact.plotting.</code><code class="descname">Viewer</code><span class="sig-paren">(</span><em>dataset</em>, <em>label</em>, <em>clickedcolour='r'</em>, <em>mapfile='pixel-map.csv'</em>, <em>cmap='gray'</em>, <em>vmin=None</em>, <em>vmax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A tkinter based GUI to look at fact events in the camera view.</p>
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.dataset">
+<code class="descname">dataset</code><a class="headerlink" href="#fact.plotting.Viewer.dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>array like with shape (num_events, 1440)</em> &#8211; the data you want to plot into the pixels</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.label">
+<code class="descname">label</code><a class="headerlink" href="#fact.plotting.Viewer.label" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; the label for the colormap</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.clickedcolour">
+<code class="descname">clickedcolour</code><a class="headerlink" href="#fact.plotting.Viewer.clickedcolour" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>a matplotlib conform colour represantation</em> &#8211; the coulour for clicked pixel
+[default: red]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.mapfile">
+<code class="descname">mapfile</code><a class="headerlink" href="#fact.plotting.Viewer.mapfile" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; path/to/fact/pixelmap.csv
+[default pixel-map.csv]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.cmap">
+<code class="descname">cmap</code><a class="headerlink" href="#fact.plotting.Viewer.cmap" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str or matplotlib colormap instance</em> &#8211; the colormap to use for plotting the &#8216;dataset&#8217;
+[default: gray]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.vmin">
+<code class="descname">vmin</code><a class="headerlink" href="#fact.plotting.Viewer.vmin" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; the minimum for the colorbar, if None min(dataset[event]) is used
+[default: None]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.Viewer.vmax">
+<code class="descname">vmax</code><a class="headerlink" href="#fact.plotting.Viewer.vmax" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; the maximum for the colorbar, if None max(dataset[event]) is used
+[default: None]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.init_plot">
+<code class="descname">init_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.init_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.init_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.on_key_event">
+<code class="descname">on_key_event</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.on_key_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.on_key_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.onpick">
+<code class="descname">onpick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.onpick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.onpick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.previous">
+<code class="descname">previous</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.previous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.previous" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.quit">
+<code class="descname">quit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.quit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.quit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.redraw">
+<code class="descname">redraw</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.redraw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.redraw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.save">
+<code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.Viewer.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.Viewer.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fact.plotting.analysis">
+<span id="fact-plotting-analysis-module"></span><h2>fact.plotting.analysis module<a class="headerlink" href="#module-fact.plotting.analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.plotting.analysis.plot_excess_rate">
+<code class="descclassname">fact.plotting.analysis.</code><code class="descname">plot_excess_rate</code><span class="sig-paren">(</span><em>binned_runs</em>, <em>outputfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/analysis.html#plot_excess_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.analysis.plot_excess_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an excess rate plot from given data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>binned_runs</strong> (<em>pd.DataFrame</em>) &#8211; Binned data as returned by <cite>fact.analysis.bin_runs</cite></li>
+<li><strong>outputfile</strong> (<em>path</em>) &#8211; if not None, the plot is saved to this file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>ax_excess</strong> (<em>matplotlib.axes.Axes</em>) &#8211; the matplotlib Axes for the excess rate plot</li>
+<li><strong>ax_significance</strong> (<em>matplotlib.axes.Axes</em>) &#8211; the matplotlib Axes for the significance plot</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.plotting.core">
+<span id="fact-plotting-core-module"></span><h2>fact.plotting.core module<a class="headerlink" href="#module-fact.plotting.core" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.plotting.core.camera">
+<code class="descclassname">fact.plotting.core.</code><code class="descname">camera</code><span class="sig-paren">(</span><em>data</em>, <em>ax=None</em>, <em>cmap='gray'</em>, <em>vmin=None</em>, <em>vmax=None</em>, <em>pixelcoords=None</em>, <em>edgecolor='k'</em>, <em>linewidth=None</em>, <em>picker=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#camera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.core.camera" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>array like with shape 1440</em>) &#8211; the data you want to plot into the pixels</li>
+<li><strong>ax</strong> (<em>a matplotlib.axes.Axes instace</em><em> or </em><em>None</em>) &#8211; The matplotlib axes in which to plot. If None, plt.gca() is used</li>
+<li><strong>cmap</strong> (<em>str</em><em> or </em><em>matplotlib colormap instance</em>) &#8211; the colormap to use for plotting the &#8216;dataset&#8217;
+[default: gray]</li>
+<li><strong>vmin</strong> (<em>float</em>) &#8211; the minimum for the colorbar, if None min(data) is used
+[default: None]</li>
+<li><strong>vmax</strong> (<em>float</em>) &#8211; the maximum for the colorbar, if None max(data) is used
+[default: None]</li>
+<li><strong>pixelcoords</strong> (<em>the coordinates for the pixels in form</em><em> [</em><em>x-values</em><em>, </em><em>y-values</em><em>]</em><em></em>) &#8211; if None, the package resource is used
+[default: None]</li>
+<li><strong>edgecolor</strong> (<em>any matplotlib color</em>) &#8211; the color around the pixel</li>
+<li><strong>picker</strong> (<em>bool</em>) &#8211; if True then the the pixel are made clickable to show information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.core.mark_pixel">
+<code class="descclassname">fact.plotting.core.</code><code class="descname">mark_pixel</code><span class="sig-paren">(</span><em>pixels</em>, <em>color='g'</em>, <em>ax=None</em>, <em>linewidth=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#mark_pixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.core.mark_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>surrounds pixels given by pixels with a border</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.core.onpick">
+<code class="descclassname">fact.plotting.core.</code><code class="descname">onpick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#onpick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.core.onpick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.core.pixelids">
+<code class="descclassname">fact.plotting.core.</code><code class="descname">pixelids</code><span class="sig-paren">(</span><em>ax=None</em>, <em>size=None</em>, <em>pixelcoords=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/core.html#pixelids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.core.pixelids" title="Permalink to this definition">¶</a></dt>
+<dd><p>plot the chids into the pixels</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.plotting.utils">
+<span id="fact-plotting-utils-module"></span><h2>fact.plotting.utils module<a class="headerlink" href="#module-fact.plotting.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.plotting.utils.calc_linewidth">
+<code class="descclassname">fact.plotting.utils.</code><code class="descname">calc_linewidth</code><span class="sig-paren">(</span><em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/utils.html#calc_linewidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.utils.calc_linewidth" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculate the correct linewidth for the fact pixels,
+so that the patches fit nicely together</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ax</strong> (<em>matplotlib Axes instance</em>) &#8211; the axes you want to calculate the size for</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>linewidth</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.plotting.utils.calc_text_size">
+<code class="descclassname">fact.plotting.utils.</code><code class="descname">calc_text_size</code><span class="sig-paren">(</span><em>ax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/utils.html#calc_text_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.utils.calc_text_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fact.plotting.viewer">
+<span id="fact-plotting-viewer-module"></span><h2>fact.plotting.viewer module<a class="headerlink" href="#module-fact.plotting.viewer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fact.plotting.viewer.Viewer">
+<em class="property">class </em><code class="descclassname">fact.plotting.viewer.</code><code class="descname">Viewer</code><span class="sig-paren">(</span><em>dataset</em>, <em>label</em>, <em>clickedcolour='r'</em>, <em>mapfile='pixel-map.csv'</em>, <em>cmap='gray'</em>, <em>vmin=None</em>, <em>vmax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A tkinter based GUI to look at fact events in the camera view.</p>
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.dataset">
+<code class="descname">dataset</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>array like with shape (num_events, 1440)</em> &#8211; the data you want to plot into the pixels</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.label">
+<code class="descname">label</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.label" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; the label for the colormap</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.clickedcolour">
+<code class="descname">clickedcolour</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.clickedcolour" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>a matplotlib conform colour represantation</em> &#8211; the coulour for clicked pixel
+[default: red]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.mapfile">
+<code class="descname">mapfile</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.mapfile" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; path/to/fact/pixelmap.csv
+[default pixel-map.csv]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.cmap">
+<code class="descname">cmap</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.cmap" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str or matplotlib colormap instance</em> &#8211; the colormap to use for plotting the &#8216;dataset&#8217;
+[default: gray]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.vmin">
+<code class="descname">vmin</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.vmin" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; the minimum for the colorbar, if None min(dataset[event]) is used
+[default: None]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.plotting.viewer.Viewer.vmax">
+<code class="descname">vmax</code><a class="headerlink" href="#fact.plotting.viewer.Viewer.vmax" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; the maximum for the colorbar, if None max(dataset[event]) is used
+[default: None]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.init_plot">
+<code class="descname">init_plot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.init_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.init_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.on_key_event">
+<code class="descname">on_key_event</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.on_key_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.on_key_event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.onpick">
+<code class="descname">onpick</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.onpick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.onpick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.previous">
+<code class="descname">previous</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.previous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.previous" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.quit">
+<code class="descname">quit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.quit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.quit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.redraw">
+<code class="descname">redraw</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.redraw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.redraw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.save">
+<code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.plotting.viewer.Viewer.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/plotting/viewer.html#Viewer.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.plotting.viewer.Viewer.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fact.plotting package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-fact.plotting.analysis">fact.plotting.analysis module</a></li>
+<li><a class="reference internal" href="#module-fact.plotting.core">fact.plotting.core module</a></li>
+<li><a class="reference internal" href="#module-fact.plotting.utils">fact.plotting.utils module</a></li>
+<li><a class="reference internal" href="#module-fact.plotting.viewer">fact.plotting.viewer module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="fact.html">fact package</a><ul>
+      <li>Previous: <a href="fact.factdb.html" title="previous chapter">fact.factdb package</a></li>
+      <li>Next: <a href="fact.slowdata.html" title="next chapter">fact.slowdata package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fact.plotting.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/fact.plotting.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

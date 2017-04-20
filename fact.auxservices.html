@@ -1,0 +1,423 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.auxservices package &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="fact.credentials package" href="fact.credentials.html" />
+    <link rel="prev" title="fact package" href="fact.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-fact.auxservices">
+<span id="fact-auxservices-package"></span><h1>fact.auxservices package<a class="headerlink" href="#module-fact.auxservices" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fact.auxservices.base">
+<span id="fact-auxservices-base-module"></span><h2>fact.auxservices.base module<a class="headerlink" href="#module-fact.auxservices.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fact.auxservices.base.AuxService">
+<em class="property">class </em><code class="descclassname">fact.auxservices.base.</code><code class="descname">AuxService</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/base.html#AuxService"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.base.AuxService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="fact.auxservices.base.AuxService.basename">
+<code class="descname">basename</code><em class="property"> = 'AUX_SERVICE'</em><a class="headerlink" href="#fact.auxservices.base.AuxService.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.base.AuxService.filename_template">
+<code class="descname">filename_template</code><a class="headerlink" href="#fact.auxservices.base.AuxService.filename_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.base.AuxService.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = []</em><a class="headerlink" href="#fact.auxservices.base.AuxService.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fact.auxservices.base.AuxService.read_date">
+<code class="descname">read_date</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/base.html#AuxService.read_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.base.AuxService.read_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="fact.auxservices.base.AuxService.read_file">
+<em class="property">classmethod </em><code class="descname">read_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/base.html#AuxService.read_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.base.AuxService.read_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.base.AuxService.renames">
+<code class="descname">renames</code><em class="property"> = {}</em><a class="headerlink" href="#fact.auxservices.base.AuxService.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.base.AuxService.transforms">
+<code class="descname">transforms</code><em class="property"> = {}</em><a class="headerlink" href="#fact.auxservices.base.AuxService.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.auxservices.services">
+<span id="fact-auxservices-services-module"></span><h2>fact.auxservices.services module<a class="headerlink" href="#module-fact.auxservices.services" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fact.auxservices.services.MagicWeather">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">MagicWeather</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#MagicWeather"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.MagicWeather" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.MagicWeather.basename">
+<code class="descname">basename</code><em class="property"> = 'MAGIC_WEATHER_DATA'</em><a class="headerlink" href="#fact.auxservices.services.MagicWeather.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.MagicWeather.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['stat', 'QoS']</em><a class="headerlink" href="#fact.auxservices.services.MagicWeather.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.MagicWeather.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'T': 'temperature', 'T_dew': 'dewpoint', 'H': 'humidity', 'P': 'pressure', 'v': 'wind_speed', 'v_max': 'wind_gust_speed', 'd': 'wind_direction'}</em><a class="headerlink" href="#fact.auxservices.services.MagicWeather.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.MagicWeather.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.MagicWeather.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.PfMini">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">PfMini</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#PfMini"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.PfMini" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.PfMini.basename">
+<code class="descname">basename</code><em class="property"> = 'PFMINI_CONTROL_DATA'</em><a class="headerlink" href="#fact.auxservices.services.PfMini.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.PfMini.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.PfMini.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.PfMini.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'Temperature': 'temperature', 'Humidity': 'humidity'}</em><a class="headerlink" href="#fact.auxservices.services.PfMini.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.PfMini.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.PfMini.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.DriveTracking">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">DriveTracking</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#DriveTracking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.DriveTracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveTracking.basename">
+<code class="descname">basename</code><em class="property"> = 'DRIVE_CONTROL_TRACKING_POSITION'</em><a class="headerlink" href="#fact.auxservices.services.DriveTracking.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveTracking.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.DriveTracking.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveTracking.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'Ra': 'right_ascension', 'Dec': 'declination', 'Ha': 'hourangle', 'SrcHa': 'hourangle_source', 'SrcRa': 'right_ascension_source', 'SrcDec': 'declination_source', 'HaDec': 'hourangle_source', 'Zd': 'zenith', 'Az': 'azimuth', 'dZd': 'zenith_deviation', 'dAz': 'azimuth_deviation', 'dev': 'absolute_control_deviation', 'avgdev': 'average_control_deviation'}</em><a class="headerlink" href="#fact.auxservices.services.DriveTracking.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveTracking.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.DriveTracking.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.DrivePointing">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">DrivePointing</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#DrivePointing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.DrivePointing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.DrivePointing.basename">
+<code class="descname">basename</code><em class="property"> = 'DRIVE_CONTROL_POINTING_POSITION'</em><a class="headerlink" href="#fact.auxservices.services.DrivePointing.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DrivePointing.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.DrivePointing.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DrivePointing.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'Zd': 'zenith', 'Az': 'azimuth'}</em><a class="headerlink" href="#fact.auxservices.services.DrivePointing.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DrivePointing.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.DrivePointing.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.DriveSource">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">DriveSource</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#DriveSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.DriveSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveSource.basename">
+<code class="descname">basename</code><em class="property"> = 'DRIVE_CONTROL_SOURCE_POSITION'</em><a class="headerlink" href="#fact.auxservices.services.DriveSource.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveSource.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.DriveSource.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveSource.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'Ra_src': 'right_ascension_source', 'Ra_cmd': 'right_ascension_command', 'Dec_src': 'declination_source', 'Dec_cmd': 'declination_command', 'Offset': 'wobble_offset', 'Angle': 'wobble_angle', 'Name': 'source_name', 'Period': 'orbit_period'}</em><a class="headerlink" href="#fact.auxservices.services.DriveSource.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.DriveSource.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.DriveSource.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.FSCHumidity">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">FSCHumidity</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#FSCHumidity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.FSCHumidity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCHumidity.basename">
+<code class="descname">basename</code><em class="property"> = 'FSC_CONTROL_HUMIDITY'</em><a class="headerlink" href="#fact.auxservices.services.FSCHumidity.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCHumidity.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.FSCHumidity.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCHumidity.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 't': 'fsc_uptime', 'H': 'humidity'}</em><a class="headerlink" href="#fact.auxservices.services.FSCHumidity.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCHumidity.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.FSCHumidity.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.FSCTemperature">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">FSCTemperature</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#FSCTemperature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.FSCTemperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCTemperature.basename">
+<code class="descname">basename</code><em class="property"> = 'FSC_CONTROL_TEMPERATURE'</em><a class="headerlink" href="#fact.auxservices.services.FSCTemperature.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCTemperature.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.FSCTemperature.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCTemperature.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 't': 'fsc_uptime', 'T_crate': 'crate_temperature', 'T_sens': 'sensor_compartment_temperature', 'T_ps': 'power_supply_temperature', 'T_aux': 'auxiliary_power_supply_temperature', 'T_back': 'ftm_backpanel_temperature', 'T_eth': 'ethernet_temperature'}</em><a class="headerlink" href="#fact.auxservices.services.FSCTemperature.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FSCTemperature.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.FSCTemperature.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.FTMTriggerRates">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">FTMTriggerRates</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#FTMTriggerRates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.FTMTriggerRates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.FTMTriggerRates.basename">
+<code class="descname">basename</code><em class="property"> = 'FTM_CONTROL_TRIGGER_RATES'</em><a class="headerlink" href="#fact.auxservices.services.FTMTriggerRates.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FTMTriggerRates.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.FTMTriggerRates.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FTMTriggerRates.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'FTMtimeStamp': 'ftm_timestamp', 'OnTimeCounter': 'effective_ontime', 'TriggerCounter': 'trigger_counter', 'TriggerRate': 'trigger_rate', 'BoardRate': 'board_rate', 'PatchRate': 'patch_rate', 'OnTime': 'ontime', 'ElapsedTime': 'elapsed_time'}</em><a class="headerlink" href="#fact.auxservices.services.FTMTriggerRates.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FTMTriggerRates.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;, 'ftm_timestamp': &lt;function FTMTriggerRates.&lt;lambda&gt;&gt;, 'effective_ontime': &lt;function FTMTriggerRates.&lt;lambda&gt;&gt;}</em><a class="headerlink" href="#fact.auxservices.services.FTMTriggerRates.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.BiasVoltage">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">BiasVoltage</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#BiasVoltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.BiasVoltage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.BiasVoltage.basename">
+<code class="descname">basename</code><em class="property"> = 'BIAS_CONTROL_VOLTAGE'</em><a class="headerlink" href="#fact.auxservices.services.BiasVoltage.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.BiasVoltage.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.BiasVoltage.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.BiasVoltage.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'Uout': 'bias_voltage'}</em><a class="headerlink" href="#fact.auxservices.services.BiasVoltage.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.BiasVoltage.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.BiasVoltage.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fact.auxservices.services.FADTemperature">
+<em class="property">class </em><code class="descclassname">fact.auxservices.services.</code><code class="descname">FADTemperature</code><span class="sig-paren">(</span><em>auxdir='/fact/aux'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/auxservices/services.html#FADTemperature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.auxservices.services.FADTemperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#fact.auxservices.base.AuxService" title="fact.auxservices.base.AuxService"><code class="xref py py-class docutils literal"><span class="pre">fact.auxservices.base.AuxService</span></code></a></p>
+<dl class="attribute">
+<dt id="fact.auxservices.services.FADTemperature.basename">
+<code class="descname">basename</code><em class="property"> = 'FAD_CONTROL_TEMPERATURE'</em><a class="headerlink" href="#fact.auxservices.services.FADTemperature.basename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FADTemperature.ignored_columns">
+<code class="descname">ignored_columns</code><em class="property"> = ['QoS']</em><a class="headerlink" href="#fact.auxservices.services.FADTemperature.ignored_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FADTemperature.renames">
+<code class="descname">renames</code><em class="property"> = {'Time': 'timestamp', 'cnt': 'count', 'temp': 'temperature'}</em><a class="headerlink" href="#fact.auxservices.services.FADTemperature.renames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fact.auxservices.services.FADTemperature.transforms">
+<code class="descname">transforms</code><em class="property"> = {'timestamp': &lt;function fact_mjd_to_datetime&gt;}</em><a class="headerlink" href="#fact.auxservices.services.FADTemperature.transforms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fact.auxservices package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-fact.auxservices.base">fact.auxservices.base module</a></li>
+<li><a class="reference internal" href="#module-fact.auxservices.services">fact.auxservices.services module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="fact.html">fact package</a><ul>
+      <li>Previous: <a href="fact.html" title="previous chapter">fact package</a></li>
+      <li>Next: <a href="fact.credentials.html" title="next chapter">fact.credentials package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fact.auxservices.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/fact.auxservices.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

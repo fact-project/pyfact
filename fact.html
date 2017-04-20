@@ -1,0 +1,573 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact package &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="fact.auxservices package" href="fact.auxservices.html" />
+    <link rel="prev" title="Welcome to pyfact’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-fact">
+<span id="fact-package"></span><h1>fact package<a class="headerlink" href="#module-fact" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="fact.fjd">
+<code class="descclassname">fact.</code><code class="descname">fjd</code><span class="sig-paren">(</span><em>datetime_inst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#fjd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.fjd" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert datetime instance to FJD</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.iso2dt">
+<code class="descclassname">fact.</code><code class="descname">iso2dt</code><span class="sig-paren">(</span><em>iso_time_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#iso2dt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.iso2dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse ISO time string to timezone aware datetime instance</p>
+<p>example
+2015-01-23T08:08+01:00</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.run2dt">
+<code class="descclassname">fact.</code><code class="descname">run2dt</code><span class="sig-paren">(</span><em>run_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#run2dt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.run2dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse typical FACT run file path string to datetime instance (UTC)</p>
+<p>example
+first you do this:</p>
+<p>&#8216;/path/to/file/20141231.more_text&#8217; &#8211;&gt; &#8216;20141231&#8217;
+then call
+run2dt(&#8216;20141231&#8217;)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.facttime">
+<code class="descclassname">fact.</code><code class="descname">facttime</code><span class="sig-paren">(</span><em>time_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#facttime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.facttime" title="Permalink to this definition">¶</a></dt>
+<dd><p>conver time-string to fact time</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.night">
+<code class="descclassname">fact.</code><code class="descname">night</code><span class="sig-paren">(</span><em>timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#night"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.night" title="Permalink to this definition">¶</a></dt>
+<dd><p>gives the date for a day change at noon instead of midnight</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.night_integer">
+<code class="descclassname">fact.</code><code class="descname">night_integer</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#night_integer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.night_integer" title="Permalink to this definition">¶</a></dt>
+<dd><p>return FACT night integer for date</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.datestr">
+<code class="descclassname">fact.</code><code class="descname">datestr</code><span class="sig-paren">(</span><em>datetime_inst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#datestr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.datestr" title="Permalink to this definition">¶</a></dt>
+<dd><p>make iso time string from datetime instance</p>
+</dd></dl>
+
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fact.auxservices.html">fact.auxservices package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fact.auxservices.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.auxservices.html#module-fact.auxservices.base">fact.auxservices.base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.auxservices.html#module-fact.auxservices.services">fact.auxservices.services module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fact.credentials.html">fact.credentials package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fact.factdb.html">fact.factdb package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fact.factdb.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.factdb.html#module-fact.factdb.database">fact.factdb.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.factdb.html#module-fact.factdb.models">fact.factdb.models module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.factdb.html#module-fact.factdb.utils">fact.factdb.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fact.plotting.html">fact.plotting package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fact.plotting.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.plotting.html#module-fact.plotting.analysis">fact.plotting.analysis module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.plotting.html#module-fact.plotting.core">fact.plotting.core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.plotting.html#module-fact.plotting.utils">fact.plotting.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.plotting.html#module-fact.plotting.viewer">fact.plotting.viewer module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fact.slowdata.html">fact.slowdata package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fact.slowdata.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.slowdata.html#module-fact.slowdata.correlation">fact.slowdata.correlation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.slowdata.html#module-fact.slowdata.settings">fact.slowdata.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fact.slowdata.html#module-fact.slowdata.tools">fact.slowdata.tools module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fact.analysis">
+<span id="fact-analysis-module"></span><h2>fact.analysis module<a class="headerlink" href="#module-fact.analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.analysis.bin_runs">
+<code class="descclassname">fact.analysis.</code><code class="descname">bin_runs</code><span class="sig-paren">(</span><em>runs</em>, <em>bin_width_minutes</em>, <em>alpha=0.2</em>, <em>discard_ontime_fraction=0.9</em>, <em>binning_function=&lt;function ontime_binning&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/analysis.html#bin_runs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.analysis.bin_runs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bin runs into bins with a desired ontime of <cite>bin_width_minutes</cite>
+in each bin.
+A new bin is created if either a bin would have more ontime
+than <cite>bin_width_minutes</cite> or <cite>run_start</cite> of the next run is
+more than <cite>bin_width_minutes</cite> after <cite>run_stop</cite> of the last run.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>runs</strong> (<em>pandas.DataFrame</em>) &#8211; The analysis results and necessary metadata for each run.
+Required are: ontime, n_on, n_off, run_start, run_stop, source_name</li>
+<li><strong>bin_width_minutes</strong> (<em>float</em>) &#8211; The desired ontime per bin, note: bins will always have less
+ontime than bin_width_minutes.</li>
+<li><strong>alpha</strong> (<em>float</em>) &#8211; The weight for the off regions, e.g. 1 / number of off regions</li>
+<li><strong>discard_ontime_fraction</strong> (<em>float</em><em> or </em><em>None</em>) &#8211; bins with less than discard_ontime_fraction * bin_width_minutes ontime
+are discarded</li>
+<li><strong>binning_function</strong> (<em>function</em>) &#8211; A function that takes the run data and a desired bin width
+in minutes and returns a Series of bin ids</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.analysis.groupby_observation_blocks">
+<code class="descclassname">fact.analysis.</code><code class="descname">groupby_observation_blocks</code><span class="sig-paren">(</span><em>runs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/analysis.html#groupby_observation_blocks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.analysis.groupby_observation_blocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Groupby for consecutive runs of the same source</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.analysis.li_ma_significance">
+<code class="descclassname">fact.analysis.</code><code class="descname">li_ma_significance</code><span class="sig-paren">(</span><em>n_on</em>, <em>n_off</em>, <em>alpha=0.2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/analysis.html#li_ma_significance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.analysis.li_ma_significance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Li&amp;Ma significance for given
+observations data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_on</strong> (<em>integer</em><em> or </em><em>array like</em>) &#8211; Number of events for the on observations</li>
+<li><strong>n_off</strong> (<em>integer of array like</em>) &#8211; Number of events for the off observations</li>
+<li><strong>alpha</strong> (<em>float</em>) &#8211; Scaling factor for the off observations, for wobble observations
+this is 1 / number of off regions</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.analysis.ontime_binning">
+<code class="descclassname">fact.analysis.</code><code class="descname">ontime_binning</code><span class="sig-paren">(</span><em>runs</em>, <em>bin_width_minutes=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/analysis.html#ontime_binning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.analysis.ontime_binning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate bin numbers for given runs.
+A new bin is created if either a bin would have more ontime
+than <cite>bin_width_minutes</cite> or <cite>run_start</cite> of the next run is
+more than <cite>bin_width_minutes</cite> after <cite>run_stop</cite> of the last run.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>runs</strong> (<em>pd.DataFrame</em>) &#8211; DataFrame containing analysis results and meta data
+for each run</li>
+<li><strong>bin_width_minutes</strong> (<em>number</em>) &#8211; The desired amount of ontime in each bin.
+Note: The ontime in each bin will allways be
+slightly less than <cite>bin_width_minutes</cite></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.analysis.qla_binning">
+<code class="descclassname">fact.analysis.</code><code class="descname">qla_binning</code><span class="sig-paren">(</span><em>data</em>, <em>bin_width_minutes=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/analysis.html#qla_binning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.analysis.qla_binning" title="Permalink to this definition">¶</a></dt>
+<dd><p>The binning algorithm as used by lightcurve.c</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.encrypt_credentials">
+<span id="fact-encrypt-credentials-module"></span><h2>fact.encrypt_credentials module<a class="headerlink" href="#module-fact.encrypt_credentials" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.encrypt_credentials.decrypt">
+<code class="descclassname">fact.encrypt_credentials.</code><code class="descname">decrypt</code><span class="sig-paren">(</span><em>inpath</em>, <em>outpath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/encrypt_credentials.html#decrypt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.encrypt_credentials.decrypt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.encrypt_credentials.encrypt">
+<code class="descclassname">fact.encrypt_credentials.</code><code class="descname">encrypt</code><span class="sig-paren">(</span><em>inpath</em>, <em>outpath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/encrypt_credentials.html#encrypt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.encrypt_credentials.encrypt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fact.geometry">
+<span id="fact-geometry-module"></span><h2>fact.geometry module<a class="headerlink" href="#module-fact.geometry" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-fact.io">
+<span id="fact-io-module"></span><h2>fact.io module<a class="headerlink" href="#module-fact.io" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.io.write_data">
+<code class="descclassname">fact.io.</code><code class="descname">write_data</code><span class="sig-paren">(</span><em>df</em>, <em>file_path</em>, <em>key='data'</em>, <em>use_hp5y=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#write_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.write_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.io.to_native_byteorder">
+<code class="descclassname">fact.io.</code><code class="descname">to_native_byteorder</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#to_native_byteorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.to_native_byteorder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert numpy array to native byteorder</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.io.read_data">
+<code class="descclassname">fact.io.</code><code class="descname">read_data</code><span class="sig-paren">(</span><em>file_path</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a utility wrapper for other reading functions.
+It will look for the file extension and try to use the correct
+reader and return a dataframe.</p>
+<p>Currently supported are hdf5 (pandas and h5py), json, jsonlines and csv</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path to the input file</li>
+<li><strong>kwargs are passed to the individual reading function</strong> (<em>All</em>) &#8211; </li>
+<li><strong>hdf5</strong> (<em>h5py</em>) &#8211; </li>
+<li><strong>hdf5</strong> &#8211; </li>
+<li><strong>json</strong> (<em>pd.DataFrame</em><em>(</em><em>json.load</em><em>(</em><em>file</em><em>)</em><em></em><em>)</em><em></em>) &#8211; </li>
+<li><strong>jsonlines</strong> (<em>pd.read_json</em>) &#8211; </li>
+<li><strong>csv</strong> (<em>pd.read_csv</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.io.read_h5py">
+<code class="descclassname">fact.io.</code><code class="descname">read_h5py</code><span class="sig-paren">(</span><em>file_path</em>, <em>key='data'</em>, <em>columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#read_h5py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.read_h5py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a hdf5 file written with h5py into a dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_path</strong> (<em>str</em>) &#8211; file to read in</li>
+<li><strong>key</strong> (<em>str</em>) &#8211; name of the hdf5 group to read in</li>
+<li><strong>columns</strong> (<em>iterable</em><em>[</em><em>str</em><em>]</em><em></em>) &#8211; Names of the datasets to read in. If not given read all 1d datasets</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.io.read_h5py_chunked">
+<code class="descclassname">fact.io.</code><code class="descname">read_h5py_chunked</code><span class="sig-paren">(</span><em>file_path</em>, <em>key='data'</em>, <em>columns=None</em>, <em>chunksize=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#read_h5py_chunked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.read_h5py_chunked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator function to read from h5py hdf5 in chunks,
+returns an iterator over pandas dataframes.</p>
+<p>When chunksize is None, use 1 chunk</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.io.check_extension">
+<code class="descclassname">fact.io.</code><code class="descname">check_extension</code><span class="sig-paren">(</span><em>file_path</em>, <em>allowed_extensions=('.hdf'</em>, <em>'.hdf5'</em>, <em>'.h5'</em>, <em>'.json'</em>, <em>'.jsonl'</em>, <em>'.jsonlines'</em>, <em>'.csv')</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#check_extension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.check_extension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.io.to_h5py">
+<code class="descclassname">fact.io.</code><code class="descname">to_h5py</code><span class="sig-paren">(</span><em>filename</em>, <em>df</em>, <em>key='data'</em>, <em>mode='w'</em>, <em>dtypes=None</em>, <em>index=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/io.html#to_h5py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.io.to_h5py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write pandas dataframe to h5py style hdf5 file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211; output file name</li>
+<li><strong>df</strong> (<em>pd.DataFrame</em>) &#8211; The data to write out</li>
+<li><strong>key</strong> (<em>str</em>) &#8211; the name for the hdf5 group to hold all datasets, default: data</li>
+<li><strong>mode</strong> (<em>str</em>) &#8211; &#8216;w&#8217; to overwrite existing files, &#8216;a&#8217; to append</li>
+<li><strong>dtypes</strong> (<em>dict</em>) &#8211; if given, a mapping of column names to dtypes for conversion.</li>
+<li><strong>index</strong> (<em>bool</em>) &#8211; If bool, also save the index of the dataframe</li>
+<li><strong>**kwargs are passed to h5py.create_dataset</strong> (<em>All</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.pixels">
+<span id="fact-pixels-module"></span><h2>fact.pixels module<a class="headerlink" href="#module-fact.pixels" title="Permalink to this headline">¶</a></h2>
+<dl class="attribute">
+<dt id="fact.pixels.bias_to_trigger_patch_map">
+<code class="descclassname">fact.pixels.</code><code class="descname">bias_to_trigger_patch_map</code><a class="reference internal" href="_modules/fact/pixels.html#bias_to_trigger_patch_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.bias_to_trigger_patch_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.chid2softid">
+<code class="descclassname">fact.pixels.</code><code class="descname">chid2softid</code><span class="sig-paren">(</span><em>chid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#chid2softid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.chid2softid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.combine_bias_patch_current_to_trigger_patch_current">
+<code class="descclassname">fact.pixels.</code><code class="descname">combine_bias_patch_current_to_trigger_patch_current</code><span class="sig-paren">(</span><em>bias_patch_currents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#combine_bias_patch_current_to_trigger_patch_current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.combine_bias_patch_current_to_trigger_patch_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>For this to work, you need to know that the calibrated currents in FACT
+which are delivered by the program FEEDBACK for all 320 bias patches
+are given as &#8220;uA per pixel per bias patch&#8221;, not as &#8220;uA per bias patch&#8221;
+So if you want to combine these currents into one value given as:
+&#8220;uA per trigger patch&#8221; or &#8220;uA per pixel per trigger patch&#8221;, you need to know
+the number of pixels in a bias patch.</p>
+<p>Luckily this is given by our patch_indices() DataFrame</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.get_pixel_coords">
+<code class="descclassname">fact.pixels.</code><code class="descname">get_pixel_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#get_pixel_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.get_pixel_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the pixel coordinates from the standard pixel-map file
+by default it gets rotated by 90 degrees clockwise to show the same
+orientation as MARS and fact-tools</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="fact.pixels.get_pixel_dataframe">
+<code class="descclassname">fact.pixels.</code><code class="descname">get_pixel_dataframe</code><a class="reference internal" href="_modules/fact/pixels.html#get_pixel_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.get_pixel_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>return pixel mapping as pd.DataFrame</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.hardid2chid">
+<code class="descclassname">fact.pixels.</code><code class="descname">hardid2chid</code><span class="sig-paren">(</span><em>hardid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#hardid2chid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.hardid2chid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.hardid2softid">
+<code class="descclassname">fact.pixels.</code><code class="descname">hardid2softid</code><span class="sig-paren">(</span><em>hardid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#hardid2softid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.hardid2softid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.reorder_softid2chid">
+<code class="descclassname">fact.pixels.</code><code class="descname">reorder_softid2chid</code><span class="sig-paren">(</span><em>array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#reorder_softid2chid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.reorder_softid2chid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns view to the given array, remapped from softid order
+to chid order (e.g. MARS ordering to fact-tools ordering)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.softid2chid">
+<code class="descclassname">fact.pixels.</code><code class="descname">softid2chid</code><span class="sig-paren">(</span><em>softid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#softid2chid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.softid2chid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.softid2hardid">
+<code class="descclassname">fact.pixels.</code><code class="descname">softid2hardid</code><span class="sig-paren">(</span><em>softid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#softid2hardid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.softid2hardid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fact.pixels.take_apart_trigger_values_for_bias_patches">
+<code class="descclassname">fact.pixels.</code><code class="descname">take_apart_trigger_values_for_bias_patches</code><span class="sig-paren">(</span><em>trigger_rates</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/pixels.html#take_apart_trigger_values_for_bias_patches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.pixels.take_apart_trigger_values_for_bias_patches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assumption is you have 160 values from trigger patches,
+such as the trigger rates per patch, or the trigger threshold per patch
+or whatever else you cant find per patch.</p>
+<p>And for some reason you say: Well this is valid for the entire trigger
+patch really, but I believe it also correlates with the bias patch</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.qla">
+<span id="fact-qla-module"></span><h2>fact.qla module<a class="headerlink" href="#module-fact.qla" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="fact.qla.get_qla_data">
+<code class="descclassname">fact.qla.</code><code class="descname">get_qla_data</code><span class="sig-paren">(</span><em>first_night=None</em>, <em>last_night=None</em>, <em>sources=None</em>, <em>database_engine=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/qla.html#get_qla_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.qla.get_qla_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request QLA results from our database</p>
+<dl class="docutils">
+<dt>first_night: int or None</dt>
+<dd>If given, first night to query as FACT night integer.</dd>
+<dt>last_night: int or None</dt>
+<dd>If given, last night to query as FACT night integer.</dd>
+<dt>sources: iterable[str]</dt>
+<dd>If given, only these sources will be requested.
+Names have to match Source.fSourceName in our db.</dd>
+<dt>database_engine: sqlalchmey.Engine</dt>
+<dd>If given, the connection to use for the query.
+Else, <cite>fact.credentials.create_factdb_engine</cite> will be used to create it.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fact.time">
+<span id="fact-time-module"></span><h2>fact.time module<a class="headerlink" href="#module-fact.time" title="Permalink to this headline">¶</a></h2>
+<p>some functions to deal with FACT modified modified julian date</p>
+<p>The time used most of the time in FACT is the number of days since 01.01.1970</p>
+<p>So this time is related to unix time, since it has the same offset
+(unix time is the number of seconds since 01.01.1970
+(what time? noon? midnight??))
+but it is also related to &#8216;the&#8217; Modified Julian Date (MJD),
+which is used by astronomers
+in the sense, that it also counts days.</p>
+<p>According to <a class="reference external" href="http://en.wikipedia.org/wiki/Julian_day">http://en.wikipedia.org/wiki/Julian_day</a>,
+there is quite a large number of
+somehow modified julian dates, of which the MJD is only one.
+So it might be okay, to introduce a new modification,
+going by the name of FACT Julain Date (FJD).</p>
+<dl class="function">
+<dt id="fact.time.datestr">
+<code class="descclassname">fact.time.</code><code class="descname">datestr</code><span class="sig-paren">(</span><em>datetime_inst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#datestr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.datestr" title="Permalink to this definition">¶</a></dt>
+<dd><p>make iso time string from datetime instance</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.facttime">
+<code class="descclassname">fact.time.</code><code class="descname">facttime</code><span class="sig-paren">(</span><em>time_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#facttime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.facttime" title="Permalink to this definition">¶</a></dt>
+<dd><p>conver time-string to fact time</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.fjd">
+<code class="descclassname">fact.time.</code><code class="descname">fjd</code><span class="sig-paren">(</span><em>datetime_inst</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#fjd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.fjd" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert datetime instance to FJD</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.iso2dt">
+<code class="descclassname">fact.time.</code><code class="descname">iso2dt</code><span class="sig-paren">(</span><em>iso_time_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#iso2dt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.iso2dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse ISO time string to timezone aware datetime instance</p>
+<p>example
+2015-01-23T08:08+01:00</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.night">
+<code class="descclassname">fact.time.</code><code class="descname">night</code><span class="sig-paren">(</span><em>timestamp=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#night"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.night" title="Permalink to this definition">¶</a></dt>
+<dd><p>gives the date for a day change at noon instead of midnight</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.night_integer">
+<code class="descclassname">fact.time.</code><code class="descname">night_integer</code><span class="sig-paren">(</span><em>date</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#night_integer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.night_integer" title="Permalink to this definition">¶</a></dt>
+<dd><p>return FACT night integer for date</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.run2dt">
+<code class="descclassname">fact.time.</code><code class="descname">run2dt</code><span class="sig-paren">(</span><em>run_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#run2dt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.run2dt" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse typical FACT run file path string to datetime instance (UTC)</p>
+<p>example
+first you do this:</p>
+<p>&#8216;/path/to/file/20141231.more_text&#8217; &#8211;&gt; &#8216;20141231&#8217;
+then call
+run2dt(&#8216;20141231&#8217;)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fact.time.to_datetime">
+<code class="descclassname">fact.time.</code><code class="descname">to_datetime</code><span class="sig-paren">(</span><em>fact_julian_date</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fact/time.html#to_datetime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fact.time.to_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert facttime to datetime instance</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fact package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-fact.analysis">fact.analysis module</a></li>
+<li><a class="reference internal" href="#module-fact.encrypt_credentials">fact.encrypt_credentials module</a></li>
+<li><a class="reference internal" href="#module-fact.geometry">fact.geometry module</a></li>
+<li><a class="reference internal" href="#module-fact.io">fact.io module</a></li>
+<li><a class="reference internal" href="#module-fact.pixels">fact.pixels module</a></li>
+<li><a class="reference internal" href="#module-fact.qla">fact.qla module</a></li>
+<li><a class="reference internal" href="#module-fact.time">fact.time module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to pyfact&#8217;s documentation!</a></li>
+      <li>Next: <a href="fact.auxservices.html" title="next chapter">fact.auxservices package</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fact.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/fact.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

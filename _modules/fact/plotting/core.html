@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.plotting.core &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fact.plotting.core</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="k">import</span> <span class="n">RegularPolygon</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="k">import</span> <span class="n">PatchCollection</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">..pixels</span> <span class="k">import</span> <span class="n">get_pixel_coords</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">calc_linewidth</span><span class="p">,</span> <span class="n">calc_text_size</span>
+
+<span class="n">lastpixel</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+
+<div class="viewcode-block" id="onpick"><a class="viewcode-back" href="../../../fact.plotting.html#fact.plotting.onpick">[docs]</a><span class="k">def</span> <span class="nf">onpick</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">lastpixel</span>
+    <span class="n">hitpixel</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">hitpixel</span> <span class="o">!=</span> <span class="n">lastpixel</span><span class="p">:</span>
+        <span class="n">lastpixel</span> <span class="o">=</span> <span class="n">hitpixel</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">artist</span>
+
+        <span class="n">ecols</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">get_edgecolors</span><span class="p">()</span>
+        <span class="n">before</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ecols</span><span class="p">[</span><span class="n">hitpixel</span><span class="p">])</span>
+        <span class="n">ecols</span><span class="p">[</span><span class="n">hitpixel</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">set_edgecolors</span><span class="p">(</span><span class="n">ecols</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">ecols</span><span class="p">[</span><span class="n">hitpixel</span><span class="p">]</span> <span class="o">=</span> <span class="n">before</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;chid:&#39;</span><span class="p">,</span> <span class="n">hitpixel</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">get_array</span><span class="p">()[</span><span class="n">hitpixel</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="camera"><a class="viewcode-back" href="../../../fact.plotting.html#fact.plotting.camera">[docs]</a><span class="k">def</span> <span class="nf">camera</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pixelcoords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">picker</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    data : array like with shape 1440</span>
+<span class="sd">        the data you want to plot into the pixels</span>
+<span class="sd">    ax : a matplotlib.axes.Axes instace or None</span>
+<span class="sd">        The matplotlib axes in which to plot. If None, plt.gca() is used</span>
+<span class="sd">    cmap : str or matplotlib colormap instance</span>
+<span class="sd">        the colormap to use for plotting the &#39;dataset&#39;</span>
+<span class="sd">        [default: gray]</span>
+<span class="sd">    vmin : float</span>
+<span class="sd">        the minimum for the colorbar, if None min(data) is used</span>
+<span class="sd">        [default: None]</span>
+<span class="sd">    vmax : float</span>
+<span class="sd">        the maximum for the colorbar, if None max(data) is used</span>
+<span class="sd">        [default: None]</span>
+<span class="sd">    pixelcoords : the coordinates for the pixels in form [x-values, y-values]</span>
+<span class="sd">        if None, the package resource is used</span>
+<span class="sd">        [default: None]</span>
+<span class="sd">    edgecolor : any matplotlib color</span>
+<span class="sd">        the color around the pixel</span>
+<span class="sd">    picker: bool</span>
+<span class="sd">        if True then the the pixel are made clickable to show information</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">picker</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;pick_event&#39;</span><span class="p">,</span> <span class="n">onpick</span><span class="p">)</span>
+
+    <span class="c1"># if the axes limit is still (0,1) assume new axes</span>
+    <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pixelcoords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pixel_x</span><span class="p">,</span> <span class="n">pixel_y</span> <span class="o">=</span> <span class="n">get_pixel_coords</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pixel_x</span><span class="p">,</span> <span class="n">pixel_y</span> <span class="o">=</span> <span class="n">pixelcoords</span>
+
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">edgecolors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1440</span> <span class="o">*</span> <span class="p">[</span><span class="n">edgecolor</span><span class="p">])</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ec</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pixel_x</span><span class="p">,</span> <span class="n">pixel_y</span><span class="p">,</span> <span class="n">edgecolors</span><span class="p">):</span>
+        <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">RegularPolygon</span><span class="p">(</span>
+                <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+                <span class="n">numVertices</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="mf">9.51</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>   <span class="c1"># in radians</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">linewidth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">linewidth</span> <span class="o">=</span> <span class="n">calc_linewidth</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">PatchCollection</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="n">linewidth</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_edgecolors</span><span class="p">(</span><span class="n">edgecolors</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw_if_interactive</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">collection</span></div>
+
+
+<div class="viewcode-block" id="pixelids"><a class="viewcode-back" href="../../../fact.plotting.html#fact.plotting.pixelids">[docs]</a><span class="k">def</span> <span class="nf">pixelids</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pixelcoords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    plot the chids into the pixels</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">pixelcoords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pixel_x</span><span class="p">,</span> <span class="n">pixel_y</span> <span class="o">=</span> <span class="n">get_pixel_coords</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pixel_x</span><span class="p">,</span> <span class="n">pixel_y</span> <span class="o">=</span> <span class="n">pixelcoords</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">calc_text_size</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+    <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+
+    <span class="n">maskx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">pixel_x</span> <span class="o">+</span> <span class="mf">4.5</span> <span class="o">&lt;</span> <span class="n">x2</span><span class="p">,</span> <span class="n">pixel_x</span> <span class="o">-</span> <span class="mf">4.5</span> <span class="o">&gt;</span> <span class="n">x1</span><span class="p">)</span>
+    <span class="n">masky</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">pixel_y</span> <span class="o">+</span> <span class="mf">4.5</span> <span class="o">&lt;</span> <span class="n">y2</span><span class="p">,</span> <span class="n">pixel_y</span> <span class="o">-</span> <span class="mf">4.5</span> <span class="o">&gt;</span> <span class="n">y1</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">maskx</span><span class="p">,</span> <span class="n">masky</span><span class="p">)</span>
+
+    <span class="n">chids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1440</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">chid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pixel_x</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">pixel_y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">chids</span><span class="p">[</span><span class="n">mask</span><span class="p">]):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">chid</span><span class="p">),</span>
+            <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw_if_interactive</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="mark_pixel"><a class="viewcode-back" href="../../../fact.plotting.html#fact.plotting.mark_pixel">[docs]</a><span class="k">def</span> <span class="nf">mark_pixel</span><span class="p">(</span><span class="n">pixels</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; surrounds pixels given by pixels with a border &#39;&#39;&#39;</span>
+    <span class="n">pixel_x</span><span class="p">,</span> <span class="n">pixel_y</span> <span class="o">=</span> <span class="n">get_pixel_coords</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">xy</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pixel_x</span><span class="p">[</span><span class="n">pixels</span><span class="p">],</span> <span class="n">pixel_y</span><span class="p">[</span><span class="n">pixels</span><span class="p">]):</span>
+        <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">RegularPolygon</span><span class="p">(</span>
+                <span class="n">xy</span><span class="o">=</span><span class="n">xy</span><span class="p">,</span>
+                <span class="n">numVertices</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="mf">9.5</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>   <span class="c1"># in radians</span>
+                <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">linewidth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">linewidth</span> <span class="o">=</span> <span class="n">calc_linewidth</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">PatchCollection</span><span class="p">(</span><span class="n">patches</span><span class="p">,</span> <span class="n">picker</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="n">linewidth</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_edgecolors</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw_if_interactive</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">collection</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

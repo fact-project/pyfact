@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.slowdata.correlation &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fact.slowdata.correlation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; library of functions for correlating services</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">interpolate</span>
+
+
+<div class="viewcode-block" id="interpolator"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.correlation.interpolator">[docs]</a><span class="k">def</span> <span class="nf">interpolator</span><span class="p">(</span><span class="n">support</span><span class="p">,</span> <span class="n">times_to_be_evaluated</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        support : is  a structured array with, &#39;Time&#39;</span>
+<span class="sd">                    and a lot of other fields, to be interpolated.</span>
+
+<span class="sd">        times_to_be_evaluated : is a 1D array-like holding the times,</span>
+<span class="sd">                        where the interpolation should be done</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">output_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times_to_be_evaluated</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">support</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">output_array</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">times_to_be_evaluated</span>
+
+    <span class="n">field_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">support</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="k">if</span> <span class="s1">&#39;Time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">:</span>
+        <span class="n">output_array</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">support</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">],</span>
+            <span class="n">support</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)(</span><span class="n">times_to_be_evaluated</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output_array</span></div>
+
+
+<div class="viewcode-block" id="CorrelationByInterpolation"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.correlation.CorrelationByInterpolation">[docs]</a><span class="k">class</span> <span class="nc">CorrelationByInterpolation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_1</span><span class="p">,</span> <span class="n">service_2</span><span class="p">,</span> <span class="n">delta_in_seconds</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_1</span> <span class="o">=</span> <span class="n">service_1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_2</span> <span class="o">=</span> <span class="n">service_2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_in_seconds</span> <span class="o">=</span> <span class="n">delta_in_seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">services</span> <span class="o">=</span> <span class="p">[</span><span class="n">service_1</span><span class="p">,</span> <span class="n">service_2</span><span class="p">]</span>
+
+<div class="viewcode-block" id="CorrelationByInterpolation.correlate"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.correlation.CorrelationByInterpolation.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; correlate by interpolation</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">averaged_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_average_times</span><span class="p">()</span>
+        <span class="n">common_averaged_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__common_times</span><span class="p">(</span><span class="n">averaged_times</span><span class="p">)</span>
+        <span class="n">new_service_2</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service_2</span><span class="p">,</span> <span class="n">common_averaged_times</span><span class="p">)</span>
+        <span class="n">new_service_1</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service_1</span><span class="p">,</span> <span class="n">common_averaged_times</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_service_1</span><span class="p">,</span> <span class="n">new_service_2</span></div>
+
+    <span class="k">def</span> <span class="nf">__common_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">averaged_times</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; crop times for interpolation</span>
+
+<span class="sd">        times : 1D array, containting times in FACT format</span>
+<span class="sd">        services: list of services (having a &#39;Time&#39; field)</span>
+
+<span class="sd">        times is cropped such, that times does not contain any time</span>
+<span class="sd">        ealier than the earliest time in any service, and no time later</span>
+<span class="sd">        than the latest time in any service.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">maximal_earliest</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="p">])</span>
+        <span class="n">minimal_latest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">services</span><span class="p">])</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span>
+            <span class="n">averaged_times</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">maximal_earliest</span><span class="p">,</span> <span class="n">minimal_latest</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">averaged_times</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__create_average_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; create &#39;near&#39; times from the &#39;Time&#39; fields self.services</span>
+
+<span class="sd">        near times, are time stampfs which are nearer to each other than delta</span>
+<span class="sd">        each group of times, which is near enough creates one averaged timestamp</span>
+<span class="sd">        which is simply the average of the intire group of times</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">list_of_averages</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_average_bad_name</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_1</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_2</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">])</span>
+        <span class="n">list_of_averages</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_average_bad_name</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_2</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">service_1</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_of_averages</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__make_average_bad_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time1</span><span class="p">,</span> <span class="n">time2</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; helper for the fucntion above. this one is not easy to explain</span>
+<span class="sd">            maybe this means it needs refactoring</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># convert times to seconds</span>
+        <span class="n">time1</span> <span class="o">*=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="n">time2</span> <span class="o">*=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="n">list_of_averages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">left_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span>
+            <span class="n">time1</span><span class="p">,</span>
+            <span class="n">time2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_in_seconds</span><span class="p">)</span>
+        <span class="n">right_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span>
+            <span class="n">time1</span><span class="p">,</span>
+            <span class="n">time2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_in_seconds</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">index_in_2</span><span class="p">,</span> <span class="n">tup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">left_indices</span><span class="p">,</span> <span class="n">right_indices</span><span class="p">)):</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">tup</span>
+            <span class="n">this_time2</span> <span class="o">=</span> <span class="n">time2</span><span class="p">[</span><span class="n">index_in_2</span><span class="p">]</span>
+            <span class="n">list_of_averages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">time1</span><span class="p">[</span><span class="n">left</span><span class="p">:</span><span class="n">right</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">this_time2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">time1</span><span class="p">[</span><span class="n">left</span><span class="p">:</span><span class="n">right</span><span class="p">]))</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_of_averages</span></div>
+
+
+<div class="viewcode-block" id="CorrelationByIdentification"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.correlation.CorrelationByIdentification">[docs]</a><span class="k">class</span> <span class="nc">CorrelationByIdentification</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_1</span><span class="p">,</span> <span class="n">service_2</span><span class="p">,</span> <span class="n">delta_in_seconds</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">service_1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">service_2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">longer</span> <span class="o">=</span> <span class="n">service_1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shorter</span> <span class="o">=</span> <span class="n">service_2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__long_1_short_2</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">longer</span> <span class="o">=</span> <span class="n">service_2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shorter</span> <span class="o">=</span> <span class="n">service_1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__long_1_short_2</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_in_seconds</span> <span class="o">=</span> <span class="n">delta_in_seconds</span>
+
+        <span class="c1"># a version of self.longer, which contains as many rows</span>
+        <span class="c1"># as self.shorter, the timestamps in new_longer are as close to those</span>
+        <span class="c1"># in self.shorter as possible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__new_longer</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CorrelationByIdentification.correlate"><a class="viewcode-back" href="../../../fact.slowdata.html#fact.slowdata.correlation.CorrelationByIdentification.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; make parts of service_1 and service_2 of equal length and timestamps</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__new_longer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__identify</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cut_for_delta</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+    <span class="k">def</span> <span class="nf">__identify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; return that part of longer, which corresponds to best to shorter</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">t_short</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorter</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span>
+        <span class="n">t_long</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">longer</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span>
+        <span class="n">indices_in_longer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">t_long</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">t_short</span><span class="p">)</span>
+        <span class="n">a_bit_smaller</span> <span class="o">=</span> <span class="n">t_long</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">indices_in_longer</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;clip&#39;</span><span class="p">)</span>
+        <span class="n">a_bit_larger</span> <span class="o">=</span> <span class="n">t_long</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">indices_in_longer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;clip&#39;</span><span class="p">)</span>
+        <span class="n">indices_nearest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">t_short</span> <span class="o">-</span> <span class="n">a_bit_smaller</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">a_bit_larger</span> <span class="o">-</span> <span class="n">t_short</span><span class="p">),</span>
+            <span class="n">indices_in_longer</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">indices_in_longer</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">longer</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">indices_nearest</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;clip&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__cut_for_delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; crop services of equal length, according to timestamps</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">time1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorter</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="n">time2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_longer</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">time1</span> <span class="o">-</span> <span class="n">time2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_in_seconds</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__long_1_short_2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_longer</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorter</span><span class="p">[</span><span class="n">good</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shorter</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">__new_longer</span><span class="p">[</span><span class="n">good</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../slowdata.html">fact.slowdata</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

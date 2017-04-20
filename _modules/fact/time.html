@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.time &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fact.time</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39; some functions to deal with FACT modified modified julian date</span>
+
+<span class="sd">The time used most of the time in FACT is the number of days since 01.01.1970</span>
+
+<span class="sd">So this time is related to unix time, since it has the same offset</span>
+<span class="sd">(unix time is the number of seconds since 01.01.1970</span>
+<span class="sd">(what time? noon? midnight??))</span>
+<span class="sd">but it is also related to &#39;the&#39; Modified Julian Date (MJD),</span>
+<span class="sd">which is used by astronomers</span>
+<span class="sd">in the sense, that it also counts days.</span>
+
+<span class="sd">According to http://en.wikipedia.org/wiki/Julian_day,</span>
+<span class="sd">there is quite a large number of</span>
+<span class="sd">somehow modified julian dates, of which the MJD is only one.</span>
+<span class="sd">So it might be okay, to introduce a new modification,</span>
+<span class="sd">going by the name of FACT Julain Date (FJD).</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">calendar</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">dateutil</span>
+<span class="kn">import</span> <span class="nn">dateutil.parser</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">OFFSET</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">days</span>
+
+
+<div class="viewcode-block" id="fjd"><a class="viewcode-back" href="../../fact.html#fact.fjd">[docs]</a><span class="k">def</span> <span class="nf">fjd</span><span class="p">(</span><span class="n">datetime_inst</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; convert datetime instance to FJD</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">datetime_inst</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;datetime instance is not aware of its timezone.&#39;</span>
+                        <span class="s1">&#39;result possibly wrong!&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">datetime_inst</span><span class="o">.</span><span class="n">utctimetuple</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="mf">24.</span> <span class="o">*</span> <span class="mf">3600.</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="iso2dt"><a class="viewcode-back" href="../../fact.html#fact.iso2dt">[docs]</a><span class="k">def</span> <span class="nf">iso2dt</span><span class="p">(</span><span class="n">iso_time_string</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; parse ISO time string to timezone aware datetime instance</span>
+
+<span class="sd">    example</span>
+<span class="sd">    2015-01-23T08:08+01:00</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">datetime_inst</span> <span class="o">=</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">iso_time_string</span><span class="p">)</span>
+    <span class="c1"># make aware at any cost!</span>
+    <span class="k">if</span> <span class="n">datetime_inst</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ISO time string did not contain timezone info. I assume UTC!&#39;</span><span class="p">)</span>
+        <span class="n">datetime_inst</span> <span class="o">=</span> <span class="n">datetime_inst</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">dateutil</span><span class="o">.</span><span class="n">tz</span><span class="o">.</span><span class="n">tzutc</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">datetime_inst</span></div>
+
+
+<div class="viewcode-block" id="run2dt"><a class="viewcode-back" href="../../fact.html#fact.run2dt">[docs]</a><span class="k">def</span> <span class="nf">run2dt</span><span class="p">(</span><span class="n">run_string</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; parse typical FACT run file path string to datetime instance (UTC)</span>
+
+<span class="sd">    example</span>
+<span class="sd">    first you do this:</span>
+
+<span class="sd">    &#39;/path/to/file/20141231.more_text&#39; --&gt; &#39;20141231&#39;</span>
+<span class="sd">    then call</span>
+<span class="sd">    run2dt(&#39;20141231&#39;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">format_</span> <span class="o">=</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span>
+    <span class="n">datetime_inst</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">run_string</span><span class="p">,</span> <span class="n">format_</span><span class="p">)</span>
+    <span class="n">datetime_inst</span> <span class="o">=</span> <span class="n">datetime_inst</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">dateutil</span><span class="o">.</span><span class="n">tz</span><span class="o">.</span><span class="n">tzutc</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">datetime_inst</span></div>
+
+
+<div class="viewcode-block" id="facttime"><a class="viewcode-back" href="../../fact.html#fact.facttime">[docs]</a><span class="k">def</span> <span class="nf">facttime</span><span class="p">(</span><span class="n">time_string</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; conver time-string to fact time</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+        <span class="n">time_string</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mf">24.</span> <span class="o">*</span> <span class="mf">3600.</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_datetime"><a class="viewcode-back" href="../../fact.html#fact.to_datetime">[docs]</a><span class="k">def</span> <span class="nf">to_datetime</span><span class="p">(</span><span class="n">fact_julian_date</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; convert facttime to datetime instance</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">unix_time</span> <span class="o">=</span> <span class="n">fact_julian_date</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
+    <span class="n">datetime_inst</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">unix_time</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">datetime_inst</span></div>
+
+
+<div class="viewcode-block" id="datestr"><a class="viewcode-back" href="../../fact.html#fact.datestr">[docs]</a><span class="k">def</span> <span class="nf">datestr</span><span class="p">(</span><span class="n">datetime_inst</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; make iso time string from datetime instance</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">datetime_inst</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="night"><a class="viewcode-back" href="../../fact.html#fact.night">[docs]</a><span class="k">def</span> <span class="nf">night</span><span class="p">(</span><span class="n">timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    gives the date for a day change at noon instead of midnight</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">timestamp</span></div>
+
+
+<div class="viewcode-block" id="night_integer"><a class="viewcode-back" href="../../fact.html#fact.night_integer">[docs]</a><span class="k">def</span> <span class="nf">night_integer</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; return FACT night integer for date</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">date</span> <span class="o">-=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">night_int</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">year</span> <span class="o">*</span> <span class="mi">10000</span> <span class="o">+</span> <span class="n">date</span><span class="o">.</span><span class="n">month</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">+</span> <span class="n">date</span><span class="o">.</span><span class="n">day</span>
+    <span class="k">return</span> <span class="n">night_int</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

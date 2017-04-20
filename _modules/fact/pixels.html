@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.pixels &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fact.pixels</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pkg_resources</span> <span class="k">as</span> <span class="nn">res</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">pixel_mapping</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;fact&#39;</span><span class="p">,</span> <span class="s1">&#39;resources/FACTmap111030.txt&#39;</span><span class="p">),</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;softID&#39;</span><span class="p">,</span> <span class="s1">&#39;hardID&#39;</span><span class="p">,</span> <span class="s1">&#39;geom_i&#39;</span><span class="p">,</span> <span class="s1">&#39;geom_j&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;G-APD&#39;</span><span class="p">,</span> <span class="s1">&#39;V_op&#39;</span><span class="p">,</span> <span class="s1">&#39;HV_B&#39;</span><span class="p">,</span> <span class="s1">&#39;HV_C&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pos_X&#39;</span><span class="p">,</span> <span class="s1">&#39;pos_Y&#39;</span><span class="p">,</span> <span class="s1">&#39;radius&#39;</span>
+    <span class="p">],</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">non_standard_pixel_chids</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">dead</span><span class="o">=</span><span class="p">[</span><span class="mi">927</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">873</span><span class="p">],</span>
+    <span class="n">crazy</span><span class="o">=</span><span class="p">[</span><span class="mi">863</span><span class="p">,</span> <span class="mi">297</span><span class="p">,</span> <span class="mi">868</span><span class="p">],</span>
+    <span class="n">twins</span><span class="o">=</span><span class="p">[</span>            <span class="c1"># the signals of these pairs of pixels are the same</span>
+        <span class="p">(</span><span class="mi">1093</span><span class="p">,</span> <span class="mi">1094</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">527</span><span class="p">,</span> <span class="mi">528</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">721</span><span class="p">,</span> <span class="mi">722</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">FOCAL_LENGTH_IN_MM</span> <span class="o">=</span> <span class="mf">4889.</span>
+<span class="n">DISTORTION_SLOPE</span> <span class="o">=</span> <span class="mf">0.031</span><span class="o">/</span><span class="mf">1.5</span>  <span class="c1"># only Sebastian can explain this number.</span>
+<span class="n">PIXEL_SPACING_IN_MM</span> <span class="o">=</span> <span class="mf">9.5</span>
+
+<span class="n">GEOM_2_SOFTID</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span> <span class="n">soft</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">soft</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;geom_i&#39;</span><span class="p">],</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;geom_j&#39;</span><span class="p">],</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;softID&#39;</span><span class="p">]</span>
+    <span class="p">)}</span>
+
+
+<div class="viewcode-block" id="reorder_softid2chid"><a class="viewcode-back" href="../../fact.html#fact.pixels.reorder_softid2chid">[docs]</a><span class="k">def</span> <span class="nf">reorder_softid2chid</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Returns view to the given array, remapped from softid order</span>
+<span class="sd">    to chid order (e.g. MARS ordering to fact-tools ordering)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">array</span><span class="p">[</span><span class="n">CHID_2_SOFTID</span><span class="p">]</span></div>
+
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="viewcode-block" id="get_pixel_dataframe"><a class="viewcode-back" href="../../fact.html#fact.pixels.get_pixel_dataframe">[docs]</a><span class="k">def</span> <span class="nf">get_pixel_dataframe</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; return pixel mapping as pd.DataFrame</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">pixel_mapping</span><span class="p">)</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;hardID&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># after sorting the CHID is in principle the index</span>
+    <span class="c1"># of pm, but I&#39;ll like to have it explicitely</span>
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;CHID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pm</span><span class="p">))</span>
+
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;trigger_patch_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;CHID&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="mi">9</span>
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;bias_patch_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;HV_B&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;HV_C&#39;</span><span class="p">]</span>
+
+    <span class="n">bias_patch_sizes</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">bias_patch_id</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;bias_patch_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bias_patch_sizes</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">bias_patch_id</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">pm</span><span class="o">.</span><span class="n">pos_Y</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">PIXEL_SPACING_IN_MM</span>
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">pos_X</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">PIXEL_SPACING_IN_MM</span>
+
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;azimuth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">x</span> <span class="o">/</span> <span class="n">FOCAL_LENGTH_IN_MM</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">DISTORTION_SLOPE</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">pm</span><span class="p">[</span><span class="s1">&#39;zenith&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">y</span> <span class="o">/</span> <span class="n">FOCAL_LENGTH_IN_MM</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">DISTORTION_SLOPE</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pm</span></div>
+
+<span class="n">FOV_RADIUS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span>
+    <span class="n">get_pixel_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">azimuth</span><span class="p">,</span> <span class="n">get_pixel_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">zenith</span>
+<span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+
+<span class="n">patch_indices</span> <span class="o">=</span> <span class="n">get_pixel_dataframe</span><span class="p">()[[</span>
+        <span class="s1">&#39;trigger_patch_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bias_patch_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bias_patch_size&#39;</span><span class="p">,</span>
+    <span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
+<span class="k">def</span> <span class="nf">geom2soft</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">GEOM_2_SOFTID</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)]</span>
+
+
+<div class="viewcode-block" id="softid2chid"><a class="viewcode-back" href="../../fact.html#fact.pixels.softid2chid">[docs]</a><span class="k">def</span> <span class="nf">softid2chid</span><span class="p">(</span><span class="n">softid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">hardid2chid</span><span class="p">(</span><span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;hardID&#39;</span><span class="p">])[</span><span class="n">softid</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="softid2hardid"><a class="viewcode-back" href="../../fact.html#fact.pixels.softid2hardid">[docs]</a><span class="k">def</span> <span class="nf">softid2hardid</span><span class="p">(</span><span class="n">softid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;hardID&#39;</span><span class="p">][</span><span class="n">softid</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="hardid2chid"><a class="viewcode-back" href="../../fact.html#fact.pixels.hardid2chid">[docs]</a><span class="k">def</span> <span class="nf">hardid2chid</span><span class="p">(</span><span class="n">hardid</span><span class="p">):</span>
+    <span class="n">crate</span> <span class="o">=</span> <span class="n">hardid</span> <span class="o">//</span> <span class="mi">1000</span>
+    <span class="n">board</span> <span class="o">=</span> <span class="p">(</span><span class="n">hardid</span> <span class="o">//</span> <span class="mi">100</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span>
+    <span class="n">patch</span> <span class="o">=</span> <span class="p">(</span><span class="n">hardid</span> <span class="o">//</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span>
+    <span class="n">pixel</span> <span class="o">=</span> <span class="p">(</span><span class="n">hardid</span> <span class="o">%</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pixel</span> <span class="o">+</span> <span class="mi">9</span> <span class="o">*</span> <span class="n">patch</span> <span class="o">+</span> <span class="mi">36</span> <span class="o">*</span> <span class="n">board</span> <span class="o">+</span> <span class="mi">360</span> <span class="o">*</span> <span class="n">crate</span></div>
+
+
+<span class="n">CHID_2_SOFTID</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1440</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">softid</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1440</span><span class="p">):</span>
+    <span class="n">hardid</span> <span class="o">=</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;hardID&#39;</span><span class="p">][</span><span class="n">softid</span><span class="p">]</span>
+    <span class="n">chid</span> <span class="o">=</span> <span class="n">hardid2chid</span><span class="p">(</span><span class="n">hardid</span><span class="p">)</span>
+    <span class="n">CHID_2_SOFTID</span><span class="p">[</span><span class="n">chid</span><span class="p">]</span> <span class="o">=</span> <span class="n">softid</span>
+
+
+<div class="viewcode-block" id="chid2softid"><a class="viewcode-back" href="../../fact.html#fact.pixels.chid2softid">[docs]</a><span class="k">def</span> <span class="nf">chid2softid</span><span class="p">(</span><span class="n">chid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">CHID_2_SOFTID</span><span class="p">[</span><span class="n">chid</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="hardid2softid"><a class="viewcode-back" href="../../fact.html#fact.pixels.hardid2softid">[docs]</a><span class="k">def</span> <span class="nf">hardid2softid</span><span class="p">(</span><span class="n">hardid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">chid2softid</span><span class="p">(</span><span class="n">hardid2chid</span><span class="p">(</span><span class="n">hardid</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_pixel_coords"><a class="viewcode-back" href="../../fact.html#fact.pixels.get_pixel_coords">[docs]</a><span class="k">def</span> <span class="nf">get_pixel_coords</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculate the pixel coordinates from the standard pixel-map file</span>
+<span class="sd">    by default it gets rotated by 90 degrees clockwise to show the same</span>
+<span class="sd">    orientation as MARS and fact-tools</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pd</span> <span class="o">=</span> <span class="n">get_pixel_dataframe</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">y</span></div>
+
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="viewcode-block" id="bias_to_trigger_patch_map"><a class="viewcode-back" href="../../fact.html#fact.pixels.bias_to_trigger_patch_map">[docs]</a><span class="k">def</span> <span class="nf">bias_to_trigger_patch_map</span><span class="p">():</span>
+    <span class="n">by_chid</span> <span class="o">=</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="s1">&#39;hardID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+
+    <span class="n">bias_channel</span> <span class="o">=</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="n">by_chid</span><span class="p">][</span><span class="s1">&#39;HV_B&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">pixel_mapping</span><span class="p">[</span><span class="n">by_chid</span><span class="p">][</span><span class="s1">&#39;HV_C&#39;</span><span class="p">]</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">bias_channel</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bias_channel</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">idx</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="combine_bias_patch_current_to_trigger_patch_current"><a class="viewcode-back" href="../../fact.html#fact.pixels.combine_bias_patch_current_to_trigger_patch_current">[docs]</a><span class="k">def</span> <span class="nf">combine_bias_patch_current_to_trigger_patch_current</span><span class="p">(</span><span class="n">bias_patch_currents</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For this to work, you need to know that the calibrated currents in FACT</span>
+<span class="sd">    which are delivered by the program FEEDBACK for all 320 bias patches</span>
+<span class="sd">    are given as &quot;uA per pixel per bias patch&quot;, not as &quot;uA per bias patch&quot;</span>
+<span class="sd">    So if you want to combine these currents into one value given as:</span>
+<span class="sd">    &quot;uA per trigger patch&quot; or &quot;uA per pixel per trigger patch&quot;, you need to know</span>
+<span class="sd">    the number of pixels in a bias patch.</span>
+
+<span class="sd">    Luckily this is given by our patch_indices() DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">patch_indices</span><span class="p">()</span>
+    <span class="n">fourers</span> <span class="o">=</span> <span class="n">pi</span><span class="p">[</span><span class="n">pi</span><span class="o">.</span><span class="n">bias_patch_size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;trigger_patch_id&#39;</span><span class="p">)</span>
+    <span class="n">fivers</span> <span class="o">=</span> <span class="n">pi</span><span class="p">[</span><span class="n">pi</span><span class="o">.</span><span class="n">bias_patch_size</span> <span class="o">==</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;trigger_patch_id&#39;</span><span class="p">)</span>
+
+    <span class="n">b_c</span> <span class="o">=</span> <span class="n">bias_patch_currents</span>  <span class="c1"># just to shorten the name</span>
+    <span class="n">t_c</span> <span class="o">=</span> <span class="n">b_c</span><span class="p">[</span><span class="n">fourers</span><span class="o">.</span><span class="n">bias_patch_id</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span><span class="o">/</span><span class="mi">9</span> <span class="o">+</span> <span class="n">b_c</span><span class="p">[</span><span class="n">fivers</span><span class="o">.</span><span class="n">bias_patch_id</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span><span class="o">/</span><span class="mi">9</span>
+
+    <span class="n">trigger_patch_currents</span> <span class="o">=</span> <span class="n">t_c</span>  <span class="c1"># unshorten the name</span>
+    <span class="k">return</span> <span class="n">trigger_patch_currents</span></div>
+
+
+<div class="viewcode-block" id="take_apart_trigger_values_for_bias_patches"><a class="viewcode-back" href="../../fact.html#fact.pixels.take_apart_trigger_values_for_bias_patches">[docs]</a><span class="k">def</span> <span class="nf">take_apart_trigger_values_for_bias_patches</span><span class="p">(</span><span class="n">trigger_rates</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assumption is you have 160 values from trigger patches,</span>
+<span class="sd">    such as the trigger rates per patch, or the trigger threshold per patch</span>
+<span class="sd">    or whatever else you cant find per patch.</span>
+
+<span class="sd">    And for some reason you say: Well this is valid for the entire trigger</span>
+<span class="sd">    patch really, but I believe it also correlates with the bias patch</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">patch_indices</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;bias_patch_id&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">trigger_rates</span><span class="p">[</span><span class="n">pi</span><span class="o">.</span><span class="n">trigger_patch_id</span><span class="o">.</span><span class="n">values</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

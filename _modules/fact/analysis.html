@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fact.analysis &#8212; pyfact  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fact.analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+
+<div class="viewcode-block" id="li_ma_significance"><a class="viewcode-back" href="../../fact.html#fact.analysis.li_ma_significance">[docs]</a><span class="k">def</span> <span class="nf">li_ma_significance</span><span class="p">(</span><span class="n">n_on</span><span class="p">,</span> <span class="n">n_off</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculate the Li&amp;Ma significance for given</span>
+<span class="sd">    observations data</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_on: integer or array like</span>
+<span class="sd">        Number of events for the on observations</span>
+<span class="sd">    n_off: integer of array like</span>
+<span class="sd">        Number of events for the off observations</span>
+<span class="sd">    alpha: float</span>
+<span class="sd">        Scaling factor for the off observations, for wobble observations</span>
+<span class="sd">        this is 1 / number of off regions</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">scalar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">n_on</span><span class="p">)</span>
+
+    <span class="n">n_on</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">n_on</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">n_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">n_off</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+        <span class="n">p_on</span> <span class="o">=</span> <span class="n">n_on</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_on</span> <span class="o">+</span> <span class="n">n_off</span><span class="p">)</span>
+        <span class="n">p_off</span> <span class="o">=</span> <span class="n">n_off</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_on</span> <span class="o">+</span> <span class="n">n_off</span><span class="p">)</span>
+
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">n_on</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">p_on</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">n_off</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">p_off</span><span class="p">)</span>
+
+        <span class="n">ts</span> <span class="o">=</span> <span class="p">(</span><span class="n">t1</span> <span class="o">+</span> <span class="n">t2</span><span class="p">)</span>
+        <span class="n">significance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ts</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">significance</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">significance</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">significance</span><span class="p">[</span><span class="n">n_on</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">n_off</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">scalar</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">significance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">significance</span></div>
+
+
+<div class="viewcode-block" id="ontime_binning"><a class="viewcode-back" href="../../fact.html#fact.analysis.ontime_binning">[docs]</a><span class="k">def</span> <span class="nf">ontime_binning</span><span class="p">(</span><span class="n">runs</span><span class="p">,</span> <span class="n">bin_width_minutes</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculate bin numbers for given runs.</span>
+<span class="sd">    A new bin is created if either a bin would have more ontime</span>
+<span class="sd">    than `bin_width_minutes` or `run_start` of the next run is</span>
+<span class="sd">    more than `bin_width_minutes` after `run_stop` of the last run.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    runs: pd.DataFrame</span>
+<span class="sd">        DataFrame containing analysis results and meta data</span>
+<span class="sd">        for each run</span>
+<span class="sd">    bin_width_minutes: number</span>
+<span class="sd">        The desired amount of ontime in each bin.</span>
+<span class="sd">        Note: The ontime in each bin will allways be</span>
+<span class="sd">        slightly less than `bin_width_minutes`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">bin_width_sec</span> <span class="o">=</span> <span class="n">bin_width_minutes</span> <span class="o">*</span> <span class="mi">60</span>
+    <span class="n">bin_number</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ontime_sum</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">bins</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">last_stop</span> <span class="o">=</span> <span class="n">runs</span><span class="p">[</span><span class="s1">&#39;run_start&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">delta_t_max</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">bin_width_sec</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">runs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">delta_t</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">run_start</span> <span class="o">-</span> <span class="n">last_stop</span>
+        <span class="n">last_stop</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">run_stop</span>
+
+        <span class="k">if</span> <span class="n">ontime_sum</span> <span class="o">+</span> <span class="n">row</span><span class="o">.</span><span class="n">ontime</span> <span class="o">&gt;</span> <span class="n">bin_width_sec</span> <span class="ow">or</span> <span class="n">delta_t</span> <span class="o">&gt;</span> <span class="n">delta_t_max</span><span class="p">:</span>
+            <span class="n">bin_number</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ontime_sum</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bin_number</span><span class="p">)</span>
+        <span class="n">ontime_sum</span> <span class="o">+=</span> <span class="n">row</span><span class="o">.</span><span class="n">ontime</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">runs</span><span class="o">.</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="qla_binning"><a class="viewcode-back" href="../../fact.html#fact.analysis.qla_binning">[docs]</a><span class="k">def</span> <span class="nf">qla_binning</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bin_width_minutes</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The binning algorithm as used by lightcurve.c</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">bin_number</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ontime_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">bins</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">ontime_sum</span> <span class="o">+</span> <span class="n">row</span><span class="o">.</span><span class="n">fOnTimeAfterCuts</span> <span class="o">&gt;</span> <span class="n">bin_width_minutes</span> <span class="o">*</span> <span class="mi">60</span><span class="p">:</span>
+            <span class="n">bin_number</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ontime_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">bins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bin_number</span><span class="p">)</span>
+        <span class="n">ontime_sum</span> <span class="o">+=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;ontime&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="groupby_observation_blocks"><a class="viewcode-back" href="../../fact.html#fact.analysis.groupby_observation_blocks">[docs]</a><span class="k">def</span> <span class="nf">groupby_observation_blocks</span><span class="p">(</span><span class="n">runs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Groupby for consecutive runs of the same source&#39;&#39;&#39;</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">runs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;run_start&#39;</span><span class="p">)</span>
+    <span class="n">new_source</span> <span class="o">=</span> <span class="n">runs</span><span class="o">.</span><span class="n">fSourceName</span> <span class="o">!=</span> <span class="n">runs</span><span class="o">.</span><span class="n">fSourceName</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">observation_blocks</span> <span class="o">=</span> <span class="n">new_source</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">runs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">observation_blocks</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="bin_runs"><a class="viewcode-back" href="../../fact.html#fact.analysis.bin_runs">[docs]</a><span class="k">def</span> <span class="nf">bin_runs</span><span class="p">(</span>
+        <span class="n">runs</span><span class="p">,</span>
+        <span class="n">bin_width_minutes</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">discard_ontime_fraction</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">binning_function</span><span class="o">=</span><span class="n">ontime_binning</span><span class="p">,</span>
+        <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Bin runs into bins with a desired ontime of `bin_width_minutes`</span>
+<span class="sd">    in each bin.</span>
+<span class="sd">    A new bin is created if either a bin would have more ontime</span>
+<span class="sd">    than `bin_width_minutes` or `run_start` of the next run is</span>
+<span class="sd">    more than `bin_width_minutes` after `run_stop` of the last run.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    runs: pandas.DataFrame</span>
+<span class="sd">        The analysis results and necessary metadata for each run.</span>
+<span class="sd">        Required are: ontime, n_on, n_off, run_start, run_stop, source_name</span>
+<span class="sd">    bin_width_minutes: float</span>
+<span class="sd">        The desired ontime per bin, note: bins will always have less</span>
+<span class="sd">        ontime than bin_width_minutes.</span>
+<span class="sd">    alpha: float</span>
+<span class="sd">        The weight for the off regions, e.g. 1 / number of off regions</span>
+<span class="sd">    discard_ontime_fraction: float or None</span>
+<span class="sd">        bins with less than discard_ontime_fraction * bin_width_minutes ontime</span>
+<span class="sd">        are discarded</span>
+<span class="sd">    binning_function: function</span>
+<span class="sd">        A function that takes the run data and a desired bin width</span>
+<span class="sd">        in minutes and returns a Series of bin ids</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">source_name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">runs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;source_name&#39;</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;bin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binning_function</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">bin_width_minutes</span><span class="p">)</span>
+        <span class="n">binned</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;bin&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">aggregate</span><span class="p">({</span>
+            <span class="s1">&#39;ontime&#39;</span><span class="p">:</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;n_on&#39;</span><span class="p">:</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;n_off&#39;</span><span class="p">:</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;run_start&#39;</span><span class="p">:</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;run_stop&#39;</span><span class="p">:</span> <span class="s1">&#39;max&#39;</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;n_excess&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binned</span><span class="o">.</span><span class="n">n_on</span> <span class="o">-</span> <span class="n">binned</span><span class="o">.</span><span class="n">n_off</span> <span class="o">*</span> <span class="n">alpha</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;excess_rate_per_h&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binned</span><span class="o">.</span><span class="n">n_excess</span> <span class="o">/</span> <span class="n">binned</span><span class="o">.</span><span class="n">ontime</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;time_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binned</span><span class="o">.</span><span class="n">run_stop</span> <span class="o">-</span> <span class="n">binned</span><span class="o">.</span><span class="n">run_start</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;time_mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binned</span><span class="o">.</span><span class="n">run_start</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">binned</span><span class="o">.</span><span class="n">time_width</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;excess_rate_err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">binned</span><span class="o">.</span><span class="n">n_on</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">binned</span><span class="o">.</span><span class="n">n_off</span><span class="p">)</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;excess_rate_err&#39;</span><span class="p">]</span> <span class="o">/=</span> <span class="n">binned</span><span class="o">.</span><span class="n">ontime</span> <span class="o">/</span> <span class="mi">3600</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;significance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">li_ma_significance</span><span class="p">(</span>
+            <span class="n">binned</span><span class="o">.</span><span class="n">n_on</span><span class="p">,</span> <span class="n">binned</span><span class="o">.</span><span class="n">n_off</span><span class="p">,</span> <span class="mf">0.2</span>
+        <span class="p">)</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;source_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_name</span>
+        <span class="n">binned</span><span class="p">[</span><span class="s1">&#39;night&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">binned</span><span class="o">.</span><span class="n">time_mean</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">discard_ontime_fraction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">binned</span> <span class="o">=</span> <span class="n">binned</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                <span class="s1">&#39;ontime &gt;= </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">discard_ontime_fraction</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">bin_width_minutes</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">binned</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sources</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
