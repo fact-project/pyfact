@@ -23,11 +23,10 @@ script:
   - rst-lint README.rst
   - python setup.py build_sphinx
 
-after_success:
-  - ./.upload_docs.sh
 
 deploy:
   - provider: pypi
+    skip_cleanup: true
     distributions: sdist
     server: "https://pypi.python.org/pypi"
     user: fact-deploybot
@@ -37,3 +36,6 @@ deploy:
       branch: master
       tags: true
       condition: $TRAVIS_PYTHON_VERSION = "3.5"
+
+after_deploy:
+  - ./.upload_docs.sh
