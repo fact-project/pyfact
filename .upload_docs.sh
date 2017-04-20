@@ -13,6 +13,7 @@ then
 	cp -r ./build/sphinx/html ~/out
 
 	cd ~/out
+	touch .nojekyll
 	git init
 	git remote add origin git@github.com:$TRAVIS_REPO_SLUG
 	git config user.name "TRAVIS CI"
