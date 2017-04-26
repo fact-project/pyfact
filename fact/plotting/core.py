@@ -40,7 +40,7 @@ def camera(
         picker=False,
         ):
     '''
-    Attributes
+    Parameters
     ----------
 
     data : array like with shape 1440
@@ -51,10 +51,10 @@ def camera(
         the colormap to use for plotting the 'dataset'
         [default: gray]
     vmin : float
-        the minimum for the colorbar, if None min(dataset[event]) is used
+        the minimum for the colorbar, if None min(data) is used
         [default: None]
     vmax : float
-        the maximum for the colorbar, if None max(dataset[event]) is used
+        the maximum for the colorbar, if None max(data) is used
         [default: None]
     pixelcoords : the coordinates for the pixels in form [x-values, y-values]
         if None, the package resource is used

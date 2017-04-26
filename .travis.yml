@@ -14,16 +14,19 @@ before_install:
   - sudo ln -s /run/shm /dev/shm
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib pip pymongo flake8 pandas astropy pygments pytables
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib pip pymongo flake8 pandas astropy pygments pytables sphinx
   - pip install restructuredtext-lint
   - pip install .
 
 script:
   - python setup.py test
   - rst-lint README.rst
+  - python setup.py build_sphinx
+
 
 deploy:
   - provider: pypi
+    skip_cleanup: true
     distributions: sdist
     server: "https://pypi.python.org/pypi"
     user: fact-deploybot
@@ -33,3 +36,6 @@ deploy:
       branch: master
       tags: true
       condition: $TRAVIS_PYTHON_VERSION = "3.5"
+
+after_deploy:
+  - ./.upload_docs.sh
