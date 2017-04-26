@@ -101,9 +101,9 @@ def read_h5py(file_path, key='data', columns=None):
     return df
 
 
-def h5py_get_n_rows(file_path, key='data'):
+def h5py_get_n_rows(file_path, key='data', mode='r+'):
 
-    with h5py.File(file_path, 'r+') as f:
+    with h5py.File(file_path, mode) as f:
         group = f.get(key)
 
         if group is None:
