@@ -14,9 +14,11 @@ ontime = (run_duration * RunInfo.feffectiveon)
 
 def read_into_dataframe(query, engine=None):
     ''' read the result of a peewee query object into a pandas DataFrame '''
-
+    engine = engine or create_factdb_engine()
     sql, params = query.sql()
-    df = pd.read_sql_query(sql, engine or create_factdb_engine(), params=params)
+    
+    with engine.connect() as conn:
+        df = pd.read_sql_query(sql, conn, params=params)
 
     return df
 
