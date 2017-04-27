@@ -87,6 +87,11 @@ def read_h5py(file_path, key='data', columns=None, mode='r+'):
         df = pd.DataFrame()
         for col in columns:
             array = to_native_byteorder(group[col][:])
+
+            # pandas cannot handle bytes, convert to str
+            if array.dtype.kind == 'S':
+                array = array.astype(str)
+
             if array.ndim == 1:
                 df[col] = array
             elif array.ndim == 2:
@@ -151,6 +156,10 @@ def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode=
 
             for col in columns:
                 array = to_native_byteorder(group[col][start:end])
+
+                # pandas cannot handle bytes, convert to str
+                if array.dtype.kind == 'S':
+                    array = array.astype(str)
 
                 if array.ndim == 1:
                     df[col] = array
