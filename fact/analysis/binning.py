@@ -72,6 +72,16 @@ def groupby_observation_blocks(runs):
     return runs.groupby(observation_blocks)
 
 
+def nightly_binning(runs):
+    nights = runs.nights.unique()
+    bins = pd.Series(index=runs.index)
+
+    for bin_id, night in enumerate(nights):
+        bins.loc[runs.night == night] = bin_id
+
+    return bins
+
+
 def bin_runs(
         runs,
         alpha=0.2,
