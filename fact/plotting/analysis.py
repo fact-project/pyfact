@@ -30,7 +30,7 @@ def plot_excess_rate(binned_runs, outputfile=None):
 
     labels = []
     plots = []
-    for (name, group), color in zip(binned_runs.groupby('source_name'), colors):
+    for (name, group), color in zip(binned_runs.groupby('source'), colors):
         if len(group.index) == 0:
             continue
 

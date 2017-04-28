@@ -93,7 +93,7 @@ class DriveSource(AuxService):
         'Dec_cmd': 'declination_command',
         'Offset': 'wobble_offset',
         'Angle': 'wobble_angle',
-        'Name': 'source_name',
+        'Name': 'source',
         'Period': 'orbit_period',
     }
     transforms = {'timestamp': fact_mjd_to_datetime}

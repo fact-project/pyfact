@@ -98,7 +98,7 @@ def bin_runs(
     ----------
     runs: pandas.DataFrame
         The analysis results and necessary metadata for each run.
-        Required are: ontime, n_on, n_off, run_start, run_stop, source_name
+        Required are: ontime, n_on, n_off, run_start, run_stop, source
 
     alpha: float
         The weight for the off regions, e.g. 1 / number of off regions
@@ -112,7 +112,7 @@ def bin_runs(
     '''
     runs = runs.sort_values(by='run_start')
     sources = []
-    for source_name, df in runs.groupby('source_name'):
+    for source, df in runs.groupby('source'):
 
         df = df.copy()
         df['bin'], df['valid_bins'] = binning_function(df, **kwargs)
@@ -138,7 +138,7 @@ def bin_runs(
             binned.n_on, binned.n_off, 0.2
         )
 
-        binned['source_name'] = source_name
+        binned['source'] = source
         binned['night'] = (
             binned.time_mean - pd.Timedelta(hours=12)
         ).dt.strftime('%Y%m%d').astype(int)
