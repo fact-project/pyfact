@@ -110,7 +110,7 @@ def bin_runs(
 
     All `**kwargs` are passed to the binning function
     '''
-    runs = runs.sortby('run_start')
+    runs = runs.sort_values(by='run_start')
     sources = []
     for source_name, df in runs.groupby('source_name'):
 
