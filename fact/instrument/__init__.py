@@ -1,4 +1,4 @@
-from .pixels import get_pixel_coords, get_pixel_dataframe
+from .camera import get_pixel_coords, get_pixel_dataframe
 
 
 __all__ = [
