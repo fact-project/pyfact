@@ -63,7 +63,7 @@ def test_to_h5py_datetime():
         df2 = read_h5py(f.name, key='test')
 
         for col in df2.columns:
-            df2[col] = pd.to_datetime(df2[col].apply(bytes.decode))
+            df2[col] = pd.to_datetime(df2[col])
 
         for col in df.columns:
             assert all(df[col] == df2[col])

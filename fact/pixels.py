@@ -124,9 +124,9 @@ def get_pixel_coords():
     by default it gets rotated by 90 degrees clockwise to show the same
     orientation as MARS and fact-tools
     '''
-    pd = get_pixel_dataframe()
+    df = get_pixel_dataframe()
 
-    return pd.x, pd.y
+    return df.x.values, df.y.values
 
 
 @lru_cache(maxsize=1)
