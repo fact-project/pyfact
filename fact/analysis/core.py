@@ -52,6 +52,8 @@ def calc_run_summary_source_independent(
         selected, theta2_cut, theta_key, theta_off_keys
     )
 
+    alpha = 1 / len(theta_off_keys)
+
     runs['n_on'] = on_data.groupby(['night', 'run_id']).size()
     runs['n_on'].fillna(0, inplace=True)
 
@@ -59,7 +61,7 @@ def calc_run_summary_source_independent(
     runs['n_off'].fillna(0, inplace=True)
 
     runs['significance'] = li_ma_significance(
-        runs['n_on'], runs['n_off'], 1 / len(off_data)
+        runs['n_on'], runs['n_off'], alpha
     )
 
     runs.reset_index(inplace=True)
@@ -133,6 +135,8 @@ def calc_run_summary_source_dependent(
         events, prediction_threshold, on_prediction_key, off_prediction_keys
     )
 
+    alpha = 1 / len(off_prediction_keys)
+
     runs['n_on'] = on_data.groupby(['night', 'run_id']).size()
     runs['n_on'].fillna(0, inplace=True)
 
@@ -140,7 +144,7 @@ def calc_run_summary_source_dependent(
     runs['n_off'].fillna(0, inplace=True)
 
     runs['significance'] = li_ma_significance(
-        runs['n_on'], runs['n_off'], 1 / len(off_data)
+        runs['n_on'], runs['n_off'], alpha
     )
 
     runs.reset_index(inplace=True)
