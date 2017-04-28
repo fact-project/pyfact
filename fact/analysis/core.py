@@ -60,6 +60,12 @@ def calc_run_summary_source_independent(
     runs['n_off'] = off_data.groupby(['night', 'run_id']).size()
     runs['n_off'].fillna(0, inplace=True)
 
+    runs['n_excess'] = runs['n_on'] - alpha * runs['n_off']
+    runs['n_excess_err'] = np.sqrt(runs['n_on'] + alpha**2 * runs['n_off'])
+
+    runs['excess_rate_per_h'] = runs['n_excess'] / runs['ontime'] / 3600
+    runs['excess_rate_per_h_err'] = runs['n_excess_err'] / runs['ontime'] / 3600
+
     runs['significance'] = li_ma_significance(
         runs['n_on'], runs['n_off'], alpha
     )
@@ -146,6 +152,12 @@ def calc_run_summary_source_dependent(
     runs['significance'] = li_ma_significance(
         runs['n_on'], runs['n_off'], alpha
     )
+
+    runs['n_excess'] = runs['n_on'] - alpha * runs['n_off']
+    runs['n_excess_err'] = np.sqrt(runs['n_on'] + alpha**2 * runs['n_off'])
+
+    runs['excess_rate_per_h'] = runs['n_excess'] / runs['ontime'] / 3600
+    runs['excess_rate_per_h_err'] = runs['n_excess_err'] / runs['ontime'] / 3600
 
     runs.reset_index(inplace=True)
 
