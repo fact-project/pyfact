@@ -3,7 +3,20 @@ import numpy as np
 from functools import lru_cache
 import pandas as pd
 
-from .constants import FOCAL_LENGTH_MM, DISTORTION_SLOPE, PIXEL_SPACING_IN_MM
+from .constants import (
+    FOCAL_LENGTH_MM, DISTORTION_SLOPE,
+    PIXEL_SPACING_IN_MM, FOV_PER_PIXEL_DEG
+)
+
+
+def camera_distance_mm_to_deg(distance_mm):
+    '''
+    Transform a distance in mm in the camera plane
+    to it's approximate equivalent in degrees.
+    '''
+
+    return distance_mm * FOV_PER_PIXEL_DEG / PIXEL_SPACING_IN_MM
+
 
 pixel_mapping = np.genfromtxt(
     res.resource_filename('fact', 'resources/FACTmap111030.txt'),
