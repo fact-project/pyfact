@@ -25,10 +25,10 @@ fact\.instrument\.geometry module
     :undoc-members:
     :show-inheritance:
 
-fact\.instrument\.pixels module
+fact\.instrument\.camera module
 -------------------------------
 
-.. automodule:: fact.instrument.pixels
+.. automodule:: fact.instrument.camera
     :members:
     :undoc-members:
     :show-inheritance:

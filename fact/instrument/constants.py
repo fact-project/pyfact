@@ -1,20 +1,20 @@
-import numpy as np
 '''
 Constants describing the FACT telescope
 
-..data:: PIXEL_SPACING_MM
+.. py:data:: PIXEL_SPACING_MM
 
     Grid constant of the hexagonal grid in mm
 
-..data:: FOCAL_LENGTH_MM
+.. py:data:: FOCAL_LENGTH_MM
 
     FACT's reflector focal length in mm
 
-..data:: DISTORTION_SLOPE
+.. py:data:: DISTORTION_SLOPE
 
-    FACT's
+    FACT's distortion slope
 
 '''
+import numpy as np
 
 
 PIXEL_SPACING_IN_MM = 9.5
