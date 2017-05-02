@@ -4,7 +4,7 @@ from functools import lru_cache
 import pandas as pd
 
 from .constants import (
-    FOCAL_LENGTH_MM, DISTORTION_SLOPE,
+    FOCAL_LENGTH_MM, PINCUSHION_DISTORTION_SLOPE,
     PIXEL_SPACING_IN_MM, FOV_PER_PIXEL_DEG
 )
 
@@ -73,18 +73,20 @@ def get_pixel_dataframe():
     pm['x'] = -pm.pos_Y.values * PIXEL_SPACING_IN_MM
     pm['y'] = pm.pos_X.values * PIXEL_SPACING_IN_MM
 
-    pm['azimuth'] = np.rad2deg(
-        np.arctan(pm.x / FOCAL_LENGTH_MM) * (1 + DISTORTION_SLOPE)
+    pm['x_angle'] = np.rad2deg(
+        np.arctan(pm.x / FOCAL_LENGTH_MM) * 
+        (1 + PINCUSHION_DISTORTION_SLOPE)
     )
-    pm['zenith'] = np.rad2deg(
-        np.arctan(pm.y / FOCAL_LENGTH_MM) * (1 + DISTORTION_SLOPE)
+    pm['y_angle'] = np.rad2deg(
+        np.arctan(pm.y / FOCAL_LENGTH_MM) * 
+        (1 + PINCUSHION_DISTORTION_SLOPE)
     )
 
     return pm
 
 
 FOV_RADIUS = np.hypot(
-    get_pixel_dataframe().azimuth, get_pixel_dataframe().zenith
+    get_pixel_dataframe().x_angle, get_pixel_dataframe().y_angle
 ).max()
 
 
