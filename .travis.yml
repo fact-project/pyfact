@@ -36,6 +36,3 @@ deploy:
       branch: master
       tags: true
       condition: $TRAVIS_PYTHON_VERSION = "3.5"
-
-after_deploy:
-  - ./.upload_docs.sh
