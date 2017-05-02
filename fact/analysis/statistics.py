@@ -1,6 +1,46 @@
 import numpy as np
 
 
+def power_law(energy, phi_0, gamma):
+    r'''
+    Simple power law
+
+    .. math::
+        \phi = \phi_0 \cdot E ^ \gamma
+
+    Parameters
+    ----------
+    energy: number or array-like
+        energy points to evaluate
+    phi_0: float
+        Flux normalization
+    gamma: float
+        Spectral index
+    '''
+    return phi_0 * energy ** gamma
+
+
+def curved_power_law(energy, phi_0, a, b):
+    r'''
+    Curved power law
+
+    .. math::
+        \phi = \phi_0 \cdot E ^ {a - b \cdot \log(E)}
+
+    Parameters
+    ----------
+    energy: number or array-like
+        energy points to evaluate
+    phi_0: float
+        Flux normalization
+    a: float
+        Parameter `a`  of the curved power law
+    b: float
+        Parameter `b` of the curved power law
+    '''
+    return phi_0 * energy ** (a + b * np.log10(energy))
+
+
 def li_ma_significance(n_on, n_off, alpha=0.2):
     '''
     Calculate the Li&Ma significance for given
@@ -39,3 +79,71 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
         return significance[0]
 
     return significance
+
+
+def calc_weight_simple_to_curved(energy, gamma, a, b):
+    '''
+    Reweigt simulated events from a simulated power law with
+    spectral index `gamma` to a curved power law with parameters `a` and `b`
+
+    Parameters
+    ----------
+    energy: float or array-like
+        Energy of the events
+    gamma: float
+        Spectral index of the simulated power law
+    a: float
+        Parameter `a` of the target curved power law
+    b: float
+        Parameter `b` of the target curved power law
+    '''
+    return energy ** (-gamma + a + b * np.log10(energy))
+
+
+def calc_weight_change_index(energy, simulated_gamma, target_gamma):
+    '''
+    Reweigt simulated events from a simulated power law with
+    spectral index `gamma` to a curved power law with parameters `a` and `b`
+
+    Parameters
+    ----------
+    energy: float or array-like
+        Energy of the events
+    simulated_gamma: float
+        Spectral index of the simulated power law
+    target_gamma: float
+        Spectral index of the target power law
+    '''
+    return energy ** (target_gamma - simulated_gamma)
+
+
+def mc_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
+    '''
+    Calculate the equivalent observation time for a gamma montecarlo set
+
+    Parameters
+    ----------
+    n_events: int
+        Number of simulated events
+    gamma: float
+        Spectral index of the simulated power law
+    phi_0: float
+        Flux normalization of the simulated power law
+    max_impact: float
+        Maximal simulated impact
+    e_min: float
+        Mimimal simulated energy
+    e_max: float
+        Maximal simulated energy
+    '''
+    if gamma >= -1:
+        raise ValueError('gamma must be < -1')
+
+    numerator = n_events * (gamma + 1)
+
+    t1 = phi_0 * max_impact**2 * np.pi
+    t2 = e_max**(gamma + 1) - e_min**(gamma + 1)
+
+    denominator = t1 * t2
+
+    return numerator / denominator
