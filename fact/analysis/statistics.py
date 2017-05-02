@@ -164,14 +164,16 @@ def calc_proton_obstime(n_events, gamma, max_impact, viewcone, e_min, e_max):
     viewcone: float
         Viewcone in degrees
     e_min: float
-        Mimimal simulated energy
+        Mimimal simulated energy in GeV
     e_max: float
-        Maximal simulated energy
+        Maximal simulated energy in GeV
     '''
-    numerator = n_events * (1 - gamma)
-    area = np.pi * max_impact**2
-    solid_angle = 2 * np.pi * (1 - np.cos(np.rad2deg(viewcone)))
+    N0 = 1.8e4
 
-    denominator = area * solid_angle * (e_max**(1 - gamma) - e_min**(1 - gamma))
+    area = np.pi * max_impact**2
+    solid_angle = 2 * np.pi * (1 - np.cos(np.deg2rad(viewcone)))
+
+    numerator = n_events * (1 - gamma)
+    denominator = N0 * area * solid_angle * (e_max**(1 - gamma) - e_min**(1 - gamma))
 
     return numerator / denominator
