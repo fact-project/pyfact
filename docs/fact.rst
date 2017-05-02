@@ -11,65 +11,43 @@ Subpackages
 
 .. toctree::
 
+    fact.analysis
     fact.auxservices
     fact.credentials
     fact.factdb
+    fact.instrument
     fact.plotting
     fact.slowdata
 
 Submodules
 ----------
 
-fact.analysis module
---------------------
-
-.. automodule:: fact.analysis
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-fact.encrypt_credentials module
--------------------------------
+fact\.encrypt\_credentials module
+---------------------------------
 
 .. automodule:: fact.encrypt_credentials
     :members:
     :undoc-members:
     :show-inheritance:
 
-fact.geometry module
---------------------
-
-.. automodule:: fact.geometry
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-fact.io module
---------------
+fact\.io module
+---------------
 
 .. automodule:: fact.io
     :members:
     :undoc-members:
     :show-inheritance:
 
-fact.pixels module
-------------------
-
-.. automodule:: fact.pixels
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-fact.qla module
----------------
+fact\.qla module
+----------------
 
 .. automodule:: fact.qla
     :members:
     :undoc-members:
     :show-inheritance:
 
-fact.time module
-----------------
+fact\.time module
+-----------------
 
 .. automodule:: fact.time
     :members:

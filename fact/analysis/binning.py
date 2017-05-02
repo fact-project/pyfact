@@ -1,46 +1,8 @@
 import pandas as pd
-import numpy as np
 import datetime
+import numpy as np
 
-
-def li_ma_significance(n_on, n_off, alpha=0.2):
-    '''
-    Calculate the Li&Ma significance for given
-    observations data
-
-    Parameters
-    ----------
-    n_on: integer or array like
-        Number of events for the on observations
-    n_off: integer of array like
-        Number of events for the off observations
-    alpha: float
-        Scaling factor for the off observations, for wobble observations
-        this is 1 / number of off regions
-    '''
-
-    scalar = np.isscalar(n_on)
-
-    n_on = np.array(n_on, copy=False, ndmin=1)
-    n_off = np.array(n_off, copy=False, ndmin=1)
-
-    with np.errstate(divide='ignore', invalid='ignore'):
-        p_on = n_on / (n_on + n_off)
-        p_off = n_off / (n_on + n_off)
-
-        t1 = n_on * np.log(((1 + alpha) / alpha) * p_on)
-        t2 = n_off * np.log((1 + alpha) * p_off)
-
-        ts = (t1 + t2)
-        significance = np.sqrt(ts * 2)
-
-    significance[np.isnan(significance)] = 0
-    significance[n_on < alpha * n_off] = 0
-
-    if scalar:
-        return significance[0]
-
-    return significance
+from .statistics import li_ma_significance
 
 
 def ontime_binning(runs, bin_width_minutes=20):
@@ -90,12 +52,15 @@ def qla_binning(data, bin_width_minutes=20):
     bin_number = 0
     ontime_sum = 0
     bins = []
+
     for key, row in data.iterrows():
         if ontime_sum + row.fOnTimeAfterCuts > bin_width_minutes * 60:
             bin_number += 1
             ontime_sum = 0
+
         bins.append(bin_number)
         ontime_sum += row['ontime']
+
     return pd.Series(bins, index=data.index)
 
 
@@ -107,41 +72,51 @@ def groupby_observation_blocks(runs):
     return runs.groupby(observation_blocks)
 
 
+def nightly_binning(runs):
+    nights = runs['night'].unique()
+    bins = pd.Series(index=runs.index, dtype=int)
+
+    for bin_id, night in enumerate(nights):
+        bins.loc[runs.night == night] = bin_id
+
+    return bins
+
+
 def bin_runs(
         runs,
-        bin_width_minutes,
         alpha=0.2,
-        discard_ontime_fraction=0.9,
         binning_function=ontime_binning,
+        **kwargs
         ):
     '''
-    Bin runs into bins with a desired ontime of `bin_width_minutes`
-    in each bin.
-    A new bin is created if either a bin would have more ontime
-    than `bin_width_minutes` or `run_start` of the next run is
-    more than `bin_width_minutes` after `run_stop` of the last run.
+    Bin runs using `binning_function` to assign bins to
+    the individual runs.
+    Calculates n_on, n_off, ontime, n_excess, excess_rate_per_h,
+    excess_rate_err, li_ma_significance and bin_width
 
     Parameters
     ----------
     runs: pandas.DataFrame
         The analysis results and necessary metadata for each run.
-        Required are: ontime, n_on, n_off, run_start, run_stop, source_name
-    bin_width_minutes: float
-        The desired ontime per bin, note: bins will always have less
-        ontime than bin_width_minutes.
+        Required are: ontime, n_on, n_off, run_start, run_stop, source
+
     alpha: float
         The weight for the off regions, e.g. 1 / number of off regions
-    discard_ontime_fraction: float or None
-        bins with less than discard_ontime_fraction * bin_width_minutes ontime
-        are discarded
+
     binning_function: function
-        A function that takes the run data and a desired bin width
-        in minutes and returns a Series of bin ids
+        A function that takes the run df and returns a
+        pd.Series containing bin ids with the index of the origininal
+        dataframe
+
+    All `**kwargs` are passed to the binning function
     '''
+    runs = runs.sort_values(by='run_start')
     sources = []
-    for source_name, df in runs.groupby('source_name'):
+    for source, df in runs.groupby('source'):
+
         df = df.copy()
-        df['bin'] = binning_function(df, bin_width_minutes)
+        df['bin'], df['valid_bins'] = binning_function(df, **kwargs)
+
         binned = df.groupby('bin').aggregate({
             'ontime': 'sum',
             'n_on': 'sum',
@@ -149,24 +124,24 @@ def bin_runs(
             'run_start': 'min',
             'run_stop': 'max',
         })
+
         binned['n_excess'] = binned.n_on - binned.n_off * alpha
         binned['excess_rate_per_h'] = binned.n_excess / binned.ontime * 3600
+
         binned['time_width'] = binned.run_stop - binned.run_start
         binned['time_mean'] = binned.run_start + 0.5 * binned.time_width
+
         binned['excess_rate_err'] = np.sqrt(binned.n_on + alpha**2 * binned.n_off)
         binned['excess_rate_err'] /= binned.ontime / 3600
+
         binned['significance'] = li_ma_significance(
             binned.n_on, binned.n_off, 0.2
         )
-        binned['source_name'] = source_name
+
+        binned['source'] = source
         binned['night'] = (
             binned.time_mean - pd.Timedelta(hours=12)
         ).dt.strftime('%Y%m%d').astype(int)
-
-        if discard_ontime_fraction is not None:
-            binned = binned.query(
-                'ontime >= {}'.format(discard_ontime_fraction * 60 * bin_width_minutes)
-            )
 
         sources.append(binned)
 

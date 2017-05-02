@@ -5,7 +5,7 @@ from matplotlib.figure import Figure
 import numpy as np
 import os
 from .utils import calc_linewidth
-from ..pixels import get_pixel_coords
+from ..instrument import get_pixel_coords
 from . import camera
 
 import tkinter as tk

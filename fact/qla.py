@@ -38,7 +38,7 @@ def get_qla_data(
         QLA.fontimeaftercuts.alias('ontime'),
         RunInfo.frunstart.alias('run_start'),
         RunInfo.frunstop.alias('run_stop'),
-        Source.fsourcename.alias('source_name'),
+        Source.fsourcename.alias('source'),
         Source.fsourcekey.alias('source_key'),
     )
 
