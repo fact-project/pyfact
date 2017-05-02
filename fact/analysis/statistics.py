@@ -17,7 +17,7 @@ def power_law(energy, phi_0, gamma):
     gamma: float
         Spectral index
     '''
-    return phi_0 * energy ** gamma
+    return phi_0 * energy**(-gamma)
 
 
 def curved_power_law(energy, phi_0, a, b):
@@ -97,7 +97,7 @@ def calc_weight_simple_to_curved(energy, gamma, a, b):
     b: float
         Parameter `b` of the target curved power law
     '''
-    return energy ** (-gamma + a + b * np.log10(energy))
+    return energy ** (gamma + a + b * np.log10(energy))
 
 
 def calc_weight_change_index(energy, simulated_gamma, target_gamma):
@@ -139,10 +139,10 @@ def calc_gamma_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
     if gamma >= -1:
         raise ValueError('gamma must be < -1')
 
-    numerator = n_events * (gamma + 1)
+    numerator = n_events * (1 - gamma)
 
     t1 = phi_0 * max_impact**2 * np.pi
-    t2 = e_max**(gamma + 1) - e_min**(gamma + 1)
+    t2 = e_max**(1 - gamma) - e_min**(1 - gamma)
 
     denominator = t1 * t2
 
@@ -168,11 +168,10 @@ def calc_proton_obstime(n_events, gamma, max_impact, viewcone, e_min, e_max):
     e_max: float
         Maximal simulated energy
     '''
-    N0 = 1.8e4
     numerator = n_events * (1 - gamma)
     area = np.pi * max_impact**2
     solid_angle = 2 * np.pi * (1 - np.cos(np.rad2deg(viewcone)))
 
-    denominator = N0 * area * solid_angle * (e_max**(1 - gamma) - e_min**(1 - gamma))
+    denominator = area * solid_angle * (e_max**(1 - gamma) - e_min**(1 - gamma))
 
     return numerator / denominator
