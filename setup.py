@@ -18,6 +18,7 @@ setup(
         'fact.auxservices',
         'fact.factdb',
         'fact.analysis',
+        'fact.instrument',
     ],
     package_data={
         '': ['resources/*', 'credentials/credentials.encrypted']
