@@ -17,14 +17,6 @@ fact\.instrument\.constants module
     :undoc-members:
     :show-inheritance:
 
-fact\.instrument\.geometry module
----------------------------------
-
-.. automodule:: fact.instrument.geometry
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 fact\.instrument\.camera module
 -------------------------------
 
