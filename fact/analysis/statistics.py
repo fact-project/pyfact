@@ -117,7 +117,7 @@ def calc_weight_change_index(energy, simulated_gamma, target_gamma):
     return energy ** (target_gamma - simulated_gamma)
 
 
-def mc_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
+def calc_gamma_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
     '''
     Calculate the equivalent observation time for a gamma montecarlo set
 
@@ -145,5 +145,34 @@ def mc_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
     t2 = e_max**(gamma + 1) - e_min**(gamma + 1)
 
     denominator = t1 * t2
+
+    return numerator / denominator
+
+
+def calc_proton_obstime(n_events, gamma, max_impact, viewcone, e_min, e_max):
+    '''
+    Calculate the equivalent observation time for a proton montecarlo set
+
+    Parameters
+    ----------
+    n_events: int
+        Number of simulated events
+    gamma: float
+        Spectral index of the simulated power law
+    max_impact: float
+        Maximal simulated impact
+    viewcone: float
+        Viewcone in degrees
+    e_min: float
+        Mimimal simulated energy
+    e_max: float
+        Maximal simulated energy
+    '''
+    N0 = 1.8e4
+    numerator = n_events * (1 - gamma)
+    area = np.pi * max_impact**2
+    solid_angle = 2 * np.pi * (1 - np.cos(np.rad2deg(viewcone)))
+
+    denominator = N0 * area * solid_angle * (e_max**(1 - gamma) - e_min**(1 - gamma))
 
     return numerator / denominator
