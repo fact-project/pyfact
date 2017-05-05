@@ -19,8 +19,11 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
 
     scalar = np.isscalar(n_on)
 
-    n_on = np.array(n_on, copy=False, ndmin=1)
-    n_off = np.array(n_off, copy=False, ndmin=1)
+    n_on = np.asanyarray(n_on)
+    n_off = np.asanyarray(n_off)
+
+    if scalar and n_on < alpha * n_off:
+        return 0.0
 
     with np.errstate(divide='ignore', invalid='ignore'):
         p_on = n_on / (n_on + n_off)
@@ -32,10 +35,8 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
         ts = (t1 + t2)
         significance = np.sqrt(ts * 2)
 
-    significance[np.isnan(significance)] = 0
-    significance[n_on < alpha * n_off] = 0
-
-    if scalar:
-        return significance[0]
+    if not scalar:
+        significance[np.isnan(significance)] = 0
+        significance[n_on < alpha * n_off] = 0
 
     return significance
