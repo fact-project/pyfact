@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import re
 
 from .statistics import li_ma_significance
 
@@ -7,6 +8,9 @@ default_theta_off_keys = tuple('Theta_Off_{}_deg'.format(i) for i in range(1, 6)
 default_prediction_off_keys = tuple(
     'background_prediction_{}'.format(i) for i in range(1, 6)
 )
+
+
+off_key_re = re.compile('([a-zA-z1-9]+)_Off_([0-9])')
 
 
 def calc_run_summary_source_independent(
@@ -102,10 +106,16 @@ def split_on_off_source_independent(
 
     on_data = events.query('{} <= {}'.format(theta_key, theta_cut))
 
-    off_data = pd.concat([
-        events.query('{} <= {}'.format(theta_off_key, theta_cut))
-        for theta_off_key in theta_off_keys
-    ])
+    off_dfs = []
+    for region, theta_off_key in enumerate(theta_off_keys, start=1):
+        off_df = events.query('{} <= {}'.format(theta_off_key, theta_cut))
+
+        off_df['off_region'] = region
+        drop_off_columns(off_df, region, inplace=True)
+
+        off_dfs.append(off_df)
+
+    off_data = pd.concat(off_dfs)
 
     return on_data, off_data
 
@@ -172,6 +182,8 @@ def split_on_off_source_dependent(
         ):
     '''
     Split events dataframe into on and off region
+    For the off regions, keys are renamed to their "on" equivalents
+    and the "off" keys are dropped.
 
     Parameters
     ----------
@@ -185,11 +197,52 @@ def split_on_off_source_dependent(
     off_prediction_keys: list[str]
         Iterable of keys to the classifier predictions for the off regions
     '''
-    on_data = events.query('{} >= {}'.format(on_prediction_key, prediction_threshold)).copy()
+    on_data = events.query('{} >= {}'.format(
+        on_prediction_key, prediction_threshold)
+    ).copy()
 
-    off_data = pd.concat([
-        events.query('{} >= {}'.format(off_key, prediction_threshold)).copy()
-        for off_key in off_prediction_keys
-    ])
+    off_dfs = []
+    for region, off_key in enumerate(off_prediction_keys, start=1):
+        off_df = events.query('{} >= {}'.format(
+            off_key, prediction_threshold)
+        ).copy()
+
+        off_df['off_region'] = region
+
+        off_df.drop(on_prediction_key, axis=1, inplace=True)
+        off_df[on_prediction_key] = off_df[off_key]
+        off_df.drop(off_key, axis=1, inplace=True)
+
+        drop_off_columns(off_df, region, inplace=True)
+
+        off_dfs.append(off_df)
+
+    off_data = pd.concat(off_dfs)
 
     return on_data, off_data
+
+
+def drop_off_columns(df, off_region, inplace=False):
+    '''
+    Replace the "On" column with the column
+    of the respective off region.
+    For example for `off_region = 1`, `Theta` is replaced by
+    Theta_Off_1 and all Theta_Off_<N> columns are dropped.
+    Same for all other columns, containing the pattern `_Off_<N>`
+    '''
+    if inplace is False:
+        df = df.copy()
+
+    for col in df.columns:
+        m = off_key_re.match(col)
+        if m:
+            on_key, key_region = m.groups()
+            # if
+            if int(key_region) == off_region:
+                df.drop(on_key, axis=1, inplace=True)
+                df[on_key] = df[col]
+
+            df.drop(col, axis=1, inplace=True)
+
+    if inplace is False:
+        return df
