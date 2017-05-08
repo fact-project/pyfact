@@ -41,6 +41,7 @@ setup(
         'h5py',
         'wrapt',
         'tables',  # pytables in anaconda
+        'python-dateutil',
     ],
     zip_safe=False,
 )
