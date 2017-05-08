@@ -2,7 +2,7 @@ from .time import fjd, iso2dt, run2dt, facttime, night, night_integer, datestr
 from . import plotting
 from . import auxservices
 
-__version__ = '0.10.1'
+__version__ = '0.10.2'
 
 __all__ = [
     'fjd',
