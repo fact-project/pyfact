@@ -56,7 +56,8 @@ def write_data(df, file_path, key='data', use_hp5y=False, **kwargs):
 def to_native_byteorder(array):
     ''' Convert numpy array to native byteorder '''
 
-    if array.dtype.byteorder not in ('=', native_byteorder):
+    # '|' : not-applicable, '=': native
+    if array.dtype.byteorder not in ('|', '=', native_byteorder):
         return array.byteswap().newbyteorder()
 
     return array
