@@ -102,8 +102,7 @@ def calc_weight_simple_to_curved(energy, gamma, a, b):
 
 def calc_weight_change_index(energy, simulated_gamma, target_gamma):
     '''
-    Reweigt simulated events from a simulated power law with
-    spectral index `gamma` to a curved power law with parameters `a` and `b`
+    Reweigt simulated events from one power law index to another
 
     Parameters
     ----------
