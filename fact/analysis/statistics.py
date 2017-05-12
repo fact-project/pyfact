@@ -1,44 +1,44 @@
 import numpy as np
 
 
-def power_law(energy, phi_0, gamma):
+def power_law(energy, flux_normalization, spectral_index):
     r'''
     Simple power law
 
     .. math::
-        \phi = \phi_0 \cdot E ^ \gamma
+        \phi = \phi_0 \cdot E ^{-\gamma}
 
     Parameters
     ----------
     energy: number or array-like
         energy points to evaluate
-    phi_0: float
+    flux_normalization: float
         Flux normalization
-    gamma: float
+    spectral_index: float
         Spectral index
     '''
-    return phi_0 * energy**(-gamma)
+    return flux_normalization * energy**(-spectral_index)
 
 
-def curved_power_law(energy, phi_0, a, b):
+def curved_power_law(energy, flux_normalization, a, b):
     r'''
     Curved power law
 
     .. math::
-        \phi = \phi_0 \cdot E ^ {a - b \cdot \log(E)}
+        \phi = \flux_normalization \cdot E ^ {a - b \cdot \log(E)}
 
     Parameters
     ----------
     energy: number or array-like
         energy points to evaluate
-    phi_0: float
+    flux_normalization: float
         Flux normalization
     a: float
         Parameter `a`  of the curved power law
     b: float
         Parameter `b` of the curved power law
     '''
-    return phi_0 * energy ** (a + b * np.log10(energy))
+    return flux_normalization * energy ** (a + b * np.log10(energy))
 
 
 def li_ma_significance(n_on, n_off, alpha=0.2):
@@ -81,52 +81,52 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
     return significance
 
 
-def calc_weight_simple_to_curved(energy, gamma, a, b):
+def calc_weight_simple_to_curved(energy, spectral_index, a, b):
     '''
-    Reweigt simulated events from a simulated power law with
-    spectral index `gamma` to a curved power law with parameters `a` and `b`
+    Reweight simulated events from a simulated power law with
+    spectral index `spectral_index` to a curved power law with parameters `a` and `b`
 
     Parameters
     ----------
     energy: float or array-like
         Energy of the events
-    gamma: float
+    spectral_index: float
         Spectral index of the simulated power law
     a: float
         Parameter `a` of the target curved power law
     b: float
         Parameter `b` of the target curved power law
     '''
-    return energy ** (gamma + a + b * np.log10(energy))
+    return energy ** (spectral_index + a + b * np.log10(energy))
 
 
-def calc_weight_change_index(energy, simulated_gamma, target_gamma):
+def calc_weight_change_index(energy, simulated_index, target_index):
     '''
-    Reweigt simulated events from one power law index to another
+    Reweight simulated events from one power law index to another
 
     Parameters
     ----------
     energy: float or array-like
         Energy of the events
-    simulated_gamma: float
+    simulated_index: float
         Spectral index of the simulated power law
-    target_gamma: float
+    target_index: float
         Spectral index of the target power law
     '''
-    return energy ** (target_gamma - simulated_gamma)
+    return energy ** (target_index - simulated_index)
 
 
-def calc_gamma_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
+def calc_gamma_obstime(n_events, spectral_index, flux_normalization, max_impact, e_min, e_max):
     '''
-    Calculate the equivalent observation time for a gamma montecarlo set
+    Calculate the equivalent observation time for a spectral_index montecarlo set
 
     Parameters
     ----------
     n_events: int
         Number of simulated events
-    gamma: float
+    spectral_index: float
         Spectral index of the simulated power law
-    phi_0: float
+    flux_normalization: float
         Flux normalization of the simulated power law
     max_impact: float
         Maximal simulated impact
@@ -135,20 +135,38 @@ def calc_gamma_obstime(n_events, gamma, phi_0, max_impact, e_min, e_max):
     e_max: float
         Maximal simulated energy
     '''
-    if gamma >= -1:
-        raise ValueError('gamma must be < -1')
+    if spectral_index >= -1:
+        raise ValueError('spectral_index must be < -1')
 
-    numerator = n_events * (1 - gamma)
+    numerator = n_events * (1 - spectral_index)
 
-    t1 = phi_0 * max_impact**2 * np.pi
-    t2 = e_max**(1 - gamma) - e_min**(1 - gamma)
+    t1 = flux_normalization * max_impact**2 * np.pi
+    t2 = e_max**(1 - spectral_index) - e_min**(1 - spectral_index)
 
     denominator = t1 * t2
 
     return numerator / denominator
 
 
-def calc_proton_obstime(n_events, gamma, max_impact, viewcone, e_min, e_max):
+def power_law_integral(flux_normalisation, spectral_index, e_min, e_max):
+    '''
+    Return the integral of a power_law with normalisation
+    `flux_normalization` and index `spectral_index`
+    between `e_min` and `e_max`
+    '''
+    int_index = 1 - spectral_index
+    return flux_normalisation / int_index * (e_max**(int_index) - e_min**(int_index))
+
+
+def calc_proton_obstime(
+        n_events,
+        spectral_index,
+        max_impact,
+        viewcone,
+        e_min,
+        e_max,
+        flux_normalization=1.8e4,
+        ):
     '''
     Calculate the equivalent observation time for a proton montecarlo set
 
@@ -156,23 +174,24 @@ def calc_proton_obstime(n_events, gamma, max_impact, viewcone, e_min, e_max):
     ----------
     n_events: int
         Number of simulated events
-    gamma: float
+    spectral_index: float
         Spectral index of the simulated power law
     max_impact: float
-        Maximal simulated impact
+        Maximal simulated impact in m
     viewcone: float
         Viewcone in degrees
     e_min: float
         Mimimal simulated energy in GeV
     e_max: float
         Maximal simulated energy in GeV
+    flux_normalization: float
+        Flux normalisation of the cosmic rays in nucleons / (m² s sr GeV)
+        Default value is (29.2) of
+        http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cosmic-rays.pdf
     '''
-    N0 = 1.8e4
-
     area = np.pi * max_impact**2
     solid_angle = 2 * np.pi * (1 - np.cos(np.deg2rad(viewcone)))
 
-    numerator = n_events * (1 - gamma)
-    denominator = N0 * area * solid_angle * (e_max**(1 - gamma) - e_min**(1 - gamma))
+    expected_integral_flux = power_law_integral(flux_normalization, 2.7, e_min, e_max)
 
-    return numerator / denominator
+    return n_events / area / solid_angle / expected_integral_flux
