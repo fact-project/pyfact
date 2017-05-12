@@ -115,7 +115,7 @@ def bin_runs(
     for source, df in runs.groupby('source'):
 
         df = df.copy()
-        df['bin'], df['valid_bins'] = binning_function(df, **kwargs)
+        df['bin'] = binning_function(df, **kwargs)
 
         binned = df.groupby('bin').aggregate({
             'ontime': 'sum',
