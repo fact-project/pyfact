@@ -1,6 +1,40 @@
 import numpy as np
 
 
+def random_power(spectral_index, e_min, e_max, size):
+    r'''
+    Draw random numbers from a power law distribution
+
+    .. math::
+        f(E) =
+        \frac{1 - \gamma}
+        {E_{\max}^{1 - \gamma} - E_{\min}^{1 - \gamma}}
+        E^{-\gamma}
+
+    Parameters
+    ----------
+    spectral_index: float
+        The differential spectral index of the power law
+    e_min: float
+        lower energy border
+    e_max: float
+        upper energy border, can be np.inf
+    size: int or tuple[int]
+        Number of events to draw or a shape like (100, 2)
+    '''
+    assert spectral_index > 1.0, 'spectral_index must be > 1.0'
+    u = np.random.uniform(0, 1, size)
+
+    exponent = 1 - spectral_index
+
+    if e_max == np.inf:
+        diff = -e_min**exponent
+    else:
+        diff = e_max**exponent - e_min**exponent
+
+    return (diff * u + e_min**exponent) ** (1 / exponent)
+
+
 def power_law(energy, flux_normalization, spectral_index):
     r'''
     Simple power law
@@ -25,7 +59,7 @@ def curved_power_law(energy, flux_normalization, a, b):
     Curved power law
 
     .. math::
-        \phi = \flux_normalization \cdot E ^ {a - b \cdot \log(E)}
+        \phi = \phi_0 \cdot E ^ {a - b \cdot \log(E)}
 
     Parameters
     ----------
