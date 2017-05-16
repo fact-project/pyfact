@@ -1,5 +1,7 @@
 from setuptools import setup
-from fact import __version__
+
+with open('fact/VERSION', 'r') as f:
+    __version__ = f.read().strip()
 
 
 setup(
@@ -21,7 +23,11 @@ setup(
         'fact.instrument',
     ],
     package_data={
-        '': ['resources/*', 'credentials/credentials.encrypted']
+        '': [
+            'VERSION',
+            'resources/*',
+            'credentials/credentials.encrypted',
+        ]
     },
     tests_require=['pytest>=3.0.0'],
     setup_requires=['pytest-runner'],
