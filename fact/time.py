@@ -52,6 +52,23 @@ def datetime_to_mjd(dt):
     return (dt - MJD_EPOCH).total_seconds() / 24 / 3600
 
 
+def mjd_to_datetime(mjd):
+    # handle numpy arrays
+    if isinstance(mjd, np.ndarray):
+        delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+        return MJD_EPOCH_NUMPY + delta
+
+    if isinstance(mjd, (int, float)):
+        delta = timedelta(microseconds=mjd * 24 * 3600 * 1e6)
+        return MJD_EPOCH + delta
+
+    if isinstance(mjd, pd.Series):
+        delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+        return MJD_EPOCH + delta
+
+    raise NotImplementedError('Conversion not implemtened for "{}"'.format(type(mjd)))
+
+
 def fjd(datetime_inst):
     ''' convert datetime instance to FJD
     '''
