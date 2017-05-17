@@ -18,15 +18,38 @@ going by the name of FACT Julain Date (FJD).
 from __future__ import print_function, division
 import time
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 import dateutil
 import dateutil.parser
+import numpy as np
 
 import pandas as pd
 
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
+
+MJD_EPOCH = datetime(1858, 11, 17, 0, tzinfo=timezone.utc)
+MJD_EPOCH_NUMPY = np.array(MJD_EPOCH.timestamp()).astype('datetime64[s]')
+
+
+def datetime_to_mjd(dt):
+    # handle numpy arrays
+    if isinstance(dt, np.ndarray):
+        mjd_ns = (dt - MJD_EPOCH_NUMPY).astype('timedelta64[ns]').astype(float)
+        print(mjd_ns)
+        return mjd_ns / 1e9 / 3600 / 24
+
+    # assume datetimes without timezone are utc
+    if isinstance(dt, datetime):
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+
+    elif isinstance(dt, (pd.Series, pd.DatetimeIndex)):
+        if dt.tz is None:
+            dt.tz = timezone.utc
+
+    return (dt - MJD_EPOCH).total_seconds() / 24 / 3600
 
 
 def fjd(datetime_inst):
