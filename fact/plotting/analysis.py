@@ -6,26 +6,55 @@ import numpy as np
 from ..time import MJD_EPOCH
 
 
+# Matplotlib uses ordinal for internal date represantion
+# to get from ordinal to mjd, we shift by the ordinal value
+# of the MJD_EPOCH
 MJD_AXES_TRANSFORM = (
     mtransforms.Affine2D().translate(MJD_EPOCH.toordinal(), 0)
 )
 
 
 def create_datetime_mjd_axes(fig=None):
+    '''
+    Create a plot with two x-axis, bottom axis using
+    dates, top axis using mjd.
+
+    Parameters
+    ----------
+    fig: matplotlib.Figure or None
+        the figure to use, if None use plt.gcf()
+
+    Returns
+    -------
+    ax: mpl_toolkits.axes_grid1.parasite_axes.SubplotHost
+        The ax for the dates
+    mjd_ax: mpl_toolkits.axes_grid1.parasite_axes.ParasiteAxis
+        The axis with the mjd axis
+
+    '''
     if fig is None:
         fig = plt.gcf()
 
     ax = SubplotHost(fig, 1, 1, 1)
 
+    # The second axis shows MJD if the first axis uses dates
     mjd_ax = ax.twin(MJD_AXES_TRANSFORM)
     mjd_ax.set_viewlim_mode('transform')
+
+    # disable unwanted axes
     mjd_ax.axis['right'].toggle(ticklabels=False, ticks=False)
     mjd_ax.axis['bottom'].toggle(ticklabels=False, ticks=False)
 
+    # add label
+    mjd_ax.axis['top'].set_label('MJD')
+
+    # Deactivate offset
     mjd_ax.ticklabel_format(useOffset=False)
 
     fig.add_subplot(ax)
-    return ax, None
+    fig.autofmt_xdate()
+
+    return ax, mjd_ax
 
 
 def plot_excess_rate(binned_runs, outputfile=None):
