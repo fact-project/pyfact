@@ -3,40 +3,12 @@ from matplotlib.dates import DateFormatter
 import matplotlib.transforms as mtransforms
 from mpl_toolkits.axes_grid1.parasite_axes import SubplotHost
 import numpy as np
-from ..time import datetime_to_mjd, mjd_to_datetime
+from ..time import MJD_EPOCH
 
 
-class DatetimeToMJDTransform(mtransforms.Transform):
-    input_dims = 1
-    output_dims = 1
-    is_separable = False
-    has_inverse = True
-
-    def transform(self, tr):
-        print(self.__class__.__name__, 'transform')
-        return datetime_to_mjd(tr)
-
-    def inverted(self):
-        return MJDToDatetimeTransform()
-
-
-class MJDToDatetimeTransform(mtransforms.Transform):
-    input_dims = 1
-    output_dims = 1
-    is_separable = False
-    has_inverse = True
-
-    def transform(self, tr):
-        print(self.__class__.__name__, 'transform')
-        return mjd_to_datetime(tr)
-
-    def inverted(self):
-        return DatetimeToMJDTransform()
-
-
-MJD_AXES_TRANSFORM = DatetimeToMJDTransform()
-
-# MJD_AXES_TRANSFORM = DatetimeToMJDTransform()
+MJD_AXES_TRANSFORM = (
+    mtransforms.Affine2D().translate(MJD_EPOCH.toordinal(), 0)
+)
 
 
 def create_datetime_mjd_axes(fig=None):
@@ -45,10 +17,12 @@ def create_datetime_mjd_axes(fig=None):
 
     ax = SubplotHost(fig, 1, 1, 1)
 
-    # mjd_ax = ax.twin(MJD_AXES_TRANSFORM)
-    # mjd_ax.set_viewlim_mode('transform')
-    # mjd_ax.axis['right'].toggle(ticklabels=False, ticks=False)
-    # mjd_ax.axis['bottom'].toggle(ticklabels=False, ticks=False)
+    mjd_ax = ax.twin(MJD_AXES_TRANSFORM)
+    mjd_ax.set_viewlim_mode('transform')
+    mjd_ax.axis['right'].toggle(ticklabels=False, ticks=False)
+    mjd_ax.axis['bottom'].toggle(ticklabels=False, ticks=False)
+
+    mjd_ax.ticklabel_format(useOffset=False)
 
     fig.add_subplot(ax)
     return ax, None
