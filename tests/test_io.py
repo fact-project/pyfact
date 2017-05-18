@@ -92,6 +92,32 @@ def test_to_h5py_append():
             assert all(df_read[col] == df_written[col])
 
 
+def test_to_h5py_append_second_group():
+    from fact.io import to_h5py, read_h5py
+
+    df1 = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+    df2 = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8')
+    })
+
+    with tempfile.NamedTemporaryFile() as f:
+        to_h5py(f.name, df1, key='g1', index=False)
+        to_h5py(f.name, df2, key='g2', index=False)
+
+        df_g1 = read_h5py(f.name, key='g1')
+        df_g2 = read_h5py(f.name, key='g2')
+
+        for col in df_g1.columns:
+            assert all(df_g1[col] == df1[col])
+
+        for col in df_g2.columns:
+            assert all(df_g2[col] == df2[col])
+
+
 def test_write_data_csv():
     from fact.io import write_data
 
