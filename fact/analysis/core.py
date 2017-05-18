@@ -10,7 +10,7 @@ default_prediction_off_keys = tuple(
 )
 
 
-off_key_re = re.compile('([a-zA-z1-9]+)_Off_([0-9])')
+off_key_re = re.compile('([a-zA-z1-9]+)_Off_([0-9])(_deg)?')
 
 
 def calc_run_summary_source_independent(
@@ -108,7 +108,9 @@ def split_on_off_source_independent(
 
     off_dfs = []
     for region, theta_off_key in enumerate(theta_off_keys, start=1):
-        off_df = events.query('{} <= {}'.format(theta_off_key, theta_cut))
+        off_df = events.query('{} <= {}'.format(
+            theta_off_key, theta_cut)
+        ).copy()
 
         off_df['off_region'] = region
         drop_off_columns(off_df, region, inplace=True)
@@ -236,8 +238,10 @@ def drop_off_columns(df, off_region, inplace=False):
     for col in df.columns:
         m = off_key_re.match(col)
         if m:
-            on_key, key_region = m.groups()
-            # if
+            on_key, key_region, deg = m.groups()
+            if deg:
+                on_key += deg
+
             if int(key_region) == off_region:
                 df.drop(on_key, axis=1, inplace=True)
                 df[on_key] = df[col]
