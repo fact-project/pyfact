@@ -14,7 +14,7 @@ MJD_AXES_TRANSFORM = (
 )
 
 
-def create_datetime_mjd_axes(fig=None):
+def create_datetime_mjd_axes(fig=None, *args, **kwargs):
     '''
     Create a plot with two x-axis, bottom axis using
     dates, top axis using mjd.
@@ -35,7 +35,10 @@ def create_datetime_mjd_axes(fig=None):
     if fig is None:
         fig = plt.gcf()
 
-    ax = SubplotHost(fig, 1, 1, 1)
+    if args == []:
+        ax = SubplotHost(fig, 1, 1, 1, **kwargs)
+    else:
+        ax = SubplotHost(fig, *args, **kwargs)
 
     # The second axis shows MJD if the first axis uses dates
     mjd_ax = ax.twin(MJD_AXES_TRANSFORM)
@@ -44,20 +47,20 @@ def create_datetime_mjd_axes(fig=None):
     # disable unwanted axes
     mjd_ax.axis['right'].toggle(ticklabels=False, ticks=False)
     mjd_ax.axis['bottom'].toggle(ticklabels=False, ticks=False)
+    mjd_ax.axis['bottom'].toggle(label=False)
 
-    # add label
+    # add/remove label
     mjd_ax.axis['top'].set_label('MJD')
 
     # Deactivate offset
     mjd_ax.ticklabel_format(useOffset=False)
 
     fig.add_subplot(ax)
-    fig.autofmt_xdate()
 
     return ax, mjd_ax
 
 
-def plot_excess_rate(binned_runs, outputfile=None):
+def plot_excess_rate(binned_runs, outputfile=None, mjd=True):
     '''
     Create an excess rate plot from given data
 
@@ -77,14 +80,30 @@ def plot_excess_rate(binned_runs, outputfile=None):
     '''
     fig = plt.figure()
 
-    ax_sig = plt.subplot2grid((8, 1), (6, 0), rowspan=2)
-    ax_rate = plt.subplot2grid((8, 1), (1, 0), rowspan=5, sharex=ax_sig)
+    gridspec = plt.GridSpec(8, 1)
+    spec_sig = gridspec.new_subplotspec((6, 0), rowspan=2)
+    spec_rate = gridspec.new_subplotspec((1, 0), rowspan=5)
+
+    ax_sig = plt.subplot(spec_sig)
+
+    if mjd is True:
+        ax_rate, ax_rate_mjd = create_datetime_mjd_axes(
+            fig, spec_rate, sharex=ax_sig
+        )
+    else:
+        ax_rate = plt.subplot(spec_rate, sharex=ax_sig)
 
     colors = [e['color'] for e in plt.rcParams['axes.prop_cycle']]
 
     labels = []
     plots = []
-    for (name, group), color in zip(binned_runs.groupby('source'), colors):
+
+    groups = list(sorted(
+        binned_runs.groupby('source'),
+        key=lambda g: g[1].time_mean.min()
+    ))
+
+    for (name, group), color in zip(groups, colors):
         if len(group.index) == 0:
             continue
 
@@ -129,7 +148,10 @@ def plot_excess_rate(binned_runs, outputfile=None):
     ax_sig.set_yticks(np.arange(0, ymax + 0.1, ymax // 4 + 1))
 
     plt.setp(ax_rate.get_xticklabels(), visible=False)
+    plt.setp(ax_rate_mjd.get_xticklabels(), visible=False)
     plt.setp(ax_sig.get_xticklabels(), rotation=30, va='top', ha='right')
+
+    ax_rate_mjd.set_xlabel('')
 
     if binned_runs.night.nunique() <= 7:
         ax_sig.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d %H:%M'))
@@ -138,7 +160,13 @@ def plot_excess_rate(binned_runs, outputfile=None):
 
     fig.tight_layout()
 
+    if mjd is True:
+        plt.setp(ax_rate_mjd.get_xticklabels(), visible=True)
+
     if outputfile is not None:
         fig.savefig(outputfile)
 
-    return ax_rate, ax_sig
+    if mjd is True:
+        return ax_rate, ax_sig, ax_rate_mjd
+    else:
+        return ax_rate, ax_sig
