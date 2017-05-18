@@ -37,7 +37,6 @@ def datetime_to_mjd(dt):
     # handle numpy arrays
     if isinstance(dt, np.ndarray):
         mjd_ns = (dt - MJD_EPOCH_NUMPY).astype('timedelta64[ns]').astype(float)
-        print(mjd_ns)
         return mjd_ns / 1e9 / 3600 / 24
 
     # assume datetimes without timezone are utc
@@ -53,11 +52,6 @@ def datetime_to_mjd(dt):
 
 
 def mjd_to_datetime(mjd):
-    # handle numpy arrays
-    if isinstance(mjd, np.ndarray):
-        delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
-        return MJD_EPOCH_NUMPY + delta
-
     if isinstance(mjd, (int, float)):
         delta = timedelta(microseconds=mjd * 24 * 3600 * 1e6)
         return MJD_EPOCH + delta
@@ -66,7 +60,10 @@ def mjd_to_datetime(mjd):
         delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
         return MJD_EPOCH + delta
 
-    raise NotImplementedError('Conversion not implemtened for "{}"'.format(type(mjd)))
+    # other types will be returned as numpy array if possible
+    mjd = np.asanyarray(mjd)
+    delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+    return MJD_EPOCH_NUMPY + delta
 
 
 def fjd(datetime_inst):
