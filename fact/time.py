@@ -29,8 +29,17 @@ import pandas as pd
 
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
 
+UNIX_EPOCH = datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc)
 MJD_EPOCH = datetime(1858, 11, 17, 0, tzinfo=timezone.utc)
 MJD_EPOCH_NUMPY = np.array(MJD_EPOCH.timestamp()).astype('datetime64[s]')
+
+
+def unixtime_to_mjd(unixtime):
+    return (unixtime - (MJD_EPOCH - UNIX_EPOCH).total_seconds()) / 3600 / 24
+
+
+def mjd_to_unixtime(mjd):
+    return (mjd + (MJD_EPOCH - UNIX_EPOCH).total_seconds()) * 3600 * 24
 
 
 def datetime_to_mjd(dt):
