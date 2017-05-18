@@ -224,7 +224,7 @@ def check_extension(file_path, allowed_extensions=allowed_extensions):
         raise IOError('Allowed formats: {}'.format(allowed_extensions))
 
 
-def to_h5py(filename, df, key='data', mode='w', dtypes=None, index=True, **kwargs):
+def to_h5py(filename, df, key='data', mode='a', dtypes=None, index=True, **kwargs):
     '''
     Write pandas dataframe to h5py style hdf5 file
 
@@ -253,7 +253,7 @@ def to_h5py(filename, df, key='data', mode='w', dtypes=None, index=True, **kwarg
         array = change_recarray_dtype(array, dtypes)
 
     with h5py.File(filename, mode=mode) as f:
-        if mode == 'w':
+        if key not in f:
             initialize_h5py(f, array.dtype, key=key, **kwargs)
 
         append_to_h5py(f, array, key=key)
