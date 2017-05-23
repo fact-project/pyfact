@@ -6,11 +6,11 @@ from .statistics import li_ma_significance
 
 default_theta_off_keys = tuple('theta_deg_off_{}'.format(i) for i in range(1, 6))
 default_prediction_off_keys = tuple(
-    'gamma_off_prediction_{}'.format(i) for i in range(1, 6)
+    'gamma_prediction_off_{}'.format(i) for i in range(1, 6)
 )
 
 
-off_key_re = re.compile('([a-zA-z1-9]+)_deg_off_([0-9])?')
+off_key_re = re.compile('([a-zA-z1-9]+_deg)_off_([0-9])?')
 
 
 def calc_run_summary_source_independent(
@@ -21,7 +21,7 @@ def calc_run_summary_source_independent(
         theta_key='theta_deg',
         theta_off_keys=default_theta_off_keys,
         ):
-        
+
     '''
     Calculate run summaries for the given theta^2 and signal prediction cuts.
     This function requires, that no source dependent features,
@@ -239,10 +239,7 @@ def drop_off_columns(df, off_region, inplace=False):
     for col in df.columns:
         m = off_key_re.match(col)
         if m:
-            on_key, key_region, deg = m.groups()
-            if deg:
-                on_key += deg
-
+            on_key, key_region = m.groups()
             if int(key_region) == off_region:
                 df.drop(on_key, axis=1, inplace=True)
                 df[on_key] = df[col]
