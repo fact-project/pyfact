@@ -84,6 +84,8 @@ def read_h5py(file_path, key='data', columns=None, mode='r+'):
         # get all columns of which don't have more than one value per row
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
+        else:
+            columns = copy(columns)
 
         df = pd.DataFrame()
         for col in columns:
@@ -133,6 +135,8 @@ def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode=
         # get all columns of which don't have more than one value per row
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
+        else:
+            columns = copy(columns)
 
         n_rows = h5py_get_n_rows(file_path, key=key)
 
