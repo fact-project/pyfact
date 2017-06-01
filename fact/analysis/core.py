@@ -177,6 +177,31 @@ def calc_run_summary_source_dependent(
     return runs
 
 
+def apply_source_dependent_cuts(
+        data_df,
+        cut_df,
+        prediction_key='gamma_prediction',
+        energy_key='gamma_energy_prediction',
+        theta_deg_key='theta_deg',
+        ):
+    ''' Apply energy dependent cuts '''
+
+    mask = pd.Series(np.ones(len(data_df), dtype=bool), index=data_df.index)
+
+    bins = cut_df['e_low'].iloc[1:]
+    data_df['energy_bin'] = np.digitize(data_df[energy_key], bins=bins)
+
+    for bin_id, df in data_df.groupby('energy_bin'):
+        m = df[prediction_key] < cut_df['prediction_threshold'].loc[bin_id]
+        mask[df[m].index] = False
+
+        if 'theta2_cut' in cut_df:
+            m = df[theta_deg_key]**2 > cut_df['theta2_cut'].loc[bin_id]
+            mask[df[m].index] = False
+
+    return df[mask]
+
+
 def split_on_off_source_dependent(
         events,
         prediction_threshold,
