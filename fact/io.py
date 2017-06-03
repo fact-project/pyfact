@@ -258,7 +258,7 @@ def to_h5py(filename, df, key='data', mode='a', dtypes=None, index=True, **kwarg
 
     with h5py.File(filename, mode=mode) as f:
         if key not in f:
-            initialize_h5py(f, array.dtype, key=key, **kwargs)
+            initialize_h5py(f, array, key=key, **kwargs)
 
         append_to_h5py(f, array, key=key)
 
@@ -293,7 +293,7 @@ def change_recarray_dtype(array, dtypes):
     return array.astype(dt)
 
 
-def initialize_h5py(f, dtypes, key='events', **kwargs):
+def initialize_h5py(f, array, key='events', **kwargs):
     '''
     Create a group with name `key` and empty datasets for each
     entry in dtypes.
@@ -302,9 +302,8 @@ def initialize_h5py(f, dtypes, key='events', **kwargs):
     ----------
     f: h5py.File
         the hdf5 file, opened either in write or append mode
-    dtypes: numpy.dtype
-        the numpy dtype object of a record or structured array describing
-        the columns
+    array: numpy structured array
+        The data
     key: str
         the name for the hdf5 group to hold all datasets, default: data
 
@@ -312,13 +311,19 @@ def initialize_h5py(f, dtypes, key='events', **kwargs):
     '''
     group = f.create_group(key)
 
+    dtypes = array.dtype
     for name in dtypes.names:
         dtype = dtypes[name]
         maxshape = [None] + list(dtype.shape)
         shape = [0] + list(dtype.shape)
 
         if dtype.base == object:
-            dt = h5py.special_dtype(vlen=str)
+            if isinstance(array[name][0], list):
+                dt = np.array(array[name][0]).dtype
+                shape = [0, len(array[name][0])]
+                maxshape = [None, len(array[name][0])]
+            else:
+                dt = h5py.special_dtype(vlen=str)
 
         elif dtype.type == np.datetime64:
             # save dates as ISO string, create dummy date to get correct length
@@ -371,6 +376,10 @@ def append_to_h5py(f, array, key='events'):
 
         if data.dtype.type == np.datetime64:
             data = data.astype('S')
+
+        if data.dtype.base == object:
+            if isinstance(data[0], list):
+                data = np.array([o for o in data])
 
         if data.ndim == 1:
             dataset[n_existing_rows:] = data
