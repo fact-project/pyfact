@@ -176,7 +176,7 @@ def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode=
             yield df, start, end
 
 
-def read_data(file_path, key=None, **kwargs):
+def read_data(file_path, key=None, columns=None, **kwargs):
     '''
     This is a utility wrapper for other reading functions.
     It will look for the file extension and try to use the correct
@@ -201,11 +201,12 @@ def read_data(file_path, key=None, **kwargs):
 
     if extension in ['.hdf', '.hdf5', '.h5']:
         try:
-            df = pd.read_hdf(file_path, key=key, **kwargs)
+            df = pd.read_hdf(file_path, key=key, columns=columns, **kwargs)
         except (TypeError, ValueError):
-            df = read_h5py(file_path, key=key, **kwargs)
+            df = read_h5py(file_path, key=key, columns=columns, **kwargs)
+        return df
 
-    elif extension == '.json':
+    if extension == '.json':
         with open(file_path, 'r') as j:
             d = json.load(j)
             df = pd.DataFrame(d)
@@ -218,6 +219,9 @@ def read_data(file_path, key=None, **kwargs):
 
     else:
         raise NotImplementedError('Unknown data file extension {}'.format(extension))
+
+    if columns:
+        df = df[columns]
 
     return df
 
