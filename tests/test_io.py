@@ -178,6 +178,21 @@ def test_write_data_h5py():
         write_data(df, f.name, use_h5py=True)
 
 
+def test_write_lists_h5py():
+    from fact.io import to_h5py, read_h5py
+
+    df = pd.DataFrame({
+        'x': [[1.0, 2.0], [3.0, 4.0]]
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        to_h5py(f.name, df)
+
+        df = read_h5py(f.name, columns=['x'])
+
+        assert df['x_0'].iloc[0] == 1.0
+
+
 def test_write_data_root():
     from fact.io import write_data
 
