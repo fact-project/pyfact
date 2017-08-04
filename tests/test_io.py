@@ -189,3 +189,42 @@ def test_write_data_root():
     with pytest.raises(IOError):
         with tempfile.NamedTemporaryFile(suffix='.root') as f:
             write_data(df, f.name)
+
+
+def test_read_data_csv():
+    '''
+    Write a csv file from a dataframe and then read it back again.
+    '''
+    from fact.io import write_data, read_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50).astype('float32'),
+        'N': np.random.randint(0, 10, dtype='uint8', size=50)
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.csv') as f:
+        write_data(df, f.name)
+
+        dtypes = {'x': 'float32', 'N': 'uint8'}
+        df_from_file = read_data(f.name, dtype=dtypes)
+
+        assert df.equals(df_from_file)
+
+
+def test_read_data_h5py():
+    '''
+    Create a h5py hdf5 file from a dataframe and read it back.
+    '''
+    from fact.io import write_data, read_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50).astype('float32'),
+        'N': np.random.randint(0, 10, dtype='uint8', size=50)
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        write_data(df, f.name, use_h5py=True, key='lecker_daten')
+
+        df_from_file = read_data(f.name, key='lecker_daten')
+
+        assert df.equals(df_from_file)
