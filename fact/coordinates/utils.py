@@ -2,7 +2,7 @@ from astropy.coordinates import AltAz, ICRS, SkyCoord
 from astropy.time import Time
 import astropy.units as u
 import numpy as np
-from .camera_frame import CameraFrame
+from .camera_frame import CameraCoordinate
 from ..instrument.constants import LOCATION
 
 
@@ -41,7 +41,7 @@ def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
     observation_time = Time(np.asanyarray(observation_time).astype(str))
 
     altaz_frame = AltAz(obstime=observation_time, location=LOCATION)
-    camera_frame = CameraFrame(pointing_direction=pointing_direction)
+    camera_frame = CameraCoordinate(pointing_direction=pointing_direction)
 
     altaz_coordinates = eq_coordinates.transform_to(altaz_frame)
     cam_coordinates = altaz_coordinates.transform_to(camera_frame)
@@ -82,7 +82,7 @@ def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
         location=LOCATION,
     )
 
-    cam_coordinates = CameraFrame(
+    cam_coordinates = CameraCoordinate(
         np.asanyarray(x) * u.mm, np.asanyarray(y) * u.mm,
         pointing_direction=pointing_direction,
     )

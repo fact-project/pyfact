@@ -16,13 +16,13 @@ import numpy as np
 focal_length = FOCAL_LENGTH_MM * u.mm
 
 
-class CameraFrame(BaseCoordinateFrame):
+class CameraCoordinate(BaseCoordinateFrame):
     '''Astropy CoordinateFrame representing coordinates in the CameraPlane'''
     default_representation = PlanarRepresentation
     pointing_direction = FrameAttribute(default=None)
 
 
-@frame_transform_graph.transform(FunctionTransform, CameraFrame, AltAz)
+@frame_transform_graph.transform(FunctionTransform, CameraCoordinate, AltAz)
 def camera_to_altaz(camera_frame, altaz):
     if camera_frame.pointing_direction is None:
         raise AttributeError('Pointing Direction must be set')
@@ -52,7 +52,7 @@ def camera_to_altaz(camera_frame, altaz):
     )
 
 
-@frame_transform_graph.transform(FunctionTransform, AltAz, CameraFrame)
+@frame_transform_graph.transform(FunctionTransform, AltAz, CameraCoordinate)
 def altaz_to_camera(altaz, camera_frame):
     cartesian = altaz.cartesian
 
@@ -62,7 +62,7 @@ def altaz_to_camera(altaz, camera_frame):
     cartesian = cartesian.transform(rot_z_az)
     cartesian = cartesian.transform(rot_y_zd)
 
-    return CameraFrame(
+    return CameraCoordinate(
         x=cartesian.x * focal_length / cartesian.z,
         y=cartesian.y * focal_length / cartesian.z,
         pointing_direction=camera_frame.pointing_direction,
