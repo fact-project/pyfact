@@ -1,10 +1,16 @@
 from astropy.coordinates import (
     BaseCoordinateFrame,
-    FrameAttribute,
     AltAz,
     frame_transform_graph,
     FunctionTransform
 )
+
+try:
+    from astropy.coordinates import Attribute
+except ImportError:
+    # for astropy <= 2.0.0
+    from astropy.coordinates import FrameAttribute as Attribute
+
 from astropy.coordinates.matrix_utilities import rotation_matrix
 from astropy.coordinates.representation import CartesianRepresentation
 import astropy.units as u
@@ -19,7 +25,7 @@ focal_length = FOCAL_LENGTH_MM * u.mm
 class CameraCoordinate(BaseCoordinateFrame):
     '''Astropy CoordinateFrame representing coordinates in the CameraPlane'''
     default_representation = PlanarRepresentation
-    pointing_direction = FrameAttribute(default=None)
+    pointing_direction = Attribute(default=None)
 
 
 @frame_transform_graph.transform(FunctionTransform, CameraCoordinate, AltAz)
