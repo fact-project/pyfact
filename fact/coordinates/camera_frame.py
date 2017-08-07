@@ -45,7 +45,11 @@ def camera_to_altaz(camera_frame, altaz):
     altitude = 90 * u.deg - np.arccos(cartesian.z)
     azimuth = np.arctan2(cartesian.y, cartesian.x)
 
-    return AltAz(alt=altitude, az=azimuth)
+    return AltAz(
+        alt=altitude, az=azimuth,
+        location=altaz.location,
+        obstime=altaz.obstime,
+    )
 
 
 @frame_transform_graph.transform(FunctionTransform, AltAz, CameraFrame)

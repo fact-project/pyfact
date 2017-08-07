@@ -1,17 +1,44 @@
-from astropy.coordinates import AltAz, SkyCoord
+from astropy.coordinates import AltAz, ICRS, SkyCoord
 from astropy.time import Time
 import astropy.units as u
+import numpy as np
 from .camera_frame import CameraFrame
 from ..instrument.constants import LOCATION
 
 
-def equatorial_to_camera(ra, dec, ra_pointing, dec_pointing, observation_time):
+def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
+    '''
+    Convert sky coordinates from the equatorial frame to FACT camera
+    coordinates.
+
+    Parameters
+    ----------
+    ra: number or array-like
+        Right ascension in hourangle
+    dec: number or array-like
+        Declination in degrees
+    zd_pointing: number or array-like
+        Zenith distance of the telescope pointing direction in degree
+    az_pointing: number or array-like
+        Azimuth of the telescope pointing direction in degree
+    observation_time: datetime or np.datetime64
+        Time of the observations
+
+    Returns
+    -------
+    x: number or array-like
+        x-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    y: number or array-like
+        y-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    '''
     eq_coordinates = SkyCoord(ra=ra * u.hourangle, dec=dec * u.deg)
-    pointing_direction = SkyCoord(
-        ra=ra_pointing * u.hourangle,
-        dec=dec_pointing * u.deg,
+    pointing_direction = AltAz(
+        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
+        az=np.asanyarray(az_pointing) * u.deg,
     )
-    observation_time = Time(observation_time)
+    observation_time = Time(np.asanyarray(observation_time).astype(str))
 
     altaz_frame = AltAz(obstime=observation_time, location=LOCATION)
     camera_frame = CameraFrame(pointing_direction=pointing_direction)
@@ -22,20 +49,47 @@ def equatorial_to_camera(ra, dec, ra_pointing, dec_pointing, observation_time):
     return cam_coordinates.x.to(u.mm).value, cam_coordinates.y.to(u.mm).value
 
 
-def camera_to_equatorial(x, y, ra_pointing, dec_pointing, observation_time):
-    pointing_direction = SkyCoord(
-        ra=ra_pointing * u.hourangle,
-        dec=dec_pointing * u.deg,
+def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
+    '''
+    Convert FACT camera coordinates to sky coordinates in the equatorial (icrs)
+    frame.
+
+    Parameters
+    ----------
+    x: number or array-like
+        x-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    y: number or array-like
+        y-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    zd_pointing: number or array-like
+        Zenith distance of the telescope pointing direction in degree
+    az_pointing: number or array-like
+        Azimuth of the telescope pointing direction in degree
+    observation_time: datetime or np.datetime64
+        Time of the observations
+
+    Returns
+    -------
+    ra: number or array-like
+        Right ascension in hourangle
+    dec: number or array-like
+        Declination in degrees
+    '''
+    pointing_direction = AltAz(
+        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
+        az=np.asanyarray(az_pointing) * u.deg,
+        location=LOCATION,
     )
-    observation_time = Time(observation_time)
 
     cam_coordinates = CameraFrame(
-        x * u.mm, y*u.mm,
+        np.asanyarray(x) * u.mm, np.asanyarray(y) * u.mm,
         pointing_direction=pointing_direction,
     )
 
+    observation_time = Time(np.asanyarray(observation_time).astype(str))
     altaz_frame = AltAz(obstime=observation_time, location=LOCATION)
     altaz_coordinates = cam_coordinates.transform_to(altaz_frame)
-    eq_coordinates = altaz_coordinates.transform_to(SkyCoord)
+    eq_coordinates = altaz_coordinates.transform_to(ICRS)
 
     return eq_coordinates.ra.hourangle, eq_coordinates.dec.deg
