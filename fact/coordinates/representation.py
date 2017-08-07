@@ -6,8 +6,10 @@ from astropy.utils.compat.numpy import broadcast_arrays
 
 class PlanarRepresentation(BaseRepresentation):
     '''
-    Representation of a point in a 2D plane.
+    Representation of a point in a 2D plane. This is needed for coordinate
+    frames to store their coordinates internally.
     This is essentially a copy of the Cartesian representation used in astropy.
+    Copied from ctapipe.
 
     Parameters
     ----------
