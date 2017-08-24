@@ -1,6 +1,5 @@
 import os.path
 import re
-from collections import namedtuple
 
 __all__ = [
     'parse'
@@ -8,6 +7,7 @@ __all__ = [
     'TemplateToPath',
     'TreePath',
 ]
+
 
 class TemplateToPath:
     '''Turn a template like '/fac/raw/{Y}/{M}/{D}/{N}_{R}.fits.fz' into a path.
