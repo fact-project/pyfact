@@ -17,15 +17,19 @@ class TemplateToPath:
         self.template = template
 
     def __call__(self, night, run=None, **kwargs):
-        night = str(night)
         d = dict(**kwargs)
+
+        if hasattr(night, 'fNight') and hasattr(night, 'fRunID'):
+            night, run = night.fNight, night.fRunID
+
+        night = str(night)
+        if run is not None:
+            d['R'] = '{:03d}'.format(int(run))
+
         d['N'] = night
         d['Y'] = night[0:4]
         d['M'] = night[4:6]
         d['D'] = night[6:8]
-        if run is not None:
-            run = '{:03d}'.format(int(run))
-            d['R'] = run
         return self.template.format(**d)
 
 
