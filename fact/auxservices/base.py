@@ -1,6 +1,7 @@
 from astropy.table import Table
 from astropy.units import UnitsWarning
-from ..path import TreePath
+from ..path import tree_path
+from functools import partial
 import warnings
 
 
@@ -12,7 +13,8 @@ class AuxService:
     basename = 'AUX_SERVICE'
 
     def __init__(self, auxdir='/fact/aux'):
-        self.path = TreePath(
+        self.path = partial(
+            tree_path,
             base_dir=auxdir,
             suffix='.' + self.basename + '.fits')
 
