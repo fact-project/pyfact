@@ -3,37 +3,26 @@ import re
 
 __all__ = [
     'parse'
-    'run2tree_path',
-    'TemplateToPath',
-    'TreePath',
+    'template_to_path',
+    'tree_path',
 ]
 
 
-class TemplateToPath:
+def template_to_path(template, night, run=None, **kwargs):
     '''Turn a template like '/fac/raw/{Y}/{M}/{D}/{N}_{R}.fits.fz' into a path.
     '''
+    night = str(night)
+    if run is not None:
+        kwargs['R'] = '{:03d}'.format(int(run))
 
-    def __init__(self, template):
-        self.template = template
-
-    def __call__(self, night, run=None, **kwargs):
-        d = dict(**kwargs)
-
-        if hasattr(night, 'fNight') and hasattr(night, 'fRunID'):
-            night, run = night.fNight, night.fRunID
-
-        night = str(night)
-        if run is not None:
-            d['R'] = '{:03d}'.format(int(run))
-
-        d['N'] = night
-        d['Y'] = night[0:4]
-        d['M'] = night[4:6]
-        d['D'] = night[6:8]
-        return self.template.format(**d)
+    kwargs['N'] = night
+    kwargs['Y'] = night[0:4]
+    kwargs['M'] = night[4:6]
+    kwargs['D'] = night[6:8]
+    return template.format(**kwargs)
 
 
-def run2tree_path(base_dir, suffix, night, run=None):
+def tree_path(base_dir, suffix, night, run=None):
     '''Make a tree_path from a run
 
     base_dir:  eg. '/fact/raw' or '/fact/aux'
@@ -57,18 +46,8 @@ def run2tree_path(base_dir, suffix, night, run=None):
             '{M}',
             '{D}',
             base_name + suffix)
-    return TemplateToPath(template)(night, run)
+    return template_to_path(template, night, run=None)
 
-
-class TreePath:
-    '''Convenience class for run2tree_path() for people who don't like partials
-    '''
-    def __init__(self, base_dir, suffix):
-        self.base_dir = base_dir
-        self.suffix = suffix
-
-    def __call__(self, night, run=None):
-        return run2tree_path(self.base_dir, self.suffix, night, run)
 
 path_regex = re.compile(
     r'(?P<prefix>.*?)' +
