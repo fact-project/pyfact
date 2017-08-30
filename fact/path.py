@@ -8,11 +8,9 @@ __all__ = [
 ]
 
 
-def template_to_path(template, night, run=None, **kwargs):
+def template_to_path(night, run, template, **kwargs):
     '''Make path from template and (night, run) using kwargs existing.
 
-    template: string
-        e.g. "/foo/bar/{Y}/baz/{R}_{M}_{D}.gz.{N}"
     night: int or string
         e.g. night = 20160102 (int)
         is used to create Y,M,D,N template values as:
@@ -23,6 +21,8 @@ def template_to_path(template, night, run=None, **kwargs):
     run: int or string
         e.g. run = 1  or run = "000000001"
         is used to create template value R = "001"
+    template: string
+        e.g. "/foo/bar/{Y}/baz/{R}_{M}_{D}.gz.{N}"
     kwargs:
         if template contains other place holders than Y,M,D,N,R
         kwargs are used to format these.
@@ -38,17 +38,17 @@ def template_to_path(template, night, run=None, **kwargs):
     return template.format(**kwargs)
 
 
-def tree_path(prefix, suffix, night, run=None):
+def tree_path(night, run, prefix, suffix):
     '''Make a tree_path from a (night, run) for given prefix, suffix
 
-    prefix: string
-        eg. '/fact/raw' or '/fact/aux'
-    suffix: string
-        eg. '.fits.fz' or '.log' or '.AUX_FOO.fits'
     night: int or string
         eg. 20160101 or '20160101'
     run: int or string
         eg. 11 or '011' or None (int, string or None accepted)
+    prefix: string
+        eg. '/fact/raw' or '/fact/aux'
+    suffix: string
+        eg. '.fits.fz' or '.log' or '.AUX_FOO.fits'
     '''
     if run is not None:
         base_name = '{N}_{R}'
@@ -61,7 +61,7 @@ def tree_path(prefix, suffix, night, run=None):
             '{M}',
             '{D}',
             base_name + suffix)
-    return template_to_path(template, night, run=None)
+    return template_to_path(night, run, template)
 
 
 path_regex = re.compile(
