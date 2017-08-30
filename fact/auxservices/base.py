@@ -1,6 +1,7 @@
 from astropy.table import Table
 from astropy.units import UnitsWarning
-import os
+from ..path import tree_path
+from functools import partial
 import warnings
 
 
@@ -12,14 +13,10 @@ class AuxService:
     basename = 'AUX_SERVICE'
 
     def __init__(self, auxdir='/fact/aux'):
-        self.auxdir = auxdir
-
-    @property
-    def filename_template(self):
-        return os.path.join(
-            self.auxdir, '{date:%Y}',  '{date:%m}', '{date:%d}',
-            '{date:%Y%m%d}.' + self.basename + '.fits'
-        )
+        self.path = partial(
+            tree_path,
+            base_dir=auxdir,
+            suffix='.' + self.basename + '.fits')
 
     @classmethod
     def read_file(cls, filename):
@@ -49,6 +46,4 @@ class AuxService:
         return df
 
     def read_date(self, date):
-
-        filename = self.filename_template.format(date=date)
-        return self.read_file(filename)
+        return self.read_file(self.path('{:%Y%m%d}'.format(date)))
