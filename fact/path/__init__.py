@@ -9,7 +9,23 @@ __all__ = [
 
 
 def template_to_path(template, night, run=None, **kwargs):
-    '''Turn a template like '/fac/raw/{Y}/{M}/{D}/{N}_{R}.fits.fz' into a path.
+    '''Make path from template and (night, run) using kwargs existing.
+
+    template: string
+        e.g. "/foo/bar/{Y}/baz/{R}_{M}_{D}.gz.{N}"
+    night: int or string
+        e.g. night = 20160102 (int)
+        is used to create Y,M,D,N template values as:
+        Y = "2016"
+        M = "01"
+        D = "02"
+        N = "20160101"
+    run: int or string
+        e.g. run = 1  or run = "000000001"
+        is used to create template value R = "001"
+    kwargs:
+        if template contains other place holders than Y,M,D,N,R
+        kwargs are used to format these.
     '''
     night = str(night)
     if run is not None:
@@ -22,18 +38,17 @@ def template_to_path(template, night, run=None, **kwargs):
     return template.format(**kwargs)
 
 
-def tree_path(base_dir, suffix, night, run=None):
-    '''Make a tree_path from a run
+def tree_path(prefix, suffix, night, run=None):
+    '''Make a tree_path from a (night, run) for given prefix, suffix
 
-    base_dir:  eg. '/fact/raw' or '/fact/aux'
-    suffix:    eg. '.fits.fz' or '.log' or '.AUX_FOO.fits'
-    night:     eg. 20160101 or '20160101' (int or string accepted)
-    run:       eg. 11 or '011' or None (int, string or None accepted)
-
-    output:
-    eg. '/fact/raw/2016/01/01/20160101_011.fits.fz' or
-    '/fact/raw/2016/01/01/20160101.log'
-
+    prefix: string
+        eg. '/fact/raw' or '/fact/aux'
+    suffix: string
+        eg. '.fits.fz' or '.log' or '.AUX_FOO.fits'
+    night: int or string
+        eg. 20160101 or '20160101'
+    run: int or string
+        eg. 11 or '011' or None (int, string or None accepted)
     '''
     if run is not None:
         base_name = '{N}_{R}'
@@ -41,7 +56,7 @@ def tree_path(base_dir, suffix, night, run=None):
         base_name = '{N}'
 
     template = os.path.join(
-            base_dir,
+            prefix,
             '{Y}',
             '{M}',
             '{D}',
@@ -59,32 +74,10 @@ path_regex = re.compile(
 
 
 def parse(path):
-    '''return a dict with relevant parts of the path
-    for input paths like these:
-     '/fact/raw/2016/01/01/20160101_011.fits.fz',
-     '/fact/aux/2016/01/01/20160101.FSC_CONTROL_TEMPERATURE.fits',
-     '/fact/aux/2016/01/01/20160101.log',
-     '/home/guest/tbretz/gainanalysis.20130725/files/fit_bt2b/20140115_079_079.root'
+    '''Return a dict with {prefix, suffix, night, run} parsed from path.
 
-    it returns dicts like these:
-
-    {'prefix': '/fact/raw',
-     'night': 20160101,
-     'run': 011,
-     'suffix': '.fits.fz'}
-    {'prefix': '/fact/aux',
-     'night': 20160101,
-     'run': None,
-     'suffix': '.FSC_CONTROL_TEMPERATURE.fits'}
-    {'prefix': '/fact/aux',
-     'night': 20160101,
-     'run': None,
-     'suffix': '.log'}
-    {'prefix':
-     '/home/guest/tbretz/gainanalysis.20130725/files/fit_bt2b',
-     'night': 20140115,
-     'run': 079,
-     'suffix': '_079.root'}
+    path: string
+        any (absolute) path should be fine.
     '''
     d = path_regex.match(path).groupdict()
     if d['run'] is not None:
