@@ -21,7 +21,6 @@ setup(
         'fact.factdb',
         'fact.analysis',
         'fact.instrument',
-        'fact.path',
     ],
     package_data={
         '': [
