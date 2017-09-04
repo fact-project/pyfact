@@ -46,4 +46,4 @@ class AuxService:
         return df
 
     def read_date(self, date):
-        return self.read_file(self.path('{:%Y%m%d}'.format(date)))
+        return self.read_file(self.path(int('{:%Y%m%d}'.format(date))))
