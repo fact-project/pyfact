@@ -33,8 +33,8 @@ def camera_to_altaz(camera_frame, altaz):
     if camera_frame.pointing_direction is None:
         raise AttributeError('Pointing Direction must be set')
 
-    x = camera_frame.x
-    y = camera_frame.y
+    x = camera_frame.x.copy()
+    y = camera_frame.y.copy()
 
     z = 1 / np.sqrt(1 + (x / focal_length)**2 + (y / focal_length)**2)
     x *= z / focal_length
