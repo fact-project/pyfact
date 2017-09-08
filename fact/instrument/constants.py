@@ -7,7 +7,7 @@ import astropy.units as u
 
 #: The inner diameter of the hexagonal pixels in mm.
 #: This is also the grid constant of the hex grid.
-PIXEL_SPACING_IN_MM = 9.5
+PIXEL_SPACING_MM = 9.5
 FOCAL_LENGTH_MM = 4889
 #:The segmented imaging reflector of FACT is well described using the thin lens
 #:equation. However, the most prominent deviation from the thin lens, is the
@@ -40,7 +40,7 @@ LONGITUDE_DEC_DEG = -17.8911   #: FACT's longitude in decimal degrees
 ALTITUDE_ASL_M = 2200  #: FACT's altitude above sea level in meters
 FOCAL_LENGTH_MM = 4889  #: FACT's reflector focal length in mm.
 #: Field of view of a single pixel in decimal degrees
-FOV_PER_PIXEL_DEG = np.rad2deg(2 * np.arctan(0.5 * PIXEL_SPACING_IN_MM / FOCAL_LENGTH_MM))
+FOV_PER_PIXEL_DEG = np.rad2deg(2 * np.arctan(0.5 * PIXEL_SPACING_MM / FOCAL_LENGTH_MM))
 
 #: astropy.coordinates.EarthLocation for the fact position
 LOCATION = EarthLocation(

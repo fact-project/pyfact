@@ -5,7 +5,7 @@ import pandas as pd
 
 from .constants import (
     FOCAL_LENGTH_MM, PINCUSHION_DISTORTION_SLOPE,
-    PIXEL_SPACING_IN_MM, FOV_PER_PIXEL_DEG
+    PIXEL_SPACING_MM, FOV_PER_PIXEL_DEG
 )
 
 
@@ -15,7 +15,7 @@ def camera_distance_mm_to_deg(distance_mm):
     to it's approximate equivalent in degrees.
     '''
 
-    return distance_mm * FOV_PER_PIXEL_DEG / PIXEL_SPACING_IN_MM
+    return distance_mm * FOV_PER_PIXEL_DEG / PIXEL_SPACING_MM
 
 
 pixel_mapping = np.genfromtxt(
@@ -70,15 +70,15 @@ def get_pixel_dataframe():
     bias_patch_sizes = pm.bias_patch_id.value_counts().sort_index()
     pm['bias_patch_size'] = bias_patch_sizes[pm.bias_patch_id].values
 
-    pm['x'] = -pm.pos_Y.values * PIXEL_SPACING_IN_MM
-    pm['y'] = pm.pos_X.values * PIXEL_SPACING_IN_MM
+    pm['x'] = -pm.pos_Y.values * PIXEL_SPACING_MM
+    pm['y'] = pm.pos_X.values * PIXEL_SPACING_MM
 
     pm['x_angle'] = np.rad2deg(
-        np.arctan(pm.x / FOCAL_LENGTH_MM) * 
+        np.arctan(pm.x / FOCAL_LENGTH_MM) *
         (1 + PINCUSHION_DISTORTION_SLOPE)
     )
     pm['y_angle'] = np.rad2deg(
-        np.arctan(pm.y / FOCAL_LENGTH_MM) * 
+        np.arctan(pm.y / FOCAL_LENGTH_MM) *
         (1 + PINCUSHION_DISTORTION_SLOPE)
     )
 
