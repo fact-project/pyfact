@@ -93,3 +93,87 @@ def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
     eq_coordinates = altaz_coordinates.transform_to(ICRS)
 
     return eq_coordinates.ra.hourangle, eq_coordinates.dec.deg
+
+
+def horizontal_to_camera(zd, az, zd_pointing, az_pointing):
+    '''
+    Convert sky coordinates from the equatorial frame to FACT camera
+    coordinates.
+
+    Parameters
+    ----------
+    zd: number or array-like
+        Zenith distance in hourangle
+    az: number or array-like
+        azimuth in degrees
+    zd_pointing: number or array-like
+        Zenith distance of the telescope pointing direction in degree
+    az_pointing: number or array-like
+        Azimuth of the telescope pointing direction in degree
+    observation_time: datetime or np.datetime64
+        Time of the observations
+
+    Returns
+    -------
+    x: number or array-like
+        x-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    y: number or array-like
+        y-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    '''
+    pointing_direction = AltAz(
+        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
+        az=np.asanyarray(az_pointing) * u.deg,
+    )
+
+    altaz = AltAz(
+        alt=(90 - np.asanyarray(zd)) * u.deg,
+        az=np.asanyarray(az) * u.deg,
+    )
+
+    camera_frame = CameraCoordinate(pointing_direction=pointing_direction)
+    cam_coordinates = altaz.transform_to(camera_frame)
+
+    return cam_coordinates.x.to(u.mm).value, cam_coordinates.y.to(u.mm).value
+
+
+def camera_to_horizontal(x, y, zd_pointing, az_pointing):
+    '''
+    Convert FACT camera coordinates to sky coordinates in the equatorial (icrs)
+    frame.
+
+    Parameters
+    ----------
+    x: number or array-like
+        x-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    y: number or array-like
+        y-coordinate in the camera plane in mm.
+        Following the axis of the the FACTPixelMap file (and FACT-Tools).
+    zd_pointing: number or array-like
+        Zenith distance of the telescope pointing direction in degree
+    az_pointing: number or array-like
+        Azimuth of the telescope pointing direction in degree
+
+    Returns
+    -------
+    zd: number or array-like
+        Zenith distance in degrees
+    az: number or array-like
+        Declination in degrees
+    '''
+    pointing_direction = AltAz(
+        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
+        az=np.asanyarray(az_pointing) * u.deg,
+        location=LOCATION,
+    )
+
+    cam_coordinates = CameraCoordinate(
+        np.asanyarray(x) * u.mm, np.asanyarray(y) * u.mm,
+        pointing_direction=pointing_direction,
+    )
+
+    altaz = cam_coordinates.transform_to(AltAz())
+
+    return altaz.zen.deg, altaz.az.deg
