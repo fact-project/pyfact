@@ -42,8 +42,8 @@ def camera_to_altaz(camera_frame, altaz):
 
     cartesian = CartesianRepresentation(x, y, z, copy=False)
 
-    rot_z_az = rotation_matrix(camera_frame.pointing_direction.az, 'z')
-    rot_y_zd = rotation_matrix(camera_frame.pointing_direction.zen, 'y')
+    rot_z_az = rotation_matrix(-camera_frame.pointing_direction.az, 'z')
+    rot_y_zd = rotation_matrix(-camera_frame.pointing_direction.zen, 'y')
 
     cartesian = cartesian.transform(rot_y_zd)
     cartesian = cartesian.transform(rot_z_az)
@@ -62,8 +62,8 @@ def camera_to_altaz(camera_frame, altaz):
 def altaz_to_camera(altaz, camera_frame):
     cartesian = altaz.cartesian
 
-    rot_z_az = rotation_matrix(-camera_frame.pointing_direction.az, 'z')
-    rot_y_zd = rotation_matrix(-camera_frame.pointing_direction.zen, 'y')
+    rot_z_az = rotation_matrix(camera_frame.pointing_direction.az, 'z')
+    rot_y_zd = rotation_matrix(camera_frame.pointing_direction.zen, 'y')
 
     cartesian = cartesian.transform(rot_z_az)
     cartesian = cartesian.transform(rot_y_zd)
