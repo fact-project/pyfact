@@ -11,15 +11,15 @@ __all__ = [
 def template_to_path(night, run, template, **kwargs):
     '''Make path from template and (night, run) using kwargs existing.
 
-    night: int or string
-        e.g. night = 20160102 (int)
+    night: int
+        e.g. night = 20160102
         is used to create Y,M,D,N template values as:
         Y = "2016"
         M = "01"
         D = "02"
         N = "20160101"
-    run: int or string
-        e.g. run = 1  or run = "000000001"
+    run: int or None
+        e.g. run = 1
         is used to create template value R = "001"
     template: string
         e.g. "/foo/bar/{Y}/baz/{R}_{M}_{D}.gz.{N}"
@@ -27,9 +27,9 @@ def template_to_path(night, run, template, **kwargs):
         if template contains other place holders than Y,M,D,N,R
         kwargs are used to format these.
     '''
-    night = str(night)
+    night = '{:08d}'.format(night)
     if run is not None:
-        kwargs['R'] = '{:03d}'.format(int(run))
+        kwargs['R'] = '{:03d}'.format(run)
 
     kwargs['N'] = night
     kwargs['Y'] = night[0:4]
@@ -41,10 +41,10 @@ def template_to_path(night, run, template, **kwargs):
 def tree_path(night, run, prefix, suffix):
     '''Make a tree_path from a (night, run) for given prefix, suffix
 
-    night: int or string
-        eg. 20160101 or '20160101'
-    run: int or string
-        eg. 11 or '011' or None (int, string or None accepted)
+    night: int
+        eg. 20160101
+    run: int or None
+        eg. 11
     prefix: string
         eg. '/fact/raw' or '/fact/aux'
     suffix: string
