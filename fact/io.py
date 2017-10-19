@@ -323,6 +323,24 @@ def initialize_h5py(f, array, key='events', **kwargs):
 
 
 def create_empty_h5py_dataset(array, group, name, **kwargs):
+    '''
+    Create a new h5py dataset for the content of `array`.
+
+    datetime64 objects are stored as fixed length strings
+    arrays of lists are stored as 2d arrays (so they have to be fixed length)
+    strings are stored as special dtype for strings
+
+    Parameters
+    ----------
+    array: numpy.array or numpy.recarray
+        the numpy array to get the dtype and shape from
+    dataset: h5py.Group
+        the hdf5 group the dataset should be created in
+    name: str
+        name for the new dataset
+    **kwargs:
+        all **kwargs are passed to create_dataset, useful for e.g. compression
+    '''
     dtype = array.dtype
     maxshape = [None] + list(array.shape)[1:]
     shape = [0] + list(array.shape)[1:]
@@ -353,7 +371,19 @@ def create_empty_h5py_dataset(array, group, name, **kwargs):
 
 
 def append_to_h5py_dataset(array, dataset):
+    '''
+    Append a single numpy array to an h5py dataset.
 
+    datetime64 objects are stored as fixed length strings
+    arrays of lists are stored as 2d arrays (so they have to be fixed length)
+
+    Parameters
+    ----------
+    array: numpy.array or numpy.recarray
+        the numpy array to append
+    dataset: h5py.Dataset
+        the hdf5 dataset to append to
+    '''
     n_existing_rows = dataset.shape[0]
     n_new_rows = array.shape[0]
 
