@@ -352,8 +352,7 @@ def create_empty_h5py_dataset(array, group, name, **kwargs):
     return dataset
 
 
-def append_to_h5py_dataset(array, group, name):
-    dataset = group.get(name)
+def append_to_h5py_dataset(array, dataset):
 
     n_existing_rows = dataset.shape[0]
     n_new_rows = array.shape[0]
@@ -394,4 +393,7 @@ def append_to_h5py(f, array, key='events'):
     group = f.get(key)
 
     for column in array.dtype.names:
-        append_to_h5py_dataset(array[column], group, column)
+        dataset = group.get(column)
+        if dataset is None:
+            raise KeyError('No such dataset {}'.format(dataset))
+        append_to_h5py_dataset(array[column], dataset)
