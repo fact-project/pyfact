@@ -2,8 +2,34 @@ from astropy.coordinates import AltAz, ICRS, SkyCoord
 from astropy.time import Time
 import astropy.units as u
 import numpy as np
-from .camera_frame import CameraCoordinate
+from .camera_frame import CameraFrame
 from ..instrument.constants import LOCATION
+
+
+def arrays_to_altaz(zenith, azimuth, obstime=None):
+    frame = AltAz(location=LOCATION, obstime=obstime)
+    return SkyCoord(
+        az=np.asanyarray(azimuth) * u.deg,
+        alt=np.asanyarray(90 - zenith) * u.deg,
+        frame=frame,
+    )
+
+
+def arrays_to_camera(x, y, pointing_direction, obstime=None):
+    frame = CameraFrame(pointing_direction=pointing_direction, obstime=obstime)
+    return SkyCoord(
+        x=np.asanyarray(x) * u.mm,
+        y=np.asanyarray(y) * u.mm,
+        frame=frame,
+    )
+
+
+def arrays_to_equatorial(ra, dec, obstime=None):
+    return SkyCoord(
+        ra=np.asanyarray(ra) * u.hourangle,
+        dec=np.asanyarray(dec) * u.deg,
+        obstime=obstime
+    )
 
 
 def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
@@ -33,15 +59,12 @@ def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
         y-coordinate in the camera plane in mm.
         Following the axis of the the FACTPixelMap file (and FACT-Tools).
     '''
-    eq_coordinates = SkyCoord(ra=ra * u.hourangle, dec=dec * u.deg)
-    pointing_direction = AltAz(
-        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
-        az=np.asanyarray(az_pointing) * u.deg,
-    )
-    observation_time = Time(np.asanyarray(observation_time).astype(str))
+    obstime = Time(np.asanyarray(observation_time).astype(str))
+    eq_coordinates = arrays_to_equatorial(ra, dec=dec, obstime=obstime)
+    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
 
-    altaz_frame = AltAz(obstime=observation_time, location=LOCATION)
-    camera_frame = CameraCoordinate(pointing_direction=pointing_direction)
+    altaz_frame = AltAz(location=LOCATION)
+    camera_frame = CameraFrame(pointing_direction=pointing_direction)
 
     altaz_coordinates = eq_coordinates.transform_to(altaz_frame)
     cam_coordinates = altaz_coordinates.transform_to(camera_frame)
@@ -76,19 +99,11 @@ def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
     dec: number or array-like
         Declination in degrees
     '''
-    pointing_direction = AltAz(
-        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
-        az=np.asanyarray(az_pointing) * u.deg,
-        location=LOCATION,
-    )
+    obstime = Time(np.asanyarray(observation_time).astype(str))
+    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
+    cam_coordinates = arrays_to_camera(x, y, pointing_direction, obstime=obstime)
 
-    cam_coordinates = CameraCoordinate(
-        np.asanyarray(x) * u.mm, np.asanyarray(y) * u.mm,
-        pointing_direction=pointing_direction,
-    )
-
-    observation_time = Time(np.asanyarray(observation_time).astype(str))
-    altaz_frame = AltAz(obstime=observation_time, location=LOCATION)
+    altaz_frame = AltAz(location=LOCATION)
     altaz_coordinates = cam_coordinates.transform_to(altaz_frame)
     eq_coordinates = altaz_coordinates.transform_to(ICRS)
 
@@ -122,17 +137,10 @@ def horizontal_to_camera(zd, az, zd_pointing, az_pointing):
         y-coordinate in the camera plane in mm.
         Following the axis of the the FACTPixelMap file (and FACT-Tools).
     '''
-    pointing_direction = AltAz(
-        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
-        az=np.asanyarray(az_pointing) * u.deg,
-    )
+    altaz = arrays_to_altaz(zd, az)
+    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
 
-    altaz = AltAz(
-        alt=(90 - np.asanyarray(zd)) * u.deg,
-        az=np.asanyarray(az) * u.deg,
-    )
-
-    camera_frame = CameraCoordinate(pointing_direction=pointing_direction)
+    camera_frame = CameraFrame(pointing_direction=pointing_direction)
     cam_coordinates = altaz.transform_to(camera_frame)
 
     return cam_coordinates.x.to(u.mm).value, cam_coordinates.y.to(u.mm).value
@@ -163,17 +171,8 @@ def camera_to_horizontal(x, y, zd_pointing, az_pointing):
     az: number or array-like
         Declination in degrees
     '''
-    pointing_direction = AltAz(
-        alt=(90 - np.asanyarray(zd_pointing)) * u.deg,
-        az=np.asanyarray(az_pointing) * u.deg,
-        location=LOCATION,
-    )
-
-    cam_coordinates = CameraCoordinate(
-        np.asanyarray(x) * u.mm, np.asanyarray(y) * u.mm,
-        pointing_direction=pointing_direction,
-    )
-
-    altaz = cam_coordinates.transform_to(AltAz())
+    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
+    cam_coordinates = arrays_to_camera(x, y, pointing_direction)
+    altaz = cam_coordinates.transform_to(AltAz(location=LOCATION))
 
     return altaz.zen.deg, altaz.az.deg
