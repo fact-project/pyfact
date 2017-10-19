@@ -6,7 +6,7 @@ from astropy.coordinates import (
 )
 
 try:
-    from astropy.coordinates import Attribute, TimeAttribute
+    from astropy.coordinates import Attribute, TimeAttribute, EarthLocationAttribute
 except ImportError:
     # for astropy <= 2.0.0
     from astropy.coordinates import FrameAttribute as Attribute, TimeAttribute
@@ -16,7 +16,7 @@ from astropy.coordinates.representation import CartesianRepresentation
 import astropy.units as u
 
 from .representation import PlanarRepresentation
-from ..instrument.constants import FOCAL_LENGTH_MM
+from ..instrument.constants import FOCAL_LENGTH_MM, LOCATION
 import numpy as np
 
 focal_length = FOCAL_LENGTH_MM * u.mm
@@ -27,6 +27,7 @@ class CameraFrame(BaseCoordinateFrame):
     default_representation = PlanarRepresentation
     pointing_direction = Attribute(default=None)
     obstime = TimeAttribute(default=None)
+    location = EarthLocationAttribute(default=LOCATION)
 
 
 @frame_transform_graph.transform(FunctionTransform, CameraFrame, AltAz)
@@ -55,7 +56,7 @@ def camera_to_altaz(camera, altaz):
     return AltAz(
         alt=altitude,
         az=azimuth,
-        location=altaz.location,
+        location=camera.location,
         obstime=camera.obstime,
     )
 
@@ -78,4 +79,5 @@ def altaz_to_camera(altaz, camera):
         y=cartesian.y * focal_length / cartesian.z,
         pointing_direction=camera.pointing_direction,
         obstime=altaz.obstime,
+        location=camera.location,
     )

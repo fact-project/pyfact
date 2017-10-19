@@ -63,11 +63,8 @@ def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
     eq_coordinates = arrays_to_equatorial(ra, dec=dec, obstime=obstime)
     pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
 
-    altaz_frame = AltAz(location=LOCATION)
     camera_frame = CameraFrame(pointing_direction=pointing_direction)
-
-    altaz_coordinates = eq_coordinates.transform_to(altaz_frame)
-    cam_coordinates = altaz_coordinates.transform_to(camera_frame)
+    cam_coordinates = eq_coordinates.transform_to(camera_frame)
 
     return cam_coordinates.x.to(u.mm).value, cam_coordinates.y.to(u.mm).value
 
@@ -102,10 +99,7 @@ def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
     obstime = Time(np.asanyarray(observation_time).astype(str))
     pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
     cam_coordinates = arrays_to_camera(x, y, pointing_direction, obstime=obstime)
-
-    altaz_frame = AltAz(location=LOCATION)
-    altaz_coordinates = cam_coordinates.transform_to(altaz_frame)
-    eq_coordinates = altaz_coordinates.transform_to(ICRS)
+    eq_coordinates = cam_coordinates.transform_to(ICRS)
 
     return eq_coordinates.ra.hourangle, eq_coordinates.dec.deg
 
