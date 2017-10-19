@@ -313,38 +313,67 @@ def initialize_h5py(f, array, key='events', **kwargs):
 
     All kwargs are passed to h5py create_dataset
     '''
-    group = f.create_group(key)
+    group = f.require_group(key)
 
     dtypes = array.dtype
     for name in dtypes.names:
-        dtype = dtypes[name]
-        maxshape = [None] + list(dtype.shape)
-        shape = [0] + list(dtype.shape)
-
-        if dtype.base == object:
-            if isinstance(array[name][0], list):
-                dt = np.array(array[name][0]).dtype
-                shape = [0, len(array[name][0])]
-                maxshape = [None, len(array[name][0])]
-            else:
-                dt = h5py.special_dtype(vlen=str)
-
-        elif dtype.type == np.datetime64:
-            # save dates as ISO string, create dummy date to get correct length
-            dt = np.array(0, dtype=dtype).astype('S').dtype
-
-        else:
-            dt = dtype.base
-
-        group.create_dataset(
-            name,
-            shape=tuple(shape),
-            maxshape=tuple(maxshape),
-            dtype=dt,
-            **kwargs
-        )
+        create_empty_h5py_dataset(array[name], group, name, **kwargs)
 
     return group
+
+
+def create_empty_h5py_dataset(array, group, name, **kwargs):
+    dtype = array.dtype
+    maxshape = [None] + list(array.shape)[1:]
+    shape = [0] + list(array.shape)[1:]
+
+    if dtype.base == object:
+        if isinstance(array[0], list):
+            dt = np.array(array[0]).dtype
+            shape = [0, len(array[0])]
+            maxshape = [None, len(array[0])]
+        else:
+            dt = h5py.special_dtype(vlen=str)
+
+    elif dtype.type == np.datetime64:
+        # save dates as ISO string, create dummy date to get correct length
+        dt = np.array(0, dtype=dtype).astype('S').dtype
+
+    else:
+        dt = dtype.base
+
+    dataset = group.create_dataset(
+        name,
+        shape=tuple(shape),
+        maxshape=tuple(maxshape),
+        dtype=dt,
+        **kwargs
+    )
+    return dataset
+
+
+def append_to_h5py_dataset(array, group, name):
+    dataset = group.get(name)
+
+    n_existing_rows = dataset.shape[0]
+    n_new_rows = array.shape[0]
+
+    dataset.resize(n_existing_rows + n_new_rows, axis=0)
+
+    # swap byteorder if not native
+    if array.dtype.byteorder not in ('=', native_byteorder, '|'):
+        data = array.newbyteorder().byteswap()
+    else:
+        data = array
+
+    if data.dtype.type == np.datetime64:
+        data = data.astype('S')
+
+    if data.dtype.base == object:
+        if isinstance(data[0], list):
+            data = np.array([o for o in data])
+
+    dataset[n_existing_rows:] = data
 
 
 def append_to_h5py(f, array, key='events'):
@@ -365,31 +394,4 @@ def append_to_h5py(f, array, key='events'):
     group = f.get(key)
 
     for column in array.dtype.names:
-        dataset = group.get(column)
-
-        n_existing_rows = dataset.shape[0]
-        n_new_rows = array[column].shape[0]
-
-        dataset.resize(n_existing_rows + n_new_rows, axis=0)
-
-        # swap byteorder if not native
-        if array[column].dtype.byteorder not in ('=', native_byteorder, '|'):
-            data = array[column].newbyteorder().byteswap()
-        else:
-            data = array[column]
-
-        if data.dtype.type == np.datetime64:
-            data = data.astype('S')
-
-        if data.dtype.base == object:
-            if isinstance(data[0], list):
-                data = np.array([o for o in data])
-
-        if data.ndim == 1:
-            dataset[n_existing_rows:] = data
-
-        elif data.ndim == 2:
-            dataset[n_existing_rows:, :] = data
-
-        else:
-            raise NotImplementedError('Only 1d and 2d arrays are supported at this point')
+        append_to_h5py_dataset(array[column], group, column)
