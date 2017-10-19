@@ -6,7 +6,7 @@ from .utils import horizontal_to_camera, camera_to_horizontal
 __all__ = [
     'CameraCoordinate',
     'equatorial_to_camera',
-    'camera_to_equatorial'
+    'camera_to_equatorial',
     'horizontal_to_camera',
-    'camera_to_horizontal'
+    'camera_to_horizontal',
 ]
