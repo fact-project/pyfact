@@ -7,15 +7,19 @@ from ..instrument.constants import LOCATION
 
 
 def arrays_to_altaz(zenith, azimuth, obstime=None):
-    frame = AltAz(location=LOCATION, obstime=obstime)
-    return SkyCoord(
+    if obstime is not None:
+        obstime = array_to_time(obstime)
+    return AltAz(
         az=np.asanyarray(azimuth) * u.deg,
         alt=np.asanyarray(90 - zenith) * u.deg,
-        frame=frame,
+        location=LOCATION,
+        obstime=obstime,
     )
 
 
 def arrays_to_camera(x, y, pointing_direction, obstime=None):
+    if obstime is not None:
+        obstime = array_to_time(obstime)
     frame = CameraFrame(pointing_direction=pointing_direction, obstime=obstime)
     return SkyCoord(
         x=np.asanyarray(x) * u.mm,
@@ -25,6 +29,8 @@ def arrays_to_camera(x, y, pointing_direction, obstime=None):
 
 
 def arrays_to_equatorial(ra, dec, obstime=None):
+    if obstime is not None:
+        obstime = array_to_time(obstime)
     return SkyCoord(
         ra=np.asanyarray(ra) * u.hourangle,
         dec=np.asanyarray(dec) * u.deg,
@@ -32,7 +38,11 @@ def arrays_to_equatorial(ra, dec, obstime=None):
     )
 
 
-def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
+def array_to_time(obstime_array):
+    return Time(np.asanyarray(obstime_array).astype(str))
+
+
+def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, obstime):
     '''
     Convert sky coordinates from the equatorial frame to FACT camera
     coordinates.
@@ -47,7 +57,7 @@ def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
         Zenith distance of the telescope pointing direction in degree
     az_pointing: number or array-like
         Azimuth of the telescope pointing direction in degree
-    observation_time: datetime or np.datetime64
+    obstime: datetime or np.datetime64
         Time of the observations
 
     Returns
@@ -59,9 +69,8 @@ def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
         y-coordinate in the camera plane in mm.
         Following the axis of the the FACTPixelMap file (and FACT-Tools).
     '''
-    obstime = Time(np.asanyarray(observation_time).astype(str))
-    eq_coordinates = arrays_to_equatorial(ra, dec=dec, obstime=obstime)
-    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
+    eq_coordinates = arrays_to_equatorial(ra, dec, obstime=obstime)
+    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing, obstime)
 
     camera_frame = CameraFrame(pointing_direction=pointing_direction)
     cam_coordinates = eq_coordinates.transform_to(camera_frame)
@@ -69,7 +78,7 @@ def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, observation_time):
     return cam_coordinates.x.to(u.mm).value, cam_coordinates.y.to(u.mm).value
 
 
-def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
+def camera_to_equatorial(x, y, zd_pointing, az_pointing, obstime):
     '''
     Convert FACT camera coordinates to sky coordinates in the equatorial (icrs)
     frame.
@@ -86,7 +95,7 @@ def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
         Zenith distance of the telescope pointing direction in degree
     az_pointing: number or array-like
         Azimuth of the telescope pointing direction in degree
-    observation_time: datetime or np.datetime64
+    obstime: datetime or np.datetime64
         Time of the observations
 
     Returns
@@ -96,8 +105,7 @@ def camera_to_equatorial(x, y, zd_pointing, az_pointing, observation_time):
     dec: number or array-like
         Declination in degrees
     '''
-    obstime = Time(np.asanyarray(observation_time).astype(str))
-    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing)
+    pointing_direction = arrays_to_altaz(zd_pointing, az_pointing, obstime)
     cam_coordinates = arrays_to_camera(x, y, pointing_direction, obstime=obstime)
     eq_coordinates = cam_coordinates.transform_to(ICRS)
 
@@ -119,8 +127,6 @@ def horizontal_to_camera(zd, az, zd_pointing, az_pointing):
         Zenith distance of the telescope pointing direction in degree
     az_pointing: number or array-like
         Azimuth of the telescope pointing direction in degree
-    observation_time: datetime or np.datetime64
-        Time of the observations
 
     Returns
     -------

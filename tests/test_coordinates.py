@@ -45,3 +45,21 @@ def test_there_and_back_again():
 
     assert np.allclose(x, df.x)
     assert np.allclose(y, df.y)
+
+
+def test_there_and_back_again_horizontal():
+    from fact.coordinates import camera_to_horizontal, horizontal_to_camera
+
+    df = pd.DataFrame({
+        'az_tracking': [0, 90, 270],
+        'zd_tracking': [0, 10, 20],
+        'timestamp': pd.date_range('2017-10-01 22:00Z', periods=3, freq='10min'),
+        'x': [-100, 0, 150],
+        'y': [0, 100, 0],
+    })
+
+    zd, az = camera_to_horizontal(df.x, df.y, df.zd_tracking, df.az_tracking)
+    x, y = horizontal_to_camera(zd, az, df.zd_tracking, df.az_tracking)
+
+    assert np.allclose(x, df.x)
+    assert np.allclose(y, df.y)
