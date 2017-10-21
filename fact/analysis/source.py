@@ -133,7 +133,6 @@ def calc_theta_camera(
 
     source_prediction_alt_az = source_prediction.transform_to(altaz)
     source_pos_altaz = source_pos.transform_to(altaz)
-
     return source_pos_altaz.separation(source_prediction_alt_az).deg
 
 
@@ -176,15 +175,19 @@ def calc_theta_offs_camera(
     theta_deg: n_off-tuple
         theta in degrees for each off position
     '''
-    altaz = AltAz(location=LOCATION, obstime=obstime)
-    camera_frame = CameraFrame(location=LOCATION, obstime=obstime)
-
-    source = arrays_to_equatorial(source_ra, source_dec)
     pointing = arrays_to_altaz(zd_pointing, az_pointing, obstime)
+    source = arrays_to_equatorial(source_ra, source_dec)
     source_prediction = arrays_to_camera(
         source_x_prediction, source_y_prediction,
         pointing_direction=pointing,
         obstime=obstime,
+    )
+
+    altaz = AltAz(location=LOCATION, obstime=obstime)
+    camera_frame = CameraFrame(
+        location=LOCATION,
+        obstime=obstime,
+        pointing_direction=pointing
     )
 
     source_prediction_alt_az = source_prediction.transform_to(altaz)
