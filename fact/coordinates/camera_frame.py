@@ -6,10 +6,10 @@ from astropy.coordinates import (
 )
 
 try:
-    from astropy.coordinates import Attribute, TimeAttribute, EarthLocationAttribute
+    from astropy.coordinates import CoordinateAttribute, TimeAttribute, EarthLocationAttribute
 except ImportError:
     # for astropy <= 2.0.0
-    from astropy.coordinates import FrameAttribute as Attribute, TimeAttribute
+    from astropy.coordinates import CoordinateAttribute, TimeAttribute, EarthLocationAttribute
 
 from astropy.coordinates.matrix_utilities import rotation_matrix
 from astropy.coordinates.representation import CartesianRepresentation
@@ -25,7 +25,7 @@ focal_length = FOCAL_LENGTH_MM * u.mm
 class CameraFrame(BaseCoordinateFrame):
     '''Astropy CoordinateFrame representing coordinates in the CameraPlane'''
     default_representation = PlanarRepresentation
-    pointing_direction = Attribute(default=None)
+    pointing_direction = CoordinateAttribute(frame=AltAz, default=None)
     obstime = TimeAttribute(default=None)
     location = EarthLocationAttribute(default=LOCATION)
 
