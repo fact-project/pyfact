@@ -9,7 +9,11 @@ try:
     from astropy.coordinates import CoordinateAttribute, TimeAttribute, EarthLocationAttribute
 except ImportError:
     # for astropy <= 2.0.0
-    from astropy.coordinates import CoordinateAttribute, TimeAttribute, EarthLocationAttribute
+    from astropy.coordinates import (
+        CoordinateAttribute,
+        TimeFrameAttribute as TimeAttribute,
+        EarthLocationAttribute,
+    )
 
 from astropy.coordinates.matrix_utilities import rotation_matrix
 from astropy.coordinates.representation import CartesianRepresentation
