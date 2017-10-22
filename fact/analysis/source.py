@@ -2,6 +2,7 @@ import numpy as np
 
 import astropy.units as u
 from astropy.coordinates import AltAz, SkyCoord
+from astropy.coordinates.angle_utilities import angular_separation
 
 from ..coordinates import CameraFrame
 from ..coordinates.utils import (
@@ -88,9 +89,8 @@ def calc_theta_equatorial(
 def calc_theta_camera(
         source_x_prediction,
         source_y_prediction,
-        source_ra,
-        source_dec,
-        obstime,
+        source_zd,
+        source_az,
         zd_pointing,
         az_pointing):
     '''
@@ -105,12 +105,10 @@ def calc_theta_camera(
         prediction of the x postions of the source in mm
     source_y_prediction: number or array-like
         prediction of the y postions of the source in mm
-    source_ra: number or array-like
-        Right ascension of the source position in hourangle
-    source_dec: number or array-like
-        Declination of the source position in degree
-    obstime: instance or array of type datetime64
-        Timestamp of the observation
+    source_zd: number or array-like
+        Zenith of the source position in degree
+    source_az: number or array-like
+        Azimuth of the source position in degree
     zd_pointing: number or array-like
         zenith angle of the pointing direction in degrees
     az_pointing: number or array-like
@@ -121,27 +119,27 @@ def calc_theta_camera(
     theta_deg: array
         theta in degrees
     '''
-    pointing = arrays_to_altaz(zd_pointing, az_pointing, obstime)
-    altaz = AltAz(location=LOCATION, obstime=obstime)
+    pointing = arrays_to_altaz(zd_pointing, az_pointing)
+    altaz = AltAz(location=LOCATION)
 
     source_prediction = arrays_to_camera(
         source_x_prediction, source_y_prediction,
         pointing_direction=pointing,
-        obstime=obstime,
     )
-    source_pos = arrays_to_equatorial(source_ra, source_dec)
 
+    source_pos = arrays_to_altaz(source_zd, source_az)
     source_prediction_alt_az = source_prediction.transform_to(altaz)
-    source_pos_altaz = source_pos.transform_to(altaz)
-    return source_pos_altaz.separation(source_prediction_alt_az).deg
+    return angular_separation(
+        source_prediction_alt_az.az, source_prediction_alt_az.alt,
+        source_pos.az, source_pos.alt,
+    ).to(u.deg).value
 
 
 def calc_theta_offs_camera(
         source_x_prediction,
         source_y_prediction,
-        source_ra,
-        source_dec,
-        obstime,
+        source_zd,
+        source_az,
         zd_pointing,
         az_pointing,
         n_off=5):
@@ -151,18 +149,14 @@ def calc_theta_offs_camera(
 
     Parameters
     ----------
-    source_ra_prediction: number or array-like
-        prediction of the right ascension of the source position
-        in hourangle
-    source_dec_prediction: number or array-like
-        prediction of the declination of the source position
-        in degree
-    source_ra: number or array-like
-        Right ascension of the source position in hourangle
-    source_dec: number or array-like
-        Declination of the source position in degree
-    obstime: instance or array of type datetime64
-        Timestamp of the observation
+    source_x_prediction: number or array-like
+        prediction of the x coordinate of the source position in mm
+    source_y_prediction: number or array-like
+        prediction of the y coordinate of the source position in mm
+    source_zd: number or array-like
+        Zenith of the source position in degree
+    source_az: number or array-like
+        Azimuth of the source position in degree
     zd_pointing: number or array-like
         zenith angle of the pointing direction in degrees
     az_pointing: number or array-like
@@ -175,18 +169,16 @@ def calc_theta_offs_camera(
     theta_deg: n_off-tuple
         theta in degrees for each off position
     '''
-    pointing = arrays_to_altaz(zd_pointing, az_pointing, obstime)
-    source = arrays_to_equatorial(source_ra, source_dec)
+    pointing = arrays_to_altaz(zd_pointing, az_pointing)
+    source = arrays_to_altaz(source_zd, source_az)
     source_prediction = arrays_to_camera(
         source_x_prediction, source_y_prediction,
         pointing_direction=pointing,
-        obstime=obstime,
     )
 
-    altaz = AltAz(location=LOCATION, obstime=obstime)
+    altaz = AltAz(location=LOCATION)
     camera_frame = CameraFrame(
         location=LOCATION,
-        obstime=obstime,
         pointing_direction=pointing
     )
 
@@ -202,7 +194,8 @@ def calc_theta_offs_camera(
 
         off_pos = SkyCoord(off_x, off_y, frame=camera_frame)
         off_pos_altaz = off_pos.transform_to(altaz)
-        theta_offs.append(
-            off_pos_altaz.separation(source_prediction_alt_az).deg
-        )
+        theta_offs.append(angular_separation(
+            source_prediction_alt_az.az, source_prediction_alt_az.alt,
+            off_pos_altaz.az, off_pos_altaz.alt,
+        ).to(u.deg).value)
     return tuple(theta_offs)
