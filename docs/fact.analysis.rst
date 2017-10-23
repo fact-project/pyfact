@@ -9,6 +9,14 @@ fact\.analysis package
 Submodules
 ----------
 
+fact\.analysis\.source module
+------------------------------
+
+.. automodule:: fact.analysis.source
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 fact\.analysis\.binning module
 ------------------------------
 
