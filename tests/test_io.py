@@ -166,6 +166,67 @@ def test_write_data_pandas_hdf():
         write_data(df, f.name, use_h5py=False)
 
 
+def test_initialize_h5py():
+    from fact.io import initialize_h5py
+
+    df = pd.DataFrame({
+        'x': [1, 2, 3],
+        'name': ['Crab', 'Mrk 501', 'Test'],
+        't': ['2017-10-01 21:22', '2017-10-01 21:23', '2017-10-01 21:24'],
+        's': [[0, 1], [0, 2], [0, 3]],
+    })
+    df['t'] = pd.to_datetime(df['t'])
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        with h5py.File(f.name, 'w') as h5file:
+            initialize_h5py(h5file, df.to_records(index=False), key='events')
+
+        with h5py.File(f.name, 'r') as h5file:
+            assert h5file['events']['name'].dtype == np.dtype('O')
+            assert h5file['events']['x'].dtype == np.dtype('int64')
+            assert h5file['events']['t'].dtype == np.dtype('S48')
+            assert h5file['events']['s'].shape == (0, 2)
+
+
+def test_append_h5py():
+    from fact.io import initialize_h5py, append_to_h5py
+
+    df = pd.DataFrame({
+        'x': [1, 2, 3],
+        'name': ['Crab', 'Mrk 501', 'Test'],
+        't': ['2017-10-01 21:22', '2017-10-01 21:23', '2017-10-01 21:24'],
+        's': [[0, 1], [0, 2], [0, 3]],
+    })
+    df['t'] = pd.to_datetime(df['t'])
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        with h5py.File(f.name, 'w') as h5file:
+            array = df.to_records(index=False)
+            initialize_h5py(h5file, array, key='events')
+            append_to_h5py(h5file, array, key='events')
+
+        with h5py.File(f.name, 'r') as h5file:
+            assert h5file['events']['name'].dtype == np.dtype('O')
+            assert h5file['events']['x'].dtype == np.dtype('int64')
+            assert h5file['events']['t'].dtype == np.dtype('S48')
+            assert h5file['events']['s'].shape == (3, 2)
+            assert h5file['events']['s'][0, 1] == 1
+            assert h5file['events']['s'][2, 1] == 3
+
+
+def test_append_3d():
+    from fact.io import initialize_h5py, append_to_h5py
+
+    array = np.zeros(100, dtype=[('x', 'float64', (3, 3))])
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        with h5py.File(f.name, 'w') as h5file:
+            initialize_h5py(h5file, array, key='events')
+
+            append_to_h5py(h5file, array, key='events')
+            append_to_h5py(h5file, array, key='events')
+
+
 def test_write_data_h5py():
     from fact.io import write_data
 
@@ -176,6 +237,21 @@ def test_write_data_h5py():
 
     with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
         write_data(df, f.name, use_h5py=True)
+
+
+def test_write_lists_h5py():
+    from fact.io import to_h5py, read_h5py
+
+    df = pd.DataFrame({
+        'x': [[1.0, 2.0], [3.0, 4.0]]
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        to_h5py(f.name, df)
+
+        df = read_h5py(f.name, columns=['x'])
+
+        assert df['x_0'].iloc[0] == 1.0
 
 
 def test_write_data_root():
@@ -189,3 +265,45 @@ def test_write_data_root():
     with pytest.raises(IOError):
         with tempfile.NamedTemporaryFile(suffix='.root') as f:
             write_data(df, f.name)
+
+
+def test_read_data_csv():
+    '''
+    Write a csv file from a dataframe and then read it back again.
+    '''
+    from fact.io import write_data, read_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50).astype('float32'),
+        'N': np.random.randint(0, 10, dtype='uint8', size=50)
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.csv') as f:
+        write_data(df, f.name)
+
+        dtypes = {'x': 'float32', 'N': 'uint8'}
+        df_from_file = read_data(f.name, dtype=dtypes)
+
+        assert df.equals(df_from_file)
+
+
+def test_read_data_h5py():
+    '''
+    Create a h5py hdf5 file from a dataframe and read it back.
+    '''
+    from fact.io import write_data, read_data
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50).astype('float32'),
+        'N': np.random.randint(0, 10, dtype='uint8', size=50)
+    })
+
+    with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+        write_data(df, f.name, use_h5py=True, key='lecker_daten')
+
+        df_from_file = read_data(f.name, key='lecker_daten')
+
+        assert df.equals(df_from_file)
+
+
+

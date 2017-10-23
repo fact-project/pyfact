@@ -8,6 +8,7 @@ before_install:
   # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
+  - pip install --upgrade pip
 
 install:
   - pip install restructuredtext-lint sphinx pygments
@@ -23,7 +24,6 @@ deploy:
   - provider: pypi
     skip_cleanup: true
     distributions: sdist
-    server: "https://pypi.python.org/pypi"
     user: fact-deploybot
     password:
       secure: "HjD8z63sITDhK4TwcnF/q1K+nF3nIslpoVUdJhSKlX/Hv8NaFajt0bM32KqIEADMAj510dcuHlZtcyDCX/9TTF4U9fAPkZSsoAa4yyD7BwcY2arwHDBgYSvGAHTqCzMwZvNcE+k0A7ZhfqjwwW+dtMM7Hx+vS+MfqhXy6ZrLbEg="

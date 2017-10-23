@@ -13,6 +13,7 @@ Subpackages
 
     fact.analysis
     fact.auxservices
+    fact.coordinates
     fact.credentials
     fact.factdb
     fact.instrument
@@ -22,6 +23,14 @@ Subpackages
 Submodules
 ----------
 
+fact\.io module
+---------------
+
+.. automodule:: fact.io
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 fact\.encrypt\_credentials module
 ---------------------------------
 
@@ -30,13 +39,6 @@ fact\.encrypt\_credentials module
     :undoc-members:
     :show-inheritance:
 
-fact\.io module
----------------
-
-.. automodule:: fact.io
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 fact\.qla module
 ----------------

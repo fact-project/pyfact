@@ -84,6 +84,8 @@ def read_h5py(file_path, key='data', columns=None, mode='r+'):
         # get all columns of which don't have more than one value per row
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
+        else:
+            columns = copy(columns)
 
         df = pd.DataFrame()
         for col in columns:
@@ -133,6 +135,8 @@ def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode=
         # get all columns of which don't have more than one value per row
         if columns is None:
             columns = [col for col in group.keys() if group[col].ndim == 1]
+        else:
+            columns = copy(columns)
 
         n_rows = h5py_get_n_rows(file_path, key=key)
 
@@ -172,7 +176,7 @@ def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode=
             yield df, start, end
 
 
-def read_data(file_path, **kwargs):
+def read_data(file_path, key=None, columns=None, **kwargs):
     '''
     This is a utility wrapper for other reading functions.
     It will look for the file extension and try to use the correct
@@ -197,11 +201,12 @@ def read_data(file_path, **kwargs):
 
     if extension in ['.hdf', '.hdf5', '.h5']:
         try:
-            df = pd.read_hdf(file_path, **kwargs)
+            df = pd.read_hdf(file_path, key=key, columns=columns, **kwargs)
         except (TypeError, ValueError):
-            df = read_h5py(file_path, **kwargs)
+            df = read_h5py(file_path, key=key, columns=columns, **kwargs)
+        return df
 
-    elif extension == '.json':
+    if extension == '.json':
         with open(file_path, 'r') as j:
             d = json.load(j)
             df = pd.DataFrame(d)
@@ -214,6 +219,9 @@ def read_data(file_path, **kwargs):
 
     else:
         raise NotImplementedError('Unknown data file extension {}'.format(extension))
+
+    if columns:
+        df = df[columns]
 
     return df
 
@@ -254,7 +262,7 @@ def to_h5py(filename, df, key='data', mode='a', dtypes=None, index=True, **kwarg
 
     with h5py.File(filename, mode=mode) as f:
         if key not in f:
-            initialize_h5py(f, array.dtype, key=key, **kwargs)
+            initialize_h5py(f, array, key=key, **kwargs)
 
         append_to_h5py(f, array, key=key)
 
@@ -289,7 +297,7 @@ def change_recarray_dtype(array, dtypes):
     return array.astype(dt)
 
 
-def initialize_h5py(f, dtypes, key='events', **kwargs):
+def initialize_h5py(f, array, key='events', **kwargs):
     '''
     Create a group with name `key` and empty datasets for each
     entry in dtypes.
@@ -298,40 +306,103 @@ def initialize_h5py(f, dtypes, key='events', **kwargs):
     ----------
     f: h5py.File
         the hdf5 file, opened either in write or append mode
-    dtypes: numpy.dtype
-        the numpy dtype object of a record or structured array describing
-        the columns
+    array: numpy structured array
+        The data
     key: str
         the name for the hdf5 group to hold all datasets, default: data
 
     All kwargs are passed to h5py create_dataset
     '''
-    group = f.create_group(key)
+    group = f.require_group(key)
 
+    dtypes = array.dtype
     for name in dtypes.names:
-        dtype = dtypes[name]
-        maxshape = [None] + list(dtype.shape)
-        shape = [0] + list(dtype.shape)
-
-        if dtype.base == object:
-            dt = h5py.special_dtype(vlen=str)
-
-        elif dtype.type == np.datetime64:
-            # save dates as ISO string, create dummy date to get correct length
-            dt = np.array(0, dtype=dtype).astype('S').dtype
-
-        else:
-            dt = dtype.base
-
-        group.create_dataset(
-            name,
-            shape=tuple(shape),
-            maxshape=tuple(maxshape),
-            dtype=dt,
-            **kwargs
-        )
+        create_empty_h5py_dataset(array[name], group, name, **kwargs)
 
     return group
+
+
+def create_empty_h5py_dataset(array, group, name, **kwargs):
+    '''
+    Create a new h5py dataset for the content of `array`.
+
+    datetime64 objects are stored as fixed length strings
+    arrays of lists are stored as 2d arrays (so they have to be fixed length)
+    strings are stored as special dtype for strings
+
+    Parameters
+    ----------
+    array: numpy.array or numpy.recarray
+        the numpy array to get the dtype and shape from
+    dataset: h5py.Group
+        the hdf5 group the dataset should be created in
+    name: str
+        name for the new dataset
+    **kwargs:
+        all **kwargs are passed to create_dataset, useful for e.g. compression
+    '''
+    dtype = array.dtype
+    maxshape = [None] + list(array.shape)[1:]
+    shape = [0] + list(array.shape)[1:]
+
+    if dtype.base == object:
+        if isinstance(array[0], list):
+            dt = np.array(array[0]).dtype
+            shape = [0, len(array[0])]
+            maxshape = [None, len(array[0])]
+        else:
+            dt = h5py.special_dtype(vlen=str)
+
+    elif dtype.type == np.datetime64:
+        # save dates as ISO string, create dummy date to get correct length
+        dt = np.array(0, dtype=dtype).astype('S').dtype
+
+    else:
+        dt = dtype.base
+
+    dataset = group.create_dataset(
+        name,
+        shape=tuple(shape),
+        maxshape=tuple(maxshape),
+        dtype=dt,
+        **kwargs
+    )
+    return dataset
+
+
+def append_to_h5py_dataset(array, dataset):
+    '''
+    Append a single numpy array to an h5py dataset.
+
+    datetime64 objects are stored as fixed length strings
+    arrays of lists are stored as 2d arrays (so they have to be fixed length)
+
+    Parameters
+    ----------
+    array: numpy.array or numpy.recarray
+        the numpy array to append
+    dataset: h5py.Dataset
+        the hdf5 dataset to append to
+    '''
+    n_existing_rows = dataset.shape[0]
+    n_new_rows = array.shape[0]
+
+    dataset.resize(n_existing_rows + n_new_rows, axis=0)
+
+    # swap byteorder if not native
+    if array.dtype.byteorder not in ('=', native_byteorder, '|'):
+        data = array.newbyteorder().byteswap()
+    else:
+        data = array
+
+    if data.dtype.type == np.datetime64:
+        data = data.astype('S')
+
+    if data.dtype.base == object:
+        if isinstance(data[0], list):
+            data = np.array([o for o in data])
+
+    dataset[n_existing_rows:] = data
 
 
 def append_to_h5py(f, array, key='events'):
@@ -353,26 +424,6 @@ def append_to_h5py(f, array, key='events'):
 
     for column in array.dtype.names:
         dataset = group.get(column)
-
-        n_existing_rows = dataset.shape[0]
-        n_new_rows = array[column].shape[0]
-
-        dataset.resize(n_existing_rows + n_new_rows, axis=0)
-
-        # swap byteorder if not native
-        if array[column].dtype.byteorder not in ('=', native_byteorder, '|'):
-            data = array[column].newbyteorder().byteswap()
-        else:
-            data = array[column]
-
-        if data.dtype.type == np.datetime64:
-            data = data.astype('S')
-
-        if data.ndim == 1:
-            dataset[n_existing_rows:] = data
-
-        elif data.ndim == 2:
-            dataset[n_existing_rows:, :] = data
-
-        else:
-            raise NotImplementedError('Only 1d and 2d arrays are supported at this point')
+        if dataset is None:
+            raise KeyError('No such dataset {}'.format(dataset))
+        append_to_h5py_dataset(array[column], dataset)
