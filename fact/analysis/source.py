@@ -97,7 +97,7 @@ def calc_theta_camera(
     Calculate the angular distance between reconstructed source
     position and assumed source position, where the
     prediction is given as camera coordinates and the source position
-    in the equatorial coordinate system.
+    in the horizontal coordinate system.
 
     Parameters
     ----------
