@@ -18,15 +18,61 @@ going by the name of FACT Julain Date (FJD).
 from __future__ import print_function, division
 import time
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 import dateutil
 import dateutil.parser
+import numpy as np
 
 import pandas as pd
 
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
+
+UNIX_EPOCH = datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc)
+MJD_EPOCH = datetime(1858, 11, 17, 0, tzinfo=timezone.utc)
+MJD_EPOCH_NUMPY = np.array(MJD_EPOCH.timestamp()).astype('datetime64[s]')
+
+
+def unixtime_to_mjd(unixtime):
+    return (unixtime - (MJD_EPOCH - UNIX_EPOCH).total_seconds()) / 3600 / 24
+
+
+def mjd_to_unixtime(mjd):
+    return (mjd + (MJD_EPOCH - UNIX_EPOCH).total_seconds()) * 3600 * 24
+
+
+def datetime_to_mjd(dt):
+    # handle numpy arrays
+    if isinstance(dt, np.ndarray):
+        mjd_ns = (dt - MJD_EPOCH_NUMPY).astype('timedelta64[ns]').astype(float)
+        return mjd_ns / 1e9 / 3600 / 24
+
+    # assume datetimes without timezone are utc
+    if isinstance(dt, datetime):
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+
+    elif isinstance(dt, (pd.Series, pd.DatetimeIndex)):
+        if dt.tz is None:
+            dt.tz = timezone.utc
+
+    return (dt - MJD_EPOCH).total_seconds() / 24 / 3600
+
+
+def mjd_to_datetime(mjd):
+    if isinstance(mjd, (int, float)):
+        delta = timedelta(microseconds=mjd * 24 * 3600 * 1e6)
+        return MJD_EPOCH + delta
+
+    if isinstance(mjd, pd.Series):
+        delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+        return MJD_EPOCH + delta
+
+    # other types will be returned as numpy array if possible
+    mjd = np.asanyarray(mjd)
+    delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+    return MJD_EPOCH_NUMPY + delta
 
 
 def fjd(datetime_inst):

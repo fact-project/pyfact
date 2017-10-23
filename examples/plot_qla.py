@@ -11,9 +11,8 @@ runs = get_qla_data(
 qla_results = bin_runs(
     runs,
     bin_width_minutes=20,
-    discard_ontime_fraction=0.9,
 )
-ax1, ax2 = plot_excess_rate(qla_results)
+ax1, ax2, ax1_mjd = plot_excess_rate(qla_results)
 ax1.grid()
 
 plt.show()
