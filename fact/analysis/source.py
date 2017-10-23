@@ -29,9 +29,9 @@ def calc_off_position(source_x, source_y, off_index, n_off=5):
 
     Returns
     -------
-    x_off: float or or astropy.units.Quantity
+    x_off: float or astropy.units.Quantity
         x coordinate of the off position
-    y_off: float or or astropy.units.Quantity
+    y_off: float or astropy.units.Quantity
         y coordinate of the off position
     '''
 
