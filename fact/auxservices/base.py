@@ -15,7 +15,8 @@ class AuxService:
     def __init__(self, auxdir='/fact/aux'):
         self.path = partial(
             tree_path,
-            base_dir=auxdir,
+            run=None,
+            prefix=auxdir,
             suffix='.' + self.basename + '.fits')
 
     @classmethod
