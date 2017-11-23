@@ -30,6 +30,12 @@ setup(
             'credentials/credentials.encrypted',
         ]
     },
+    entry_points={
+        'console_scripts': [
+            'fact_calculate_theta = fact.analysis.scripts.theta:main',
+            'fact_calculate_radec = fact.analysis.scripts.radec:main',
+        ]
+    },
     tests_require=['pytest>=3.0.0'],
     setup_requires=['pytest-runner'],
     install_requires=[
