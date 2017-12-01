@@ -85,11 +85,21 @@ cols = [
 @click.option('-c', '--chunksize', type=int, default=10000)
 @click.option('-y', '--yes', is_flag=True, help='Do not ask to overwrite existing keys')
 def main(inputfile, source, chunksize, yes):
+    '''
+    Calculate theta_deg and theta_deg_offs from source position in camera coordinates
+    e.g. for example for files analysed with the classifier-tools
+
+    The following keys have to be present in the h5py hdf5 file.
+        * az_tracking
+        * zd_tracking
+        * source_x_prediction
+        * source_y_prediction
+        * unix_time_utc (Only if a source name is given)
+    '''
 
     with h5py.File(inputfile, 'r') as f:
         if any(col in f['events'].keys() for col in cols) and not yes:
             click.confirm('Output keys already exist, overwrite? ', abort=True)
-
 
     if source is None:
         df_it = read_h5py_chunked(
@@ -100,7 +110,6 @@ def main(inputfile, source, chunksize, yes):
                 'zd_tracking',
                 'source_x_prediction',
                 'source_y_prediction',
-                'gamma_prediction',
                 'az_source_calc',
                 'zd_source_calc',
             ],
@@ -123,7 +132,6 @@ def main(inputfile, source, chunksize, yes):
                 'zd_tracking',
                 'source_x_prediction',
                 'source_y_prediction',
-                'gamma_prediction',
                 'unix_time_utc',
             ],
             chunksize=chunksize
