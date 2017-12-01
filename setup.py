@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('fact/VERSION', 'r') as f:
     __version__ = f.read().strip()
@@ -12,22 +12,18 @@ setup(
     author='Maximilian Noethe, Dominik Neise',
     author_email='maximilian.noethe@tu-dortmund.de',
     license='MIT',
-    packages=[
-        'fact',
-        'fact.plotting',
-        'fact.slowdata',
-        'fact.credentials',
-        'fact.auxservices',
-        'fact.factdb',
-        'fact.analysis',
-        'fact.instrument',
-        'fact.coordinates',
-    ],
+    packages=find_packages(),
     package_data={
         '': [
             'VERSION',
             'resources/*',
             'credentials/credentials.encrypted',
+        ]
+    },
+    entry_points={
+        'console_scripts': [
+            'fact_calculate_theta = fact.analysis.scripts.theta:main',
+            'fact_calculate_radec = fact.analysis.scripts.radec:main',
         ]
     },
     tests_require=['pytest>=3.0.0'],
