@@ -67,4 +67,7 @@ def create_factdb_engine(database=None):
     if database is not None:
         config['database'] = database
 
-    return create_engine(spec.format(**config))
+    return create_engine(
+        spec.format(**config),
+        connect_args={'ssl': {'ssl-mode': 'preferred'}},
+    )
