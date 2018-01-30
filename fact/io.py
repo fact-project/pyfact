@@ -31,7 +31,7 @@ def write_data(df, file_path, key='data', use_hp5y=True, **kwargs):
 
     if extension in ['.hdf', '.hdf5', '.h5']:
         if use_hp5y is True:
-            to_h5py(file_path, df, key=key, **kwargs)
+            to_h5py(df, file_path, key=key, **kwargs)
         else:
             df.to_hdf(file_path, key=key, **kwargs)
 
@@ -232,7 +232,7 @@ def check_extension(file_path, allowed_extensions=allowed_extensions):
         raise IOError('Allowed formats: {}'.format(allowed_extensions))
 
 
-def to_h5py(filename, df, key='data', mode='a', dtypes=None, index=True, **kwargs):
+def to_h5py(df, filename, key='data', mode='a', dtypes=None, index=True, **kwargs):
     '''
     Write pandas dataframe to h5py style hdf5 file
 
