@@ -25,7 +25,7 @@ allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.jsonl', '.jsonlines', '
 native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
-def write_data(df, file_path, key='data', use_hp5y=False, **kwargs):
+def write_data(df, file_path, key='data', use_hp5y=True, **kwargs):
 
     name, extension = path.splitext(file_path)
 
