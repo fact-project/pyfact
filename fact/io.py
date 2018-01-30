@@ -26,6 +26,33 @@ native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
 def write_data(df, file_path, key='data', use_h5py=True, **kwargs):
+    '''
+    Write a pandas DataFrame to several output formats, determined by the
+    extension of `file_path`
+
+    Supported file types are:
+        * hdf5, used when extensions are `.hdf`, `.hdf5` or `.h5`.
+          By default h5py with one dataset per column is used.
+          Pandas to_hdf5 is used if `use_h5py=False`
+        * json, if extension is json
+        * jsonlines if extension is `jsonl` or `jsonline`
+        * csv, if extension is `csv`
+
+    Arguments
+    ---------
+
+    df: pd.DataFrame
+        DataFrame to save
+    file_path: str
+        Path to the outputfile
+    key: str
+        Groupkey, only used for hdf5
+    use_h5py: bool
+        wheither to write h5py style or pandas style hdf5
+
+    All other key word arguments are passed to the actual writer functions.
+    '''
+
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
