@@ -14,7 +14,7 @@ def test_to_h5py():
     })
 
     with tempfile.NamedTemporaryFile() as f:
-        to_h5py(f.name, df, key='test')
+        to_h5py(df, f.name, key='test')
 
         with h5py.File(f.name, 'r') as hf:
 
@@ -40,7 +40,7 @@ def test_to_h5py_string():
     })
 
     with tempfile.NamedTemporaryFile() as f:
-        to_h5py(f.name, df, key='test')
+        to_h5py(df, f.name, key='test')
         df2 = read_h5py(f.name, key='test')
 
         assert all(df.dtypes == df2.dtypes)
@@ -59,7 +59,7 @@ def test_to_h5py_datetime():
     })
 
     with tempfile.NamedTemporaryFile() as f:
-        to_h5py(f.name, df, key='test')
+        to_h5py(df, f.name, key='test')
         df2 = read_h5py(f.name, key='test')
 
         for col in df2.columns:
@@ -82,8 +82,8 @@ def test_to_h5py_append():
     })
 
     with tempfile.NamedTemporaryFile() as f:
-        to_h5py(f.name, df1, key='test', index=False)
-        to_h5py(f.name, df2, key='test', mode='a', index=False)
+        to_h5py(df1, f.name, key='test', index=False)
+        to_h5py(df2, f.name, key='test', mode='a', index=False)
 
         df_read = read_h5py(f.name, key='test')
         df_written = pd.concat([df1, df2], ignore_index=True)
@@ -105,8 +105,8 @@ def test_to_h5py_append_second_group():
     })
 
     with tempfile.NamedTemporaryFile() as f:
-        to_h5py(f.name, df1, key='g1', index=False)
-        to_h5py(f.name, df2, key='g2', index=False)
+        to_h5py(df1, f.name, key='g1', index=False)
+        to_h5py(df2, f.name, key='g2', index=False)
 
         df_g1 = read_h5py(f.name, key='g1')
         df_g2 = read_h5py(f.name, key='g2')
@@ -247,7 +247,7 @@ def test_write_lists_h5py():
     })
 
     with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
-        to_h5py(f.name, df)
+        to_h5py(df, f.name)
 
         df = read_h5py(f.name, columns=['x'])
 
