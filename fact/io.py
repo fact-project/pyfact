@@ -25,13 +25,39 @@ allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.jsonl', '.jsonlines', '
 native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
 
 
-def write_data(df, file_path, key='data', use_hp5y=False, **kwargs):
+def write_data(df, file_path, key='data', use_h5py=True, **kwargs):
+    '''
+    Write a pandas DataFrame to several output formats, determined by the
+    extension of `file_path`
+
+    Supported file types are:
+        * hdf5, used when extensions are `.hdf`, `.hdf5` or `.h5`.
+          By default h5py with one dataset per column is used.
+          Pandas to_hdf5 is used if `use_h5py=False`
+        * json, if extension is json
+        * jsonlines if extension is `jsonl` or `jsonline`
+        * csv, if extension is `csv`
+
+    Arguments
+    ---------
+
+    df: pd.DataFrame
+        DataFrame to save
+    file_path: str
+        Path to the outputfile
+    key: str
+        Groupkey, only used for hdf5
+    use_h5py: bool
+        wheither to write h5py style or pandas style hdf5
+
+    All other key word arguments are passed to the actual writer functions.
+    '''
 
     name, extension = path.splitext(file_path)
 
     if extension in ['.hdf', '.hdf5', '.h5']:
-        if use_hp5y is True:
-            to_h5py(file_path, df, key=key, **kwargs)
+        if use_h5py is True:
+            to_h5py(df, file_path, key=key, **kwargs)
         else:
             df.to_hdf(file_path, key=key, **kwargs)
 
@@ -232,7 +258,7 @@ def check_extension(file_path, allowed_extensions=allowed_extensions):
         raise IOError('Allowed formats: {}'.format(allowed_extensions))
 
 
-def to_h5py(filename, df, key='data', mode='a', dtypes=None, index=True, **kwargs):
+def to_h5py(df, filename, key='data', mode='a', dtypes=None, index=True, **kwargs):
     '''
     Write pandas dataframe to h5py style hdf5 file
 
