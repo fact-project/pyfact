@@ -120,7 +120,7 @@ def horizontal_to_camera(zd, az, zd_pointing, az_pointing):
     Parameters
     ----------
     zd: number or array-like
-        Zenith distance in hourangle
+        Zenith distance in degrees
     az: number or array-like
         azimuth in degrees
     zd_pointing: number or array-like
