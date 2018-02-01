@@ -25,16 +25,16 @@ def calc_theta_source(df, source):
         df.source_y_prediction,
         source_altaz.zen.deg,
         source_altaz.az.deg,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
     )
     theta_offs = calc_theta_offs_camera(
         df.source_x_prediction,
         df.source_y_prediction,
         source_altaz.zen.deg,
         source_altaz.az.deg,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
         n_off=5,
     )
 
@@ -51,16 +51,16 @@ def calc_theta_coordinates(df):
         df.source_y_prediction,
         df.zd_source_calc,
         df.az_source_calc,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
     )
     theta_offs = calc_theta_offs_camera(
         df.source_x_prediction,
         df.source_y_prediction,
         df.zd_source_calc,
         df.az_source_calc,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
         n_off=5,
     )
 
@@ -106,12 +106,12 @@ def main(inputfile, source, chunksize, yes):
             inputfile,
             key='events',
             columns=[
-                'az_tracking',
-                'zd_tracking',
+                'pointing_position_az',
+                'pointing_position_zd',
                 'source_x_prediction',
                 'source_y_prediction',
-                'az_source_calc',
-                'zd_source_calc',
+                'source_position_az',
+                'source_position_zd',
             ],
             chunksize=chunksize
         )
@@ -128,8 +128,8 @@ def main(inputfile, source, chunksize, yes):
             inputfile,
             key='events',
             columns=[
-                'az_tracking',
-                'zd_tracking',
+                'pointing_position_az',
+                'pointing_position_zd',
                 'source_x_prediction',
                 'source_y_prediction',
                 'unix_time_utc',
