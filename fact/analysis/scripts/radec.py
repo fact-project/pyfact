@@ -11,10 +11,7 @@ from ...io import create_empty_h5py_dataset, append_to_h5py_dataset
 
 
 def calc_ra_dec(events):
-    events['obstime'] = pd.to_datetime(
-        events['unix_time_utc_0'] * 1e6 + events['unix_time_utc_1'],
-        unit='us',
-    )
+    events['obstime'] = pd.to_datetime(events['timestamp'])
 
     events['ra_prediction'], events['dec_prediction'] = camera_to_equatorial(
         events['source_x_prediction'],
@@ -59,7 +56,7 @@ def main(inputfile, chunksize, n_jobs, yes):
             'pointing_position_zd',
             'source_x_prediction',
             'source_y_prediction',
-            'unix_time_utc',
+            'timestamp',
         ],
         chunksize=chunksize
     )

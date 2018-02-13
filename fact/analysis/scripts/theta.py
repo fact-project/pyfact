@@ -12,10 +12,7 @@ import click
 
 
 def calc_theta_source(df, source):
-
-    obstime = array_to_time(pd.to_datetime(
-        df.unix_time_utc_0 * 1e6 + df.unix_time_utc_1, unit='us'
-    ))
+    obstime = array_to_time(pd.to_datetime(df['timestamp']))
 
     altaz = AltAz(location=LOCATION, obstime=obstime)
     source_altaz = source.transform_to(altaz)
@@ -132,7 +129,7 @@ def main(inputfile, source, chunksize, yes):
                 'pointing_position_zd',
                 'source_x_prediction',
                 'source_y_prediction',
-                'unix_time_utc',
+                'timestamp',
             ],
             chunksize=chunksize
         )
