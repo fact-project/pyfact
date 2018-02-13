@@ -89,7 +89,7 @@ def to_native_byteorder(array):
     return array
 
 
-def read_h5py(file_path, key='data', columns=None, mode='r+'):
+def read_h5py(file_path, key='data', columns=None, mode='r'):
     '''
     Read a hdf5 file written with h5py into a dataframe
 
@@ -135,7 +135,7 @@ def read_h5py(file_path, key='data', columns=None, mode='r+'):
     return df
 
 
-def h5py_get_n_rows(file_path, key='data', mode='r+'):
+def h5py_get_n_rows(file_path, key='data', mode='r'):
 
     with h5py.File(file_path, mode) as f:
         group = f.get(key)
@@ -146,7 +146,7 @@ def h5py_get_n_rows(file_path, key='data', mode='r+'):
         return group[next(iter(group.keys()))].shape[0]
 
 
-def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode='r+'):
+def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode='r'):
     '''
     Generator function to read from h5py hdf5 in chunks,
     returns an iterator over pandas dataframes.
