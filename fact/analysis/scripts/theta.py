@@ -119,7 +119,7 @@ def main(inputfile, source, chunksize, yes):
                 for df, start, stop in df_it
             )
     else:
-        crab = SkyCoord.from_name(source)
+        source = SkyCoord.from_name(source)
 
         df_it = read_h5py_chunked(
             inputfile,
@@ -137,7 +137,7 @@ def main(inputfile, source, chunksize, yes):
         with Parallel(-1, verbose=10) as pool:
 
             dfs = pool(
-                delayed(calc_theta_source)(df, crab)
+                delayed(calc_theta_source)(df, source)
                 for df, start, stop in df_it
             )
 
