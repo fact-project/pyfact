@@ -45,7 +45,9 @@ def to_astropy_time(series_or_array):
     '''
     Convert a pandas or numpy time object to an astropy time
     '''
-    if isinstance(series_or_array, pd.Series):
+    if isinstance(series_or_array, Time):
+        return series_or_array
+    elif isinstance(series_or_array, pd.Series):
         time = series_or_array.dt.to_pydatetime()
     elif isinstance(series_or_array, (pd.DateTimeIndex, pd.timestamp)):
         time = series_or_array.to_pydatetime()
