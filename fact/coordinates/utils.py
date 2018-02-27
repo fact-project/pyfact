@@ -2,13 +2,15 @@ from astropy.coordinates import AltAz, ICRS, SkyCoord
 from astropy.time import Time
 import astropy.units as u
 import numpy as np
+import pandas as pd
 from .camera_frame import CameraFrame
 from ..instrument.constants import LOCATION
+from datetime import datetime
 
 
 def arrays_to_altaz(zenith, azimuth, obstime=None):
     if obstime is not None:
-        obstime = Time(obstime)
+        obstime = to_astropy_time(obstime)
     return AltAz(
         az=np.asanyarray(azimuth) * u.deg,
         alt=np.asanyarray(90 - zenith) * u.deg,
@@ -19,7 +21,7 @@ def arrays_to_altaz(zenith, azimuth, obstime=None):
 
 def arrays_to_camera(x, y, pointing_direction, obstime=None):
     if obstime is not None:
-        obstime = Time(obstime)
+        obstime = to_astropy_time(obstime)
     frame = CameraFrame(pointing_direction=pointing_direction, obstime=obstime)
     return SkyCoord(
         x=np.asanyarray(x) * u.mm,
@@ -30,13 +32,33 @@ def arrays_to_camera(x, y, pointing_direction, obstime=None):
 
 def arrays_to_equatorial(ra, dec, obstime=None):
     if obstime is not None:
-        obstime = Time(obstime)
+        obstime = to_astropy_time(obstime)
 
     return SkyCoord(
         ra=np.asanyarray(ra) * u.hourangle,
         dec=np.asanyarray(dec) * u.deg,
         obstime=obstime
     )
+
+
+def to_astropy_time(series_or_array):
+    '''
+    Convert a pandas or numpy time object to an astropy time
+    '''
+    if isinstance(series_or_array, pd.Series):
+        time = series_or_array.dt.to_pydatetime()
+    elif isinstance(series_or_array, (pd.DateTimeIndex, pd.timestamp)):
+        time = series_or_array.to_pydatetime()
+    else:
+        # convert to us, as ns does return longs instead of datetimes,
+        # datetimes cannot handle ns
+        time = (
+            np.asanyarray(series_or_array)
+            .astype('datetime64[us]')
+            .astype(datetime)
+        )
+
+    return Time(time, scale='utc')
 
 
 def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, obstime):
