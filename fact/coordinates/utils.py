@@ -8,7 +8,7 @@ from ..instrument.constants import LOCATION
 
 def arrays_to_altaz(zenith, azimuth, obstime=None):
     if obstime is not None:
-        obstime = array_to_time(obstime)
+        obstime = Time(obstime)
     return AltAz(
         az=np.asanyarray(azimuth) * u.deg,
         alt=np.asanyarray(90 - zenith) * u.deg,
@@ -19,7 +19,7 @@ def arrays_to_altaz(zenith, azimuth, obstime=None):
 
 def arrays_to_camera(x, y, pointing_direction, obstime=None):
     if obstime is not None:
-        obstime = array_to_time(obstime)
+        obstime = Time(obstime)
     frame = CameraFrame(pointing_direction=pointing_direction, obstime=obstime)
     return SkyCoord(
         x=np.asanyarray(x) * u.mm,
@@ -30,16 +30,13 @@ def arrays_to_camera(x, y, pointing_direction, obstime=None):
 
 def arrays_to_equatorial(ra, dec, obstime=None):
     if obstime is not None:
-        obstime = array_to_time(obstime)
+        obstime = Time(obstime)
+
     return SkyCoord(
         ra=np.asanyarray(ra) * u.hourangle,
         dec=np.asanyarray(dec) * u.deg,
         obstime=obstime
     )
-
-
-def array_to_time(obstime_array):
-    return Time(np.asanyarray(obstime_array).astype(str))
 
 
 def equatorial_to_camera(ra, dec, zd_pointing, az_pointing, obstime):

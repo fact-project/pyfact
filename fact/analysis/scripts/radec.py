@@ -18,7 +18,7 @@ def calc_ra_dec(events):
         events['source_y_prediction'],
         events['pointing_position_zd'],
         events['pointing_position_az'],
-        events['obstime'],
+        events['obstime'].dt.to_pydatetime(),
     )
     return events
 

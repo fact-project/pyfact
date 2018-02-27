@@ -3,16 +3,16 @@ import pandas as pd
 from fact.analysis import calc_theta_camera, calc_theta_offs_camera
 from fact.io import read_h5py_chunked
 from fact.io import create_empty_h5py_dataset, append_to_h5py_dataset
-from fact.coordinates.utils import array_to_time
 from fact.instrument.constants import LOCATION
 from astropy.coordinates import SkyCoord, AltAz
+from astropy.time import Time
 from joblib import Parallel, delayed
 import h5py
 import click
 
 
 def calc_theta_source(df, source):
-    obstime = array_to_time(pd.to_datetime(df['timestamp']))
+    obstime = Time(pd.to_datetime(df['timestamp']).dt.to_pydatetime())
 
     altaz = AltAz(location=LOCATION, obstime=obstime)
     source_altaz = source.transform_to(altaz)
