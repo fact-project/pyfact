@@ -1,7 +1,7 @@
 from astropy.coordinates import BaseRepresentation, CartesianRepresentation
 import astropy.units as u
 from collections import OrderedDict
-from astropy.utils.compat.numpy import broadcast_arrays
+import numpy as np
 
 
 class PlanarRepresentation(BaseRepresentation):
@@ -42,7 +42,7 @@ class PlanarRepresentation(BaseRepresentation):
             raise u.UnitsError("x and y should have matching physical types")
 
         try:
-            x, y = broadcast_arrays(x, y, subok=True)
+            x, y = np.broadcast_arrays(x, y, subok=True)
         except ValueError:
             raise ValueError("Input parameters x and y cannot be broadcast")
 
