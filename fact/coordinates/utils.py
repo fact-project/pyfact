@@ -49,7 +49,7 @@ def to_astropy_time(series_or_array):
         return series_or_array
     elif isinstance(series_or_array, pd.Series):
         time = series_or_array.dt.to_pydatetime()
-    elif isinstance(series_or_array, (pd.DatetimeIndex, pd.timestamp)):
+    elif isinstance(series_or_array, (pd.DatetimeIndex, pd.Timestamp)):
         time = series_or_array.to_pydatetime()
     else:
         # convert to us, as ns does return longs instead of datetimes,
