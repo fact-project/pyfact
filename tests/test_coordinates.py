@@ -1,5 +1,18 @@
 import pandas as pd
 import numpy as np
+from astropy.time import Time
+from datetime import datetime
+
+
+def test_to_astropy_time():
+    from fact.coordinates.utils import to_astropy_time
+
+    t = Time('2013-01-01 00:00')
+
+    assert to_astropy_time(datetime(2013, 1, 1)) == t
+    assert to_astropy_time(pd.Timestamp(t.unix * 1e9)) == t
+    assert to_astropy_time(pd.to_datetime('2013-01-01 00:00')) == t
+    assert to_astropy_time(np.array('2013-01-01 00:00', dtype='datetime64[ns]')) == t
 
 
 def test_transforms():
