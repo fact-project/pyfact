@@ -89,7 +89,14 @@ def to_native_byteorder(array):
     return array
 
 
-def read_h5py(file_path, key='data', columns=None, mode='r'):
+def read_h5py(
+        file_path,
+        key='data',
+        columns=None,
+        mode='r',
+        parse_dates=True,
+        first=None,
+        last=None):
     '''
     Read a hdf5 file written with h5py into a dataframe
 
@@ -101,6 +108,13 @@ def read_h5py(file_path, key='data', columns=None, mode='r'):
         name of the hdf5 group to read in
     columns: iterable[str]
         Names of the datasets to read in. If not given read all 1d datasets
+    parse_dates: bool
+        Convert columns with attrs['timeformat'] to timestamps
+    first: int or None
+        first row to read from the file
+    last: int or None
+        last event to read from the file
+
     '''
     with h5py.File(file_path, mode) as f:
         group = f.get(key)
@@ -115,11 +129,15 @@ def read_h5py(file_path, key='data', columns=None, mode='r'):
 
         df = pd.DataFrame()
         for col in columns:
-            array = to_native_byteorder(group[col][:])
+            dataset = group[col]
+            array = to_native_byteorder(dataset[first:last])
 
             # pandas cannot handle bytes, convert to str
             if array.dtype.kind == 'S':
                 array = array.astype(str)
+
+            if parse_dates and dataset.attrs.get('timeformat') is not None:
+                array = pd.to_datetime(array, infer_datetime_format=True)
 
             if array.ndim == 1:
                 df[col] = array
@@ -146,7 +164,13 @@ def h5py_get_n_rows(file_path, key='data', mode='r'):
         return group[next(iter(group.keys()))].shape[0]
 
 
-def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode='r'):
+def read_h5py_chunked(
+        file_path,
+        key='data',
+        columns=None,
+        chunksize=None,
+        mode='r',
+        parse_dates=True):
     '''
     Generator function to read from h5py hdf5 in chunks,
     returns an iterator over pandas dataframes.
@@ -178,28 +202,22 @@ def read_h5py_chunked(file_path, key='data', columns=None, chunksize=None, mode=
                 columns.remove(col)
                 log.warning('Ignoring column {}, not 1d or 2d'.format(col))
 
-        for chunk in range(n_chunks):
+    for chunk in range(n_chunks):
 
-            start = chunk * chunksize
-            end = min(n_rows, (chunk + 1) * chunksize)
+        start = chunk * chunksize
+        end = min(n_rows, (chunk + 1) * chunksize)
 
-            df = pd.DataFrame(index=np.arange(start, end))
+        df = read_h5py(
+            file_path,
+            key=key,
+            columns=columns,
+            parse_dates=parse_dates,
+            first=start,
+            last=end
+        )
+        df.index = np.arange(start, end)
 
-            for col in columns:
-                array = to_native_byteorder(group[col][start:end])
-
-                # pandas cannot handle bytes, convert to str
-                if array.dtype.kind == 'S':
-                    array = array.astype(str)
-
-                if array.ndim == 1:
-                    df[col] = array
-
-                else:
-                    for i in range(array.shape[1]):
-                        df[col + '_{}'.format(i)] = array[:, i]
-
-            yield df, start, end
+        yield df, start, end
 
 
 def read_data(file_path, key=None, columns=None, **kwargs):
@@ -370,6 +388,7 @@ def create_empty_h5py_dataset(array, group, name, **kwargs):
     dtype = array.dtype
     maxshape = [None] + list(array.shape)[1:]
     shape = [0] + list(array.shape)[1:]
+    attrs = {}
 
     if dtype.base == object:
         if isinstance(array[0], list):
@@ -382,6 +401,7 @@ def create_empty_h5py_dataset(array, group, name, **kwargs):
     elif dtype.type == np.datetime64:
         # save dates as ISO string, create dummy date to get correct length
         dt = np.array(0, dtype=dtype).astype('S').dtype
+        attrs['timeformat'] = 'iso'
 
     else:
         dt = dtype.base
@@ -393,6 +413,10 @@ def create_empty_h5py_dataset(array, group, name, **kwargs):
         dtype=dt,
         **kwargs
     )
+
+    for k, v in attrs.items():
+        dataset.attrs[k] = v
+
     return dataset
 
 
