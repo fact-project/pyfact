@@ -32,13 +32,3 @@ fact.plotting.utils module
     :members:
     :undoc-members:
     :show-inheritance:
-
-fact.plotting.viewer module
----------------------------
-
-.. automodule:: fact.plotting.viewer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
