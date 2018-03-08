@@ -11,17 +11,14 @@ from ...io import create_empty_h5py_dataset, append_to_h5py_dataset
 
 
 def calc_ra_dec(events):
-    events['obstime'] = pd.to_datetime(
-        events['unix_time_utc_0'] * 1e6 + events['unix_time_utc_1'],
-        unit='us',
-    )
+    events['obstime'] = pd.to_datetime(events['timestamp'])
 
     events['ra_prediction'], events['dec_prediction'] = camera_to_equatorial(
         events['source_x_prediction'],
         events['source_y_prediction'],
-        events['zd_tracking'],
-        events['az_tracking'],
-        events['obstime'],
+        events['pointing_position_zd'],
+        events['pointing_position_az'],
+        events['obstime'].dt.to_pydatetime(),
     )
     return events
 
@@ -40,8 +37,8 @@ def main(inputfile, chunksize, n_jobs, yes):
     e.g. for example for files analysed with the classifier-tools
 
     The following keys have to be present in the h5py hdf5 file.
-        * az_tracking
-        * zd_tracking
+        * pointing_position_az
+        * pointing_position_zd
         * source_x_prediction
         * source_y_prediction
         * unix_time_utc
@@ -55,11 +52,11 @@ def main(inputfile, chunksize, n_jobs, yes):
         inputfile,
         key='events',
         columns=[
-            'az_tracking',
-            'zd_tracking',
+            'pointing_position_az',
+            'pointing_position_zd',
             'source_x_prediction',
             'source_y_prediction',
-            'unix_time_utc',
+            'timestamp',
         ],
         chunksize=chunksize
     )

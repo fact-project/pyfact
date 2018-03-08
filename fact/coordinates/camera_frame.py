@@ -5,15 +5,12 @@ from astropy.coordinates import (
     FunctionTransform,
 )
 
-try:
-    from astropy.coordinates import CoordinateAttribute, TimeAttribute, EarthLocationAttribute
-except ImportError:
-    # for astropy <= 2.0.0
-    from astropy.coordinates import (
-        CoordinateAttribute,
-        TimeFrameAttribute as TimeAttribute,
-        EarthLocationAttribute,
-    )
+from astropy.coordinates import (
+    CoordinateAttribute,
+    TimeAttribute,
+    EarthLocationAttribute,
+    Attribute
+)
 
 from astropy.coordinates.matrix_utilities import rotation_matrix
 from astropy.coordinates.representation import CartesianRepresentation
@@ -27,11 +24,31 @@ focal_length = FOCAL_LENGTH_MM * u.mm
 
 
 class CameraFrame(BaseCoordinateFrame):
-    '''Astropy CoordinateFrame representing coordinates in the CameraPlane'''
+    '''
+    Astropy CoordinateFrame representing coordinates in the CameraPlane
+
+    Attributes
+    ----------
+    pointing_direction: astropy.coordinates.AltAz
+        The pointing direction of the telescope
+    obstime: astropy.Time
+        The timestamp of the observation, only needed to directly transform
+        to Equatorial coordinates, transforming to AltAz does not need this.
+    location: astropy.coordinates.EarthLocation
+        The location of the observer,  only needed to directly transform
+        to Equatorial coordinates, transforming to AltAz does not need this,
+        default is FACT's location
+    rotated: bool
+        True means x points right and y points up when looking on the camera
+        from the dish, which is the efinition of FACT-Tools >= 1.0 and Mars.
+        False means x points up and y points left,
+        which is definition in the original FACTPixelMap file.
+    '''
     default_representation = PlanarRepresentation
     pointing_direction = CoordinateAttribute(frame=AltAz, default=None)
     obstime = TimeAttribute(default=None)
     location = EarthLocationAttribute(default=LOCATION)
+    rotated = Attribute(default=True)
 
 
 @frame_transform_graph.transform(FunctionTransform, CameraFrame, AltAz)
@@ -41,6 +58,9 @@ def camera_to_altaz(camera, altaz):
 
     x = camera.x.copy()
     y = camera.y.copy()
+
+    if camera.rotated is True:
+        x, y = y, -x
 
     z = 1 / np.sqrt(1 + (x / focal_length)**2 + (y / focal_length)**2)
     x *= z / focal_length
@@ -78,9 +98,15 @@ def altaz_to_camera(altaz, camera):
     cartesian = cartesian.transform(rot_z_az)
     cartesian = cartesian.transform(rot_y_zd)
 
+    x = (cartesian.x * focal_length / cartesian.z).copy()
+    y = (cartesian.y * focal_length / cartesian.z).copy()
+
+    if camera.rotated is True:
+        x, y = -y, x
+
     return CameraFrame(
-        x=cartesian.x * focal_length / cartesian.z,
-        y=cartesian.y * focal_length / cartesian.z,
+        x=x,
+        y=y,
         pointing_direction=camera.pointing_direction,
         obstime=altaz.obstime,
         location=camera.location,

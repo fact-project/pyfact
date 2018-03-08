@@ -1,5 +1,6 @@
 github_deploy_key*
 *.swp
+.pytest_cache
 
 .pytest_cache
 # Byte-compiled / optimized / DLL files

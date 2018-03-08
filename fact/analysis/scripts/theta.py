@@ -3,19 +3,16 @@ import pandas as pd
 from fact.analysis import calc_theta_camera, calc_theta_offs_camera
 from fact.io import read_h5py_chunked
 from fact.io import create_empty_h5py_dataset, append_to_h5py_dataset
-from fact.coordinates.utils import array_to_time
 from fact.instrument.constants import LOCATION
 from astropy.coordinates import SkyCoord, AltAz
+from astropy.time import Time
 from joblib import Parallel, delayed
 import h5py
 import click
 
 
 def calc_theta_source(df, source):
-
-    obstime = array_to_time(pd.to_datetime(
-        df.unix_time_utc_0 * 1e6 + df.unix_time_utc_1, unit='us'
-    ))
+    obstime = Time(pd.to_datetime(df['timestamp']).dt.to_pydatetime())
 
     altaz = AltAz(location=LOCATION, obstime=obstime)
     source_altaz = source.transform_to(altaz)
@@ -25,16 +22,16 @@ def calc_theta_source(df, source):
         df.source_y_prediction,
         source_altaz.zen.deg,
         source_altaz.az.deg,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
     )
     theta_offs = calc_theta_offs_camera(
         df.source_x_prediction,
         df.source_y_prediction,
         source_altaz.zen.deg,
         source_altaz.az.deg,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
         n_off=5,
     )
 
@@ -51,16 +48,16 @@ def calc_theta_coordinates(df):
         df.source_y_prediction,
         df.zd_source_calc,
         df.az_source_calc,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
     )
     theta_offs = calc_theta_offs_camera(
         df.source_x_prediction,
         df.source_y_prediction,
         df.zd_source_calc,
         df.az_source_calc,
-        zd_pointing=df.zd_tracking,
-        az_pointing=df.az_tracking,
+        zd_pointing=df['pointing_position_zd'],
+        az_pointing=df['pointing_position_az'],
         n_off=5,
     )
 
@@ -106,12 +103,12 @@ def main(inputfile, source, chunksize, yes):
             inputfile,
             key='events',
             columns=[
-                'az_tracking',
-                'zd_tracking',
+                'pointing_position_az',
+                'pointing_position_zd',
                 'source_x_prediction',
                 'source_y_prediction',
-                'az_source_calc',
-                'zd_source_calc',
+                'source_position_az',
+                'source_position_zd',
             ],
             chunksize=chunksize
         )
@@ -122,17 +119,17 @@ def main(inputfile, source, chunksize, yes):
                 for df, start, stop in df_it
             )
     else:
-        crab = SkyCoord.from_name(source)
+        source = SkyCoord.from_name(source)
 
         df_it = read_h5py_chunked(
             inputfile,
             key='events',
             columns=[
-                'az_tracking',
-                'zd_tracking',
+                'pointing_position_az',
+                'pointing_position_zd',
                 'source_x_prediction',
                 'source_y_prediction',
-                'unix_time_utc',
+                'timestamp',
             ],
             chunksize=chunksize
         )
@@ -140,7 +137,7 @@ def main(inputfile, source, chunksize, yes):
         with Parallel(-1, verbose=10) as pool:
 
             dfs = pool(
-                delayed(calc_theta_source)(df, crab)
+                delayed(calc_theta_source)(df, source)
                 for df, start, stop in df_it
             )
 
