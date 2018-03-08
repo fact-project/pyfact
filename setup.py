@@ -34,7 +34,7 @@ setup(
         'matplotlib>=1.4',
         'numpy',
         'pandas',
-        'peewee=2.*',
+        'peewee==2.*',
         'pymongo>=2.7',
         'pymysql',
         'python-dateutil',
