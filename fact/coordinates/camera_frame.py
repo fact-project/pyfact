@@ -24,7 +24,26 @@ focal_length = FOCAL_LENGTH_MM * u.mm
 
 
 class CameraFrame(BaseCoordinateFrame):
-    '''Astropy CoordinateFrame representing coordinates in the CameraPlane'''
+    '''
+    Astropy CoordinateFrame representing coordinates in the CameraPlane
+
+    Attributes
+    ----------
+    pointing_direction: astropy.coordinates.AltAz
+        The pointing direction of the telescope
+    obstime: astropy.Time
+        The timestamp of the observation, only needed to directly transform
+        to Equatorial coordinates, transforming to AltAz does not need this.
+    location: astropy.coordinates.EarthLocation
+        The location of the observer,  only needed to directly transform
+        to Equatorial coordinates, transforming to AltAz does not need this,
+        default is FACT's location
+    rotated: bool
+        True means x points right and y points up when looking on the camera
+        from the dish, which is the efinition of FACT-Tools >= 1.0 and Mars.
+        False means x points up and y points left,
+        which is definition in the original FACTPixelMap file.
+    '''
     default_representation = PlanarRepresentation
     pointing_direction = CoordinateAttribute(frame=AltAz, default=None)
     obstime = TimeAttribute(default=None)
