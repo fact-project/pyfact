@@ -8,7 +8,6 @@ matplotlib with tcl/tk support
 Currently these functions only work with shape (num_events, 1440), so
 on a pixel bases
 '''
-import warnings
 from .core import mark_pixel, camera, pixelids
 from .analysis import plot_excess_rate
 
@@ -18,10 +17,3 @@ __all__ = [
     'pixelids',
     'plot_excess_rate',
 ]
-
-try:
-    from .viewer import Viewer
-    __all__.append('Viewer')
-except ImportError:
-    warnings.warn('Matplotlib was build without tkagg support,\n'
-                  'the Viewer will not be available')
