@@ -46,16 +46,16 @@ def calc_theta_coordinates(df):
     df['theta_deg'] = calc_theta_camera(
         df.source_x_prediction,
         df.source_y_prediction,
-        df.zd_source_calc,
-        df.az_source_calc,
+        df['source_position_zd'],
+        df['source_position_az'],
         zd_pointing=df['pointing_position_zd'],
         az_pointing=df['pointing_position_az'],
     )
     theta_offs = calc_theta_offs_camera(
         df.source_x_prediction,
         df.source_y_prediction,
-        df.zd_source_calc,
-        df.az_source_calc,
+        df['source_position_zd'],
+        df['source_position_az'],
         zd_pointing=df['pointing_position_zd'],
         az_pointing=df['pointing_position_az'],
         n_off=5,
@@ -77,7 +77,7 @@ cols = [
 @click.argument('INPUTFILE')
 @click.option(
     '-s', '--source',
-    help='Source name, if not given, take `az_source_calc`, and `zd_source_calc`'
+    help='Source name, if not given, take `source_position_az`, and `source_position_zd`'
 )
 @click.option('-c', '--chunksize', type=int, default=10000)
 @click.option('-y', '--yes', is_flag=True, help='Do not ask to overwrite existing keys')
