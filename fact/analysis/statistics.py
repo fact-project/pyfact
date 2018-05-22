@@ -3,7 +3,6 @@ import astropy.units as u
 
 POINT_SOURCE_FLUX_UNIT = (1 / u.GeV / u.s / u.m**2).unit
 FLUX_UNIT = POINT_SOURCE_FLUX_UNIT / u.sr
-print(FLUX_UNIT)
 
 
 @u.quantity_input
@@ -317,6 +316,5 @@ def calc_proton_obstime(
     expected_integral_flux = power_law_integral(
         flux_normalization, spectral_index, e_min, e_max, e_ref
     )
-    print(area, solid_angle, expected_integral_flux)
 
     return n_events / area / solid_angle / expected_integral_flux
