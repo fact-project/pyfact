@@ -149,6 +149,7 @@ def read_h5py(
 
         if 'index' in df.columns:
             df.set_index('index', inplace=True)
+            df.index.name = None
 
     return df
 
