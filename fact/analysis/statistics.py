@@ -10,8 +10,8 @@ def random_power(
     spectral_index,
     e_min: u.TeV,
     e_max: u.TeV,
-    e_ref: u.TeV,
-    size
+    size,
+    e_ref: u.TeV=1 * u.TeV,
 ) -> u.TeV:
     r'''
     Draw random numbers from a power law distribution
@@ -33,7 +33,9 @@ def random_power(
     size: int or tuple[int]
         Number of events to draw or a shape like (100, 2)
     '''
-    assert spectral_index < -1.0, 'spectral_index must be < -1.0'
+    if spectral_index > -1.0:
+        raise ValueError('spectral_index must be < -1.0')
+
     u = np.random.uniform(0, 1, size)
 
     exponent = spectral_index + 1
