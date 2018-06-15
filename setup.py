@@ -3,11 +3,15 @@ from setuptools import setup, find_packages
 with open('fact/VERSION', 'r') as f:
     __version__ = f.read().strip()
 
+with open('README.rst') as f:
+    long_description = f.read()
+
 
 setup(
     name='pyfact',
     version=__version__,
     description='A module containing useful methods for working with fact',
+    long_description=long_description,
     url='http://github.com/fact-project/pyfact',
     author='Maximilian Noethe, Dominik Neise',
     author_email='maximilian.noethe@tu-dortmund.de',
