@@ -69,6 +69,7 @@ def power_law(
     spectral_index: float
         Spectral index
     e_ref: Quantity[energy]
+        The reference energy
     '''
     return flux_normalization * (energy / e_ref)**(spectral_index)
 
@@ -85,7 +86,7 @@ def curved_power_law(
     Curved power law
 
     .. math::
-        \phi = \phi_0 \cdot E ^ {a - b \cdot \log(E)}
+        \phi = \phi_0 \cdot E ^ {a + b \cdot \log_{10}(E)}
 
     Parameters
     ----------
@@ -96,7 +97,9 @@ def curved_power_law(
     a: float
         Parameter `a`  of the curved power law
     b: float
-    return flux_normalization * energy ** (a + b * np.log10((energy))
+        Parameter `b`  of the curved power law
+    e_ref: Quantity[energy]
+        The reference energy
     '''
     exp = a + b * np.log10((energy / e_ref))
     return flux_normalization * (energy / e_ref) ** exp
