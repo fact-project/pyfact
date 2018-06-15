@@ -3,6 +3,7 @@ import tempfile
 import numpy as np
 import h5py
 import pytest
+from pandas.util.testing import assert_frame_equal
 
 
 def test_to_h5py():
@@ -26,6 +27,8 @@ def test_to_h5py():
             assert 'N' in g.keys()
 
         df2 = read_h5py(f.name, key='test')
+        df2.sort_index(1, inplace=True)
+        df.sort_index(1, inplace=True)
 
         assert all(df.dtypes == df2.dtypes)
         assert all(df['x'] == df2['x'])
@@ -293,14 +296,11 @@ def test_read_data_h5py():
     df = pd.DataFrame({
         'x': np.random.normal(size=50).astype('float32'),
         'N': np.random.randint(0, 10, dtype='uint8', size=50)
-    })
+    }).sort_index(1)
 
     with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
         write_data(df, f.name, use_h5py=True, key='lecker_daten')
 
-        df_from_file = read_data(f.name, key='lecker_daten')
-
+        df_from_file = read_data(f.name, key='lecker_daten').sort_index(1)
+        assert set(df.columns) == set(df_from_file.columns)
         assert df.equals(df_from_file)
-
-
-

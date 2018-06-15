@@ -55,7 +55,7 @@ def datetime_to_mjd(dt):
 
     elif isinstance(dt, (pd.Series, pd.DatetimeIndex)):
         if dt.tz is None:
-            dt.tz = timezone.utc
+            dt = dt.tz_localize(timezone.utc)
 
     return (dt - MJD_EPOCH).total_seconds() / 24 / 3600
 
