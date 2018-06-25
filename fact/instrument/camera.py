@@ -2,10 +2,12 @@ import pkg_resources as res
 import numpy as np
 from functools import lru_cache
 import pandas as pd
+from scipy.sparse import csr_matrix
+from scipy.spatial import cKDTree
 
 from .constants import (
     FOCAL_LENGTH_MM, PINCUSHION_DISTORTION_SLOPE,
-    PIXEL_SPACING_MM, FOV_PER_PIXEL_DEG
+    PIXEL_SPACING_MM, FOV_PER_PIXEL_DEG, N_PIXEL
 )
 
 
@@ -190,3 +192,29 @@ def take_apart_trigger_values_for_bias_patches(trigger_rates):
     pi = patch_indices().sort_values('bias_patch_id')
 
     return trigger_rates[pi.trigger_patch_id.values]
+
+
+@lru_cache(maxsize=1)
+def get_neighbor_matrix():
+    '''
+    Returns a sparse boolean neighbor matrix with n[chid, other_chid] = is neighbor.
+    '''
+    xy = get_pixel_dataframe().loc[:, ['x', 'y']].values
+    tree = cKDTree(xy)
+    neighbors = tree.query_ball_tree(tree, r=10)
+
+    n_neighbors = [len(n) for n in neighbors]
+    col = np.repeat(np.arange(N_PIXEL), n_neighbors)
+    row = [pix for n in neighbors for pix in n]
+    data = np.ones(len(row))
+    m = csr_matrix((data, (row, col)), shape=(N_PIXEL, N_PIXEL), dtype=bool)
+    m.setdiag(False)
+    return m
+
+
+@lru_cache(maxsize=1)
+def get_num_neighbors():
+    '''
+    Return a numpy array with the number of neighbors for each pixel in chid order
+    '''
+    return get_neighbor_matrix().sum(axis=0).A1
