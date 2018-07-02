@@ -5,6 +5,7 @@ import numpy as np
 from astropy.coordinates import EarthLocation
 import astropy.units as u
 
+N_PIXEL = 1440
 #: The inner diameter of the hexagonal pixels in mm.
 #: This is also the grid constant of the hex grid.
 PIXEL_SPACING_MM = 9.5

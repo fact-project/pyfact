@@ -2,10 +2,12 @@ import pkg_resources as res
 import numpy as np
 from functools import lru_cache
 import pandas as pd
+from scipy.sparse import csr_matrix
+from scipy.spatial import cKDTree
 
 from .constants import (
     FOCAL_LENGTH_MM, PINCUSHION_DISTORTION_SLOPE,
-    PIXEL_SPACING_MM, FOV_PER_PIXEL_DEG
+    PIXEL_SPACING_MM, FOV_PER_PIXEL_DEG, N_PIXEL
 )
 
 
@@ -172,8 +174,10 @@ def combine_bias_patch_current_to_trigger_patch_current(bias_patch_currents):
     fivers = pi[pi.bias_patch_size == 5].sort_values('trigger_patch_id')
 
     b_c = bias_patch_currents  # just to shorten the name
-    t_c = b_c[fourers.bias_patch_id.values] * 4/9 + b_c[fivers.bias_patch_id.values] * 5/9
-
+    t_c = (
+        b_c[fourers.bias_patch_id.values] * 4 / 9
+        + b_c[fivers.bias_patch_id.values] * 5 / 9
+    )
     trigger_patch_currents = t_c  # unshorten the name
     return trigger_patch_currents
 
@@ -190,3 +194,39 @@ def take_apart_trigger_values_for_bias_patches(trigger_rates):
     pi = patch_indices().sort_values('bias_patch_id')
 
     return trigger_rates[pi.trigger_patch_id.values]
+
+
+@lru_cache(maxsize=1)
+def get_neighbor_matrix():
+    '''
+    Returns a sparse boolean neighbor matrix with n[chid, other_chid] = is neighbor.
+    '''
+    xy = get_pixel_dataframe().loc[:, ['x', 'y']].values
+    tree = cKDTree(xy)
+    neighbors = tree.query_ball_tree(tree, r=10)
+
+    n_neighbors = [len(n) for n in neighbors]
+    col = np.repeat(np.arange(N_PIXEL), n_neighbors)
+    row = [pix for n in neighbors for pix in n]
+    data = np.ones(len(row))
+    m = csr_matrix((data, (row, col)), shape=(N_PIXEL, N_PIXEL), dtype=bool)
+    m.setdiag(False)
+    return m
+
+
+@lru_cache(maxsize=1)
+def get_num_neighbors():
+    '''
+    Return a numpy array with the number of neighbors for each pixel in chid order
+    '''
+    return get_neighbor_matrix().sum(axis=0).A1
+
+
+@lru_cache()
+def get_border_pixel_mask(width=1):
+    if width == 1:
+        return get_num_neighbors() < 6
+
+    n = get_neighbor_matrix().todense().A
+
+    return (n & get_border_pixel_mask(width - 1)).any(axis=1)
