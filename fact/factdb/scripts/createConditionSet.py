@@ -1,6 +1,6 @@
 import click
 import yaml
-from .conditions import create_condition_set
+from fact.factdb.conditions import create_condition_set
 
 @click.command()
 @click.option('--condition', '-c', multiple=True, help='Only use events that fullfill this condition type')
