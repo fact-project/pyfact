@@ -28,6 +28,7 @@ setup(
         'console_scripts': [
             'fact_calculate_theta = fact.analysis.scripts.theta:main',
             'fact_calculate_radec = fact.analysis.scripts.radec:main',
+            'fact_create_conditon_set = fact.factdb.scripts.createConditionSet:main',
         ]
     },
     tests_require=['pytest>=3.0.0'],
