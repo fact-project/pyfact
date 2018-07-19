@@ -1,0 +1,12 @@
+name: no_moonlight
+author: Michael Bulinski
+description: Condition for no moonlight in the camera
+conditions: [
+    fCurrentsMedMeanBeg < 8,
+    fMoonZenithDistance > 100,
+    fThresholdMinSet < 350,
+    fEffectiveOn > 0.95,
+    fTriggerRateMedian > 40,
+    fTriggerRateMedian < 85,
+    fThresholdMinSet < (14 * fCurrentsMedMeanBeg + 265)
+]

@@ -1,0 +1,9 @@
+name: low_moonlight
+author: Michael Bulinski
+conditions: [
+    fTriggerRateMedian < 85,
+    fZenithDistanceMax < 30,
+    fThresholdMinSet < (14 * fCurrentsMedMeanBeg + 265),
+    fCurrentsMedMeanBeg > 8,
+    fCurrentsMedMeanBeg <= 16,
+]

@@ -1,0 +1,8 @@
+name: moderate_moonlight
+author: Michael Bulinski
+conditions: [
+    fTriggerRateMedian < 85,
+    fThresholdMinSet < (14 * fCurrentsMedMeanBeg + 265),
+    fCurrentsMedMeanBeg > 32,
+    fCurrentsMedMeanBeg <= 48,
+]

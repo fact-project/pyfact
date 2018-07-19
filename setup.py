@@ -22,7 +22,8 @@ setup(
             'VERSION',
             'resources/*',
             'credentials/credentials.encrypted',
-        ]
+        ],
+        'fact_conditions': ['conditions/*.yaml'],
     },
     entry_points={
         'console_scripts': [
