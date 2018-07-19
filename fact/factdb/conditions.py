@@ -63,7 +63,7 @@ def apply_to_query(query, conditionSets):
         query = query.where(SQL(c))
     return query
     
-def create_query_apply_cond(conditionSets):
+def create_query_apply_condition(conditionSets):
     """
     Creates a default query and applies the given condition sets
     """
