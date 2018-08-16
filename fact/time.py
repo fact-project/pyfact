@@ -24,18 +24,38 @@ MJD_EPOCH = datetime(1858, 11, 17, 0, 0, tzinfo=timezone.utc)
 
 
 def datetime_to_numpy(dt):
+    '''
+    Convert a python datetime object to numpy.datetime64
+    '''
     return np.array(dt.timestamp()).astype('datetime64[s]')
 
 
 def unixtime_to_mjd(unixtime):
+    '''
+    Convert a unix timestamp to mjd
+    '''
     return (unixtime - (MJD_EPOCH - UNIX_EPOCH).total_seconds()) / 3600 / 24
 
 
 def mjd_to_unixtime(mjd):
+    '''
+    Convert an mjd timestamp to unix
+    '''
     return (mjd + (MJD_EPOCH - UNIX_EPOCH).total_seconds()) * 3600 * 24
 
 
 def datetime_to_mjd(dt, epoch=MJD_EPOCH):
+    '''
+    Convert a datetime to julian date float.
+    This function can handle python dates, numpy arrays and pandas Series.
+
+    Parameters
+    ----------
+    dt: datetime, np.ndarray[datetime64], pd.DateTimeIndex, pd.Series[datetime64]
+        The datetime object to convert to mjd
+    epoch: datetime
+        The epoch, default is classic MJD (1858-11-17T00:00)
+    '''
     # handle numpy arrays
     if isinstance(dt, np.ndarray):
         jd_ns = (dt - datetime_to_numpy(epoch)).astype('timedelta64[ns]').astype(float)
@@ -57,6 +77,17 @@ def datetime_to_mjd(dt, epoch=MJD_EPOCH):
 
 
 def mjd_to_datetime(jd, epoch=MJD_EPOCH):
+    '''
+    Convert a julian date float to datetime.
+    This function can handle python int, float, numpy arrays and pandas Series.
+
+    Parameters
+    ----------
+    dt: int, float, np.ndarray, pd.Series
+        The datetime object to convert to mjd
+    epoch: datetime
+        The epoch, default is classic MJD (1858-11-17T00:00)
+    '''
     if isinstance(jd, (int, float)):
         delta = timedelta(microseconds=jd * 24 * 3600 * 1e6)
         return epoch + delta
@@ -72,10 +103,18 @@ def mjd_to_datetime(jd, epoch=MJD_EPOCH):
 
 
 def fjd_to_datetime(fjd):
+    '''
+    Convert a FACT julian date float to datetime, epoch is 1970-01-01T00:00Z
+    This function can handle python int, float, numpy arrays and pandas Series.
+    '''
     return mjd_to_datetime(fjd, epoch=UNIX_EPOCH)
 
 
 def datetime_to_fjd(dt):
+    '''
+    Convert a datetime to FACT julian date float, epoch is 1970-01-01T00:00Z.
+    This function can handle python dates, numpy arrays and pandas Series.
+    '''
     return datetime_to_mjd(dt, epoch=UNIX_EPOCH)
 
 
