@@ -118,18 +118,25 @@ def datetime_to_fjd(dt):
     return datetime_to_mjd(dt, epoch=UNIX_EPOCH)
 
 
-def iso_to_datetime(iso_time_string):
-    ''' parse ISO time string to timezone aware datetime instance
-
-    example
-    2015-01-23T08:08+01:00
+def iso_to_datetime(iso):
     '''
-    datetime_inst = dateutil.parser.parse(iso_time_string)
-    # make aware at any cost!
-    if datetime_inst.tzinfo is None:
-        warnings.warn('ISO time string did not contain timezone info. I assume UTC!')
-        datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
-    return datetime_inst
+    parse iso8601 to timezone aware datetime instance,
+    if timezone specification is missing, UTC is assumed.
+    '''
+    if isinstance(iso, (bytes, bytearray)):
+        iso = iso.decode('ascii')
+
+    if isinstance(iso, str):
+        dt = dateutil.parser.parse(iso)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=dateutil.tz.tzutc())
+        return dt
+
+    if isinstance(iso, pd.Series):
+        if isinstance(iso.iloc[0], bytes):
+            iso = iso.str.decode('ascii')
+
+    return pd.Series(pd.to_datetime(iso))
 
 
 def to_night(timestamp=None):

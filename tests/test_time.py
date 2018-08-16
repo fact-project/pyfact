@@ -104,3 +104,15 @@ def test_fjd_to_datetime():
     df = pd.DataFrame({'fjds': fjds})
     assert (fjd_to_datetime(fjds) == dates).all()
     assert (fjd_to_datetime(df['fjds']) == pd.Series(dates)).all()
+
+
+def test_iso_to_datetime():
+    from fact.time import iso_to_datetime
+
+    assert iso_to_datetime('2017-01-01T00:00') == datetime(2017, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert iso_to_datetime('2017-01-01T00:00Z') == datetime(2017, 1, 1, 0, 0, tzinfo=timezone.utc)
+    assert iso_to_datetime('2017-01-01T00:00+2') == datetime(2016, 12, 31, 22, 0, tzinfo=timezone.utc)
+
+    timestamps = ['2017-01-01T20:00', '2017-01-01T22:00']
+    dates = pd.date_range(start='2017-01-01T20:00', freq='2h', periods=2)
+    assert (iso_to_datetime(timestamps) == dates).all()
