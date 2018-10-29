@@ -2,7 +2,7 @@ import pandas as pd
 import peewee
 from .models import RunInfo, Source, RunType
 from ..credentials import create_factdb_engine
-from ..time import night_integer
+from ..time import to_night_int
 
 
 SECOND = peewee.SQL('SECOND')
@@ -16,7 +16,7 @@ def read_into_dataframe(query, engine=None):
     ''' read the result of a peewee query object into a pandas DataFrame '''
     engine = engine or create_factdb_engine()
     sql, params = query.sql()
-    
+
     with engine.connect() as conn:
         df = pd.read_sql_query(sql, conn, params=params)
 
@@ -51,11 +51,11 @@ def get_correct_ontime(start=None, end=None, engine=None):
     )
 
     if start is not None:
-        start = night_integer(start) if not isinstance(start, int) else start
+        start = to_night_int(start) if not isinstance(start, int) else start
         query = query.where(RunInfo.fnight >= start)
 
     if end is not None:
-        end = night_integer(end) if not isinstance(end, int) else end
+        end = to_night_int(end) if not isinstance(end, int) else end
         query = query.where(RunInfo.fnight <= end)
 
     df = read_into_dataframe(query, engine=engine)

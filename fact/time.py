@@ -1,25 +1,15 @@
-''' some functions to deal with FACT modified modified julian date
-
-The time used most of the time in FACT is the number of days since 01.01.1970
-
-So this time is related to unix time, since it has the same offset
-(unix time is the number of seconds since 01.01.1970
-(what time? noon? midnight??))
-but it is also related to 'the' Modified Julian Date (MJD),
-which is used by astronomers
-in the sense, that it also counts days.
-
-According to http://en.wikipedia.org/wiki/Julian_day,
-there is quite a large number of
-somehow modified julian dates, of which the MJD is only one.
-So it might be okay, to introduce a new modification,
-going by the name of FACT Julain Date (FJD).
 '''
-from __future__ import print_function, division
-import time
-import calendar
+This module contains functions to deal with several time formats
+in astronomy in general and for the FACT telescope in particular.
+
+FACT uses a Modified Julian Date with an epoch of 1970-01-01T00:00Z,
+same as unix time. We will call this FJD.
+Most of the time, e.g. in aux fits files, a column called `Time` will use
+this modified julian date and also give the reference in the fits header
+keyword `MJDREF = 40587`, unit as `TIMEUNIT = d` and `TIMESYS = UTC`.
+'''
 from datetime import datetime, timedelta, timezone
-import logging
+import warnings
 
 import dateutil
 import dateutil.parser
@@ -30,112 +20,126 @@ import pandas as pd
 OFFSET = (datetime(1970, 1, 1) - datetime(1, 1, 1)).days
 
 UNIX_EPOCH = datetime(1970, 1, 1, 0, 0, tzinfo=timezone.utc)
-MJD_EPOCH = datetime(1858, 11, 17, 0, tzinfo=timezone.utc)
-MJD_EPOCH_NUMPY = np.array(MJD_EPOCH.timestamp()).astype('datetime64[s]')
+MJD_EPOCH = datetime(1858, 11, 17, 0, 0, tzinfo=timezone.utc)
+
+
+def datetime_to_numpy(dt):
+    '''
+    Convert a python datetime object to numpy.datetime64
+    '''
+    return np.array(dt.timestamp()).astype('datetime64[s]')
 
 
 def unixtime_to_mjd(unixtime):
+    '''
+    Convert a unix timestamp to mjd
+    '''
     return (unixtime - (MJD_EPOCH - UNIX_EPOCH).total_seconds()) / 3600 / 24
 
 
 def mjd_to_unixtime(mjd):
+    '''
+    Convert an mjd timestamp to unix
+    '''
     return (mjd + (MJD_EPOCH - UNIX_EPOCH).total_seconds()) * 3600 * 24
 
 
-def datetime_to_mjd(dt):
+def datetime_to_mjd(dt, epoch=MJD_EPOCH):
+    '''
+    Convert a datetime to julian date float.
+    This function can handle python dates, numpy arrays and pandas Series.
+
+    Parameters
+    ----------
+    dt: datetime, np.ndarray[datetime64], pd.DateTimeIndex, pd.Series[datetime64]
+        The datetime object to convert to mjd
+    epoch: datetime
+        The epoch, default is classic MJD (1858-11-17T00:00)
+    '''
     # handle numpy arrays
     if isinstance(dt, np.ndarray):
-        mjd_ns = (dt - MJD_EPOCH_NUMPY).astype('timedelta64[ns]').astype(float)
-        return mjd_ns / 1e9 / 3600 / 24
+        jd_ns = (dt - datetime_to_numpy(epoch)).astype('timedelta64[ns]').astype(float)
+        return jd_ns / 1e9 / 3600 / 24
 
     # assume datetimes without timezone are utc
     if isinstance(dt, datetime):
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
-
-    elif isinstance(dt, (pd.Series, pd.DatetimeIndex)):
+    elif isinstance(dt, pd.DatetimeIndex):
         if dt.tz is None:
             dt = dt.tz_localize(timezone.utc)
+    elif isinstance(dt, pd.Series):
+        if dt.dt.tz is None:
+            dt = dt.dt.tz_localize(timezone.utc)
+        return (dt - epoch).dt.total_seconds() / 24 / 3600
 
-    return (dt - MJD_EPOCH).total_seconds() / 24 / 3600
+    return (dt - epoch).total_seconds() / 24 / 3600
 
 
-def mjd_to_datetime(mjd):
-    if isinstance(mjd, (int, float)):
-        delta = timedelta(microseconds=mjd * 24 * 3600 * 1e6)
-        return MJD_EPOCH + delta
+def mjd_to_datetime(jd, epoch=MJD_EPOCH):
+    '''
+    Convert a julian date float to datetime.
+    This function can handle python int, float, numpy arrays and pandas Series.
 
-    if isinstance(mjd, pd.Series):
-        delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
-        return MJD_EPOCH + delta
+    Parameters
+    ----------
+    dt: int, float, np.ndarray, pd.Series
+        The datetime object to convert to mjd
+    epoch: datetime
+        The epoch, default is classic MJD (1858-11-17T00:00)
+    '''
+    if isinstance(jd, (int, float)):
+        delta = timedelta(microseconds=jd * 24 * 3600 * 1e6)
+        return epoch + delta
+
+    if isinstance(jd, pd.Series):
+        delta = (jd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+        return epoch + delta
 
     # other types will be returned as numpy array if possible
-    mjd = np.asanyarray(mjd)
-    delta = (mjd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
-    return MJD_EPOCH_NUMPY + delta
+    jd = np.asanyarray(jd)
+    delta = (jd * 24 * 3600 * 1e9).astype('timedelta64[ns]')
+    return datetime_to_numpy(epoch) + delta
 
 
-def fjd(datetime_inst):
-    ''' convert datetime instance to FJD
+def fjd_to_datetime(fjd):
     '''
-    if datetime_inst.tzinfo is None:
-        logging.warning('datetime instance is not aware of its timezone.'
-                        'result possibly wrong!')
-    return calendar.timegm(datetime_inst.utctimetuple()) / (24. * 3600.)
-
-
-def iso2dt(iso_time_string):
-    ''' parse ISO time string to timezone aware datetime instance
-
-    example
-    2015-01-23T08:08+01:00
+    Convert a FACT julian date float to datetime, epoch is 1970-01-01T00:00Z
+    This function can handle python int, float, numpy arrays and pandas Series.
     '''
-    datetime_inst = dateutil.parser.parse(iso_time_string)
-    # make aware at any cost!
-    if datetime_inst.tzinfo is None:
-        logging.info('ISO time string did not contain timezone info. I assume UTC!')
-        datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
-    return datetime_inst
+    return mjd_to_datetime(fjd, epoch=UNIX_EPOCH)
 
 
-def run2dt(run_string):
-    ''' parse typical FACT run file path string to datetime instance (UTC)
-
-    example
-    first you do this:
-
-    '/path/to/file/20141231.more_text' --> '20141231'
-    then call
-    run2dt('20141231')
+def datetime_to_fjd(dt):
     '''
-    format_ = '%Y%m%d'
-    datetime_inst = datetime.strptime(run_string, format_)
-    datetime_inst = datetime_inst.replace(tzinfo=dateutil.tz.tzutc())
-    return datetime_inst
-
-
-def facttime(time_string):
-    ''' conver time-string to fact time
+    Convert a datetime to FACT julian date float, epoch is 1970-01-01T00:00Z.
+    This function can handle python dates, numpy arrays and pandas Series.
     '''
-    return calendar.timegm(time.strptime(
-        time_string, '%Y%m%d %H:%M')) / (24. * 3600.)
+    return datetime_to_mjd(dt, epoch=UNIX_EPOCH)
 
 
-def to_datetime(fact_julian_date):
-    ''' convert facttime to datetime instance
+def iso_to_datetime(iso):
     '''
-    unix_time = fact_julian_date * 24 * 3600
-    datetime_inst = datetime.utcfromtimestamp(unix_time)
-    return datetime_inst
-
-
-def datestr(datetime_inst):
-    ''' make iso time string from datetime instance
+    parse iso8601 to timezone aware datetime instance,
+    if timezone specification is missing, UTC is assumed.
     '''
-    return datetime_inst.isoformat('T')
+    if isinstance(iso, (bytes, bytearray)):
+        iso = iso.decode('ascii')
+
+    if isinstance(iso, str):
+        dt = dateutil.parser.parse(iso)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=dateutil.tz.tzutc())
+        return dt
+
+    if isinstance(iso, pd.Series):
+        if isinstance(iso.iloc[0], bytes):
+            iso = iso.str.decode('ascii')
+
+    return pd.Series(pd.to_datetime(iso))
 
 
-def night(timestamp=None):
+def to_night(timestamp=None):
     '''
     gives the date for a day change at noon instead of midnight
     '''
@@ -146,9 +150,11 @@ def night(timestamp=None):
     return timestamp
 
 
-def night_integer(date):
-    ''' return FACT night integer for date
+def to_night_int(date):
     '''
-    date -= pd.Timedelta(days=0.5)
-    night_int = date.year * 10000 + date.month * 100 + date.day
-    return night_int
+    return FACT night integer for date
+    '''
+    date -= timedelta(days=0.5)
+    if isinstance(date, pd.Series):
+        return date.dt.year * 10000 + date.dt.month * 100 + date.dt.day
+    return date.year * 10000 + date.month * 100 + date.day
