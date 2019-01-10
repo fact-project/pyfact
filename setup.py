@@ -47,6 +47,7 @@ setup(
         'simple-crypt',
         'sqlalchemy',
         'wrapt',
+        'tables',
     ],
     zip_safe=False,
 )
