@@ -3,6 +3,7 @@ import numpy as np
 import astropy.units as u
 from astropy.coordinates import AltAz, SkyCoord
 from astropy.coordinates.angle_utilities import angular_separation
+import pandas as pd
 
 from ..coordinates import CameraFrame
 from ..coordinates.utils import (
@@ -199,3 +200,56 @@ def calc_theta_offs_camera(
             off_pos_altaz.az, off_pos_altaz.alt,
         ).to(u.deg).value)
     return tuple(theta_offs)
+
+
+def calc_energy_dependent_theta_cut(energy, theta_deg, bins=20, quantile=0.68):
+
+    df = pd.DataFrame({'energy': energy, 'theta_deg': theta_deg})
+
+    if isinstance(bins, int):
+        n_bins = bins
+        bins = np.percentile(energy, np.linspace(0, 100, n_bins + 1))
+        bins[-1] *= 1.01
+
+    bin_center = 0.5 * (bins[:-1] + bins[1:])
+
+    df['bin'] = np.digitize(energy, bins=bins)
+    theta_cut = df.groupby('bin')['theta_deg'].quantile(quantile)
+
+    # make sure, events cannot be assigned to more than one region
+    # so the maximum theta cut is half the wobble offset
+    theta_cut[theta_cut >= 0.3] = 0.3
+
+    # underflow equal to first bin
+    theta_cut[0] = theta_cut[1]
+
+    # overflow equal to last bin
+    theta_cut[n_bins + 1] = theta_cut.loc[n_bins]
+
+    selection_df = pd.DataFrame(index=np.arange(n_bins + 2))
+    selection_df['e_low'] = np.append(-np.inf, bins)
+    selection_df['e_high'] = np.append(bins, np.inf)
+    selection_df['e_center'] = np.append(np.nan, np.append(bin_center, np.nan))
+    selection_df['theta_cut'] = theta_cut
+
+    return selection_df
+
+
+def apply_energy_dependent_theta_cut(
+    df,
+    theta_cut_df,
+    energy_key='gamma_energy_prediction',
+):
+    bins = theta_cut_df['e_low'].loc[1:]
+    bin_ids = np.digitize(df[energy_key].values, bins=bins)
+
+    regions = np.full(len(df), -1, dtype=int)
+
+    for bin_id, cut in theta_cut_df['theta_cut'].items():
+        for region in range(0, 6):
+            k = 'theta_deg' if region == 0 else f'theta_deg_off_{region}'
+
+            mask = (bin_ids == bin_id) & (df[k] < cut)
+            regions[mask] = region
+
+    return regions
