@@ -113,7 +113,7 @@ To download the database and read it to Pandas dataframe without using peewee:
      import pandas as pd
      
      factDB = credentials.create_factdb_engine()
-     runInfo = pd.read_sql_table(table_name="runInfo", con=factDB)  
+     runInfo = pd.read_sql_table(table_name="RunInfo", con=factDB)  
 
 
 
