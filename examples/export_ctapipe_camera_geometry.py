@@ -15,8 +15,11 @@ pix_area = 1.5 * np.sqrt(3) * radius**2
 t = Table()
 
 t['pix_id'] = pix_id
+
+# convert from fact coords into hess/cta camera coordinate system
 t['pix_x'] = -y
 t['pix_y'] = -x
+
 t['pix_area'] = pix_area
 t.meta['TAB_TYPE'] = 'ctapipe.instrument.CameraGeometry'
 t.meta['PIX_TYPE'] = 'hexagonal'
