@@ -105,6 +105,18 @@ To get a ``pandas.DataFrame`` containing the observation time per source and run
     print(get_ontime_by_source_and_runtype())
 
 
+To download the database and read it to Pandas dataframe without using peewee:
+
+.. code:: python
+
+     from fact import credentials
+     import pandas as pd
+     
+     factDB = credentials.create_factdb_engine()
+     runInfo = pd.read_sql_table(table_name="RunInfo", con=factDB)  
+
+
+
 
 auxservices
 -----------
