@@ -90,7 +90,7 @@ def test_mjd_to_datetime_pandas():
 
     mjd = pd.Series(np.arange(57890.0, 57891, 0.25))
 
-    dt = pd.Series(pd.date_range('2017-05-17 00:00', freq='6h', periods=4))
+    dt = pd.Series(pd.date_range('2017-05-17 00:00Z', freq='6h', periods=4))
 
     assert all(mjd_to_datetime(mjd) == dt)
 
@@ -100,7 +100,7 @@ def test_fjd_to_datetime():
 
     assert fjd_to_datetime(16000.0) == datetime(2013, 10, 22, 0, 0, tzinfo=timezone.utc)
     fjds = pd.Series([0, 365, 18000.5])
-    dates = pd.to_datetime(['1970-01-01T00:00', '1971-01-01T00:00', '2019-04-14T12:00'])
+    dates = pd.to_datetime(['1970-01-01T00:00Z', '1971-01-01T00:00Z', '2019-04-14T12:00Z'])
     df = pd.DataFrame({'fjds': fjds})
     assert (fjd_to_datetime(fjds) == dates).all()
     assert (fjd_to_datetime(df['fjds']) == pd.Series(dates)).all()
