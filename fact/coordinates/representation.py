@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 
 
-class PlanarRepresentation(BaseRepresentation):
+class FACTPlanarRepresentation(BaseRepresentation):
     '''
     Representation of a point in a 2D plane. This is needed for coordinate
     frames to store their coordinates internally.

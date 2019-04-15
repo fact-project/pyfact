@@ -16,7 +16,7 @@ from astropy.coordinates.matrix_utilities import rotation_matrix
 from astropy.coordinates.representation import CartesianRepresentation
 import astropy.units as u
 
-from .representation import PlanarRepresentation
+from .representation import FACTPlanarRepresentation
 from ..instrument.constants import FOCAL_LENGTH_MM, LOCATION
 import numpy as np
 
@@ -44,7 +44,7 @@ class CameraFrame(BaseCoordinateFrame):
         False means x points up and y points left,
         which is definition in the original FACTPixelMap file.
     '''
-    default_representation = PlanarRepresentation
+    default_representation = FACTPlanarRepresentation
     pointing_direction = CoordinateAttribute(frame=AltAz, default=None)
     obstime = TimeAttribute(default=None)
     location = EarthLocationAttribute(default=LOCATION)
