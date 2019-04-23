@@ -58,7 +58,7 @@ def power_law(
     Simple power law
 
     .. math::
-        \phi = \phi_0 \cdot (E / E_{}\mathrm{ref}})^{\gamma}
+        \phi = \phi_0 \cdot (E / E_{\mathrm{ref}})^{\gamma}
 
     Parameters
     ----------

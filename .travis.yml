@@ -16,7 +16,7 @@ before_install:
   - pip install --upgrade pip
 
 install:
-  - pip install restructuredtext-lint sphinx pygments
+  - pip install restructuredtext-lint sphinx~=1.8 pygments
   - pip install .
 
 script:
