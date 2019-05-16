@@ -283,10 +283,10 @@ def to_h5py(df, filename, key='data', mode='a', dtypes=None, index=True, **kwarg
 
     Parameters
     ----------
-    filename: str
-        output file name
     df: pd.DataFrame
         The data to write out
+    filename: str
+        output file name
     key: str
         the name for the hdf5 group to hold all datasets, default: data
     mode: str
@@ -476,5 +476,5 @@ def append_to_h5py(f, array, key='events'):
     for column in array.dtype.names:
         dataset = group.get(column)
         if dataset is None:
-            raise KeyError('No such dataset {}'.format(dataset))
+            raise KeyError('No such dataset {}'.format(column))
         append_to_h5py_dataset(array[column], dataset)
