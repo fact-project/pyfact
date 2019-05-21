@@ -6,6 +6,7 @@ import sys
 import logging
 import numpy as np
 from copy import copy
+import astropy.units as u
 
 
 __all__ = [
@@ -478,3 +479,46 @@ def append_to_h5py(f, array, key='events'):
         if dataset is None:
             raise KeyError('No such dataset {}'.format(column))
         append_to_h5py_dataset(array[column], dataset)
+
+
+def read_simulated_spectrum(corsika_headers_path):
+    '''
+    Read the properties of the simulated spectrum
+    from a corsika headers hdf5 file.
+
+    Looks in the `corsika_runs` group for the keys
+    `n_showers`, `energy_min`, `energy_max`, `x_scatter`
+    and `energy_spectrum_slope`.
+
+    For older versions, it checks the hdf5 attribute `scatter_radius`
+    of the `corsika_runs` groups.
+    '''
+    runs = read_h5py(corsika_headers_path, key='corsika_runs')
+
+    summary = {}
+    try:
+        summary['n_showers'] = runs['n_showers'].sum()
+    except KeyError:
+        summary['n_showers'] = runs['n_events'].sum()
+
+    keys = {'energy_min': u.GeV, 'energy_max': u.GeV, 'energy_spectrum_slope': None}
+    if 'x_scatter' in runs.columns:
+        keys['x_scatter'] = u.cm
+    else:
+        with h5py.File(corsika_headers_path, 'r') as f:
+            r = f['corsika_runs'].attrs.get('scatter_radius')
+            unit = f['corsika_runs'].attrs.get('scatter_radius_unit', u.m)
+            if r is None:
+                raise ValueError(
+                    'File does neither contain column `/corsika_runs/x_scatter` '
+                    'nor the attribute `scatter_radius`'
+                )
+            summary['x_scatter'] = u.Quantity(r, u.m)
+
+    for key, unit in keys.items():
+        unique_values = runs[key].unique()
+        if len(unique_values) > 1:
+            raise ValueError('Only simulations with the same "{}" supported'.format(key))
+        summary[key] = u.Quantity(unique_values[0], unit)
+
+    return summary
