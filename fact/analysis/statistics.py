@@ -74,16 +74,45 @@ def power_law(
     return flux_normalization * (energy / e_ref)**(spectral_index)
 
 
+def power_law_exponential_cutoff(
+    energy: u.TeV,
+    flux_normalization: (FLUX_UNIT, POINT_SOURCE_FLUX_UNIT),
+    spectral_index,
+    e_cutoff: u.TeV,
+    e_ref: u.TeV=1 * u.TeV,
+):
+    r'''
+    A power law with an additional exponential cutoff
+
+    .. math::
+        \phi = \phi_0 \cdot (E / E_{\mathrm{ref}})^{\gamma} \cdot e^{- E / E_{\mathrm{cutoff}}}
+
+    Parameters
+    ----------
+    energy: Quantity[energy]
+        energy points to evaluate
+    flux_normalization: Quantity[m**-2 s**-2 TeV**-1]
+        Flux normalization
+    spectral_index: float
+        Spectral index
+    e_ref: Quantity[energy]
+        The reference energy
+    '''
+    tau = np.exp(energy / e_cutoff)
+    return power_law(energy, flux_normalization, spectral_index, e_ref) * tau
+
+
 @u.quantity_input
-def curved_power_law(
+def log_parabola(
     energy: u.TeV,
     flux_normalization: (FLUX_UNIT, POINT_SOURCE_FLUX_UNIT),
     a,
     b,
-    e_ref: u.TeV=1 * u.TeV,
+    e_ref: u.TeV = 1 * u.TeV,
 ):
     r'''
-    Curved power law
+    Log-Parabola power law, power law with an additional energy dependent term
+    in the exponent.
 
     .. math::
         \phi = \phi_0 \cdot E ^ {a + b \cdot \log_{10}(E)}
@@ -95,13 +124,13 @@ def curved_power_law(
     flux_normalization: float
         Flux normalization
     a: float
-        Parameter `a`  of the curved power law
+        Parameter `a` of the curved power law
     b: float
-        Parameter `b`  of the curved power law
+        Parameter `b` of the curved power law
     e_ref: Quantity[energy]
         The reference energy
     '''
-    exp = a + b * np.log10((energy / e_ref))
+    exp = a + b * np.log10(energy / e_ref)
     return flux_normalization * (energy / e_ref) ** exp
 
 
@@ -146,29 +175,33 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
 
 
 @u.quantity_input
-def calc_weight_simple_to_curved(
+def calc_weight_power_to_logparabola(
     energy: u.TeV,
-    spectral_index,
-    a,
-    b,
+    simulated_index,
+    target_a,
+    target_b,
     e_ref: u.TeV = 1 * u.TeV,
 ):
     '''
     Reweight simulated events from a simulated power law with
     spectral index `spectral_index` to a curved power law with parameters `a` and `b`
 
+    phi(E) = phi_0 (E / E_ref)^(a + b * log10(E / E_ref))
+
     Parameters
     ----------
     energy: float or array-like
         Energy of the events
-    spectral_index: float
+    simulated_index: float
         Spectral index of the simulated power law
-    a: float
+    target_a: float
         Parameter `a` of the target curved power law
-    b: float
+    target_b: float
         Parameter `b` of the target curved power law
     '''
-    return (energy / e_ref) ** (spectral_index + a + b * np.log10(energy / e_ref))
+    return (energy / e_ref) ** (
+        target_a + target_b * np.log10(energy / e_ref) - simulated_index
+    )
 
 
 @u.quantity_input
@@ -176,7 +209,7 @@ def calc_weight_change_index(
     energy: u.TeV,
     simulated_index,
     target_index,
-    e_ref: u.TeV=1 * u.TeV,
+    e_ref: u.TeV = 1 * u.TeV,
 ):
     '''
     Reweight simulated events from one power law index to another
@@ -204,7 +237,7 @@ def calc_gamma_obstime(
     e_ref: u.TeV = 1 * u.TeV,
 ) -> u.s:
     r'''
-    Calculate the equivalent observation time for a number of simulation enents
+    Calculate the equivalent observation time for a number of simulation events
 
     The number of events produced by sampling from a power law with
     spectral index γ is given by
