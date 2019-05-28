@@ -8,7 +8,7 @@ def test_proton_obstime():
     t = calc_proton_obstime(
         n_events=n_simulated,
         spectral_index=-2.7,
-        max_impact=400 * u.m,
+        scatter_radius=400 * u.m,
         viewcone=5 * u.deg,
         e_min=100 * u.GeV,
         e_max=200 * u.TeV,
