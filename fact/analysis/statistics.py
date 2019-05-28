@@ -4,6 +4,9 @@ import astropy.units as u
 POINT_SOURCE_FLUX_UNIT = (1 / u.GeV / u.s / u.m**2).unit
 FLUX_UNIT = POINT_SOURCE_FLUX_UNIT / u.sr
 
+PDG_COSMIC_RAY_FLUX = 1.8e4 * FLUX_UNIT
+PDG_COSMIC_RAY_E_REF = 1 * u.GeV
+
 
 @u.quantity_input
 def random_power(
@@ -98,7 +101,7 @@ def power_law_exponential_cutoff(
     e_ref: Quantity[energy]
         The reference energy
     '''
-    tau = np.exp(energy / e_cutoff)
+    tau = np.exp(-energy / e_cutoff)
     return power_law(energy, flux_normalization, spectral_index, e_ref) * tau
 
 
@@ -175,55 +178,144 @@ def li_ma_significance(n_on, n_off, alpha=0.2):
 
 
 @u.quantity_input
-def calc_weight_power_to_logparabola(
+def calc_weights_powerlaw(
     energy: u.TeV,
+    obstime: u.hour,
+    n_events,
+    e_min: u.TeV,
+    e_max: u.TeV,
     simulated_index,
-    target_a,
-    target_b,
+    scatter_radius: u.m,
+    target_index,
+    flux_normalization: (POINT_SOURCE_FLUX_UNIT, FLUX_UNIT),
     e_ref: u.TeV = 1 * u.TeV,
+    sample_fraction=1,
+    viewcone=None,
 ):
     '''
-    Reweight simulated events from a simulated power law with
-    spectral index `spectral_index` to a curved power law with parameters `a` and `b`
-
-    phi(E) = phi_0 (E / E_ref)^(a + b * log10(E / E_ref))
-
-    Parameters
-    ----------
-    energy: float or array-like
-        Energy of the events
-    simulated_index: float
-        Spectral index of the simulated power law
-    target_a: float
-        Parameter `a` of the target curved power law
-    target_b: float
-        Parameter `b` of the target curved power law
+    Calculate event weights, so that simulated
+    events are reweighted to a physical power law flux
     '''
-    return (energy / e_ref) ** (
-        target_a + target_b * np.log10(energy / e_ref) - simulated_index
+
+    phi_sim = calc_simulated_flux_normalization(
+        obstime=obstime,
+        n_events=n_events,
+        e_min=e_min,
+        e_max=e_max,
+        e_ref=e_ref,
+        simulated_index=simulated_index,
+        scatter_radius=scatter_radius,
+        viewcone=viewcone,
     )
+
+    e = (energy / e_ref).to_value(u.dimensionless_unscaled)
+    weights = flux_normalization / phi_sim * e**(target_index - simulated_index)
+    return weights.to(u.dimensionless_unscaled) / sample_fraction
 
 
 @u.quantity_input
-def calc_weight_change_index(
+def calc_weights_logparabola(
     energy: u.TeV,
+    obstime: u.hour,
+    n_events,
+    e_min: u.TeV,
+    e_max: u.TeV,
     simulated_index,
-    target_index,
+    scatter_radius: u.m,
+    target_a,
+    target_b,
+    flux_normalization: (POINT_SOURCE_FLUX_UNIT, FLUX_UNIT),
     e_ref: u.TeV = 1 * u.TeV,
+    sample_fraction=1,
+    viewcone=None,
 ):
     '''
-    Reweight simulated events from one power law index to another
-
-    Parameters
-    ----------
-    energy: float or array-like
-        Energy of the events
-    simulated_index: float
-        Spectral index of the simulated power law
-    target_index: float
-        Spectral index of the target power law
+    Calculate event weights, so that simulated
+    events are reweighted to a physical power law flux
     '''
-    return (energy / e_ref) ** (target_index - simulated_index)
+
+    phi_sim = calc_simulated_flux_normalization(
+        obstime=obstime,
+        n_events=n_events,
+        e_min=e_min,
+        e_max=e_max,
+        e_ref=e_ref,
+        simulated_index=simulated_index,
+        scatter_radius=scatter_radius,
+        viewcone=viewcone,
+    )
+
+    e = (energy / e_ref).to_value(u.dimensionless_unscaled)
+    exp = target_a + np.log10(e) * target_b - simulated_index
+    weights = flux_normalization / phi_sim * e**exp
+    return weights.to(u.dimensionless_unscaled) / sample_fraction
+
+
+@u.quantity_input
+def calc_weights_exponential_cutoff(
+    energy: u.TeV,
+    obstime: u.hour,
+    n_events,
+    e_min: u.TeV,
+    e_max: u.TeV,
+    simulated_index,
+    scatter_radius: u.m,
+    target_index,
+    target_e_cutoff,
+    flux_normalization: (POINT_SOURCE_FLUX_UNIT, FLUX_UNIT),
+    e_ref: u.TeV = 1 * u.TeV,
+    sample_fraction=1,
+    viewcone=None,
+):
+    '''
+    Calculate event weights, so that simulated
+    events are reweighted to a physical power law flux with exponential cutoff
+    '''
+
+    phi_sim = calc_simulated_flux_normalization(
+        obstime=obstime,
+        n_events=n_events,
+        e_min=e_min,
+        e_max=e_max,
+        e_ref=e_ref,
+        simulated_index=simulated_index,
+        scatter_radius=scatter_radius,
+        viewcone=viewcone,
+    )
+
+    e = (energy / e_ref).to_value(u.dimensionless_unscaled)
+    tau = np.exp(-energy / target_e_cutoff)
+    weights = flux_normalization / phi_sim * e**(target_index - simulated_index) * tau
+    return weights.to(u.dimensionless_unscaled) / sample_fraction
+
+
+def calc_simulated_flux_normalization(
+    obstime: u.hour,
+    n_events,
+    e_min: u.TeV,
+    e_max: u.TeV,
+    simulated_index,
+    scatter_radius: u.m,
+    e_ref: u.TeV,
+    viewcone=None,
+):
+    '''
+    Calculate the flux normalization for simulated events drawn
+    from a power law for a certain observation time.
+    '''
+    if viewcone is not None:
+        solid_angle = 2 * np.pi * (1 - np.cos(viewcone)) * u.sr
+    else:
+        solid_angle = 1
+
+    A = np.pi * scatter_radius**2
+
+    delta = e_max**(simulated_index + 1) - e_min**(simulated_index + 1)
+
+    nom = (simulated_index + 1) * e_ref**simulated_index * n_events
+    denom = (A * obstime * solid_angle) * delta
+
+    return nom / denom
 
 
 @u.quantity_input
@@ -231,7 +323,7 @@ def calc_gamma_obstime(
     n_events,
     spectral_index,
     flux_normalization: (FLUX_UNIT, POINT_SOURCE_FLUX_UNIT),
-    max_impact: u.m,
+    scatter_radius: u.m,
     e_min: u.TeV,
     e_max: u.TeV,
     e_ref: u.TeV = 1 * u.TeV,
@@ -267,8 +359,8 @@ def calc_gamma_obstime(
         Spectral index of the simulated power law, including the sign,
         so typically -2.7 or -2
     flux_normalization: float
-        Flux normalization of the simulated power law
-    max_impact: Quantity[length]
+        Flux normalization of the target power law
+    scatter_radius: Quantity[length]
         Maximal simulated impact
     e_min: Quantity[energy]
         Mimimal simulated energy
@@ -280,16 +372,18 @@ def calc_gamma_obstime(
     if spectral_index >= -1:
         raise ValueError('spectral_index must be < -1')
 
-    numerator = n_events * (spectral_index + 1)
+    t_ref = 1 * u.hour
+    phi_sim = calc_simulated_flux_normalization(
+        obstime=t_ref,
+        n_events=n_events,
+        e_min=e_min,
+        e_max=e_max,
+        e_ref=e_ref,
+        simulated_index=spectral_index,
+        scatter_radius=scatter_radius,
+    )
 
-    A = max_impact**2 * np.pi
-    t1 = A * flux_normalization * e_ref
-    t2 = (e_max / e_ref)**(spectral_index + 1)
-    t3 = (e_min / e_ref)**(spectral_index + 1)
-
-    denominator = t1 * (t2 - t3)
-
-    return numerator / denominator
+    return (t_ref * phi_sim / flux_normalization).to(u.hour)
 
 
 @u.quantity_input
@@ -311,20 +405,20 @@ def power_law_integral(
     res = flux_normalization * e_ref / int_index * e_term
 
     if flux_normalization.unit.is_equivalent(FLUX_UNIT):
-        return res.to(1 / u.m**2 / u.s / u.sr)
-    return res.to(1 / u.m**2 / u.s)
+        return res.to(FLUX_UNIT)
+    return res.to(POINT_SOURCE_FLUX_UNIT)
 
 
 @u.quantity_input
 def calc_proton_obstime(
     n_events,
     spectral_index,
-    max_impact: u.m,
+    scatter_radius: u.m,
     viewcone: u.deg,
     e_min: u.TeV,
     e_max: u.TeV,
-    flux_normalization: FLUX_UNIT = 1.8e4 * FLUX_UNIT,
-    e_ref: u.GeV=1 * u.GeV,
+    flux_normalization: FLUX_UNIT = PDG_COSMIC_RAY_FLUX,
+    e_ref: u.GeV = PDG_COSMIC_RAY_E_REF,
 ) -> u.s:
     '''
     Calculate the equivalent observation time for a proton montecarlo set
@@ -335,7 +429,7 @@ def calc_proton_obstime(
         Number of simulated events
     spectral_index: float
         Spectral index of the simulated power law
-    max_impact: float
+    scatter_radius: float
         Maximal simulated impact in m
     viewcone: float
         Viewcone in degrees
@@ -348,11 +442,19 @@ def calc_proton_obstime(
         Default value is (29.2) of
         http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cosmic-rays.pdf
     '''
-    area = np.pi * max_impact**2
-    solid_angle = 2 * np.pi * (1 - np.cos(viewcone)) * u.sr
+    if spectral_index >= -1:
+        raise ValueError('spectral_index must be < -1')
 
-    expected_integral_flux = power_law_integral(
-        flux_normalization, spectral_index, e_min, e_max, e_ref
+    t_ref = 1 * u.hour
+    phi_sim = calc_simulated_flux_normalization(
+        obstime=t_ref,
+        n_events=n_events,
+        e_min=e_min,
+        e_max=e_max,
+        e_ref=e_ref,
+        simulated_index=spectral_index,
+        scatter_radius=scatter_radius,
+        viewcone=viewcone,
     )
 
-    return n_events / area / solid_angle / expected_integral_flux
+    return (t_ref * phi_sim / flux_normalization).to(u.hour)
