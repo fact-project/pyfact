@@ -1,11 +1,13 @@
 import numpy as np
 import astropy.units as u
+from functools import partial
 
 POINT_SOURCE_FLUX_UNIT = (1 / u.GeV / u.s / u.m**2).unit
 FLUX_UNIT = POINT_SOURCE_FLUX_UNIT / u.sr
 
 PDG_COSMIC_RAY_FLUX = 1.8e4 * FLUX_UNIT
 PDG_COSMIC_RAY_E_REF = 1 * u.GeV
+PDG_COSMIC_RAY_INDEX = -2.7
 
 
 @u.quantity_input
@@ -14,7 +16,7 @@ def random_power(
     e_min: u.TeV,
     e_max: u.TeV,
     size,
-    e_ref: u.TeV=1 * u.TeV,
+    e_ref: u.TeV = 1 * u.TeV,
 ) -> u.TeV:
     r'''
     Draw random numbers from a power law distribution
@@ -458,3 +460,15 @@ def calc_proton_obstime(
     )
 
     return (t_ref * phi_sim / flux_normalization).to(u.hour)
+
+
+calc_weights_cosmic_rays = partial(
+    calc_weights_powerlaw,
+    target_index=PDG_COSMIC_RAY_INDEX,
+    flux_normalization=PDG_COSMIC_RAY_FLUX,
+    e_ref=PDG_COSMIC_RAY_E_REF,
+)
+calc_weights_cosmic_rays.__doc__ = '''
+Calculate event weights, so that simulated
+events are reweighted to the PDG cosmic rays spectrum
+'''
