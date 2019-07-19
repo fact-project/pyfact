@@ -18,6 +18,7 @@ before_install:
 install:
   - pip install restructuredtext-lint sphinx~=1.8 pygments
   - pip install .
+  - python -c 'import tables; print(tables.filters.blosc_compressor_list())'
 
 script:
   - python setup.py test
