@@ -1,13 +1,13 @@
 from os import path
-import pandas as pd
 import json
+import tables  # must import before h5py for blosc compression to work
 import h5py
+import pandas as pd
 import sys
 import logging
 import numpy as np
 from copy import copy
 import astropy.units as u
-import tables  # noqa
 
 
 __all__ = [

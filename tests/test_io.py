@@ -1,3 +1,4 @@
+import tables.filters
 import pandas as pd
 import tempfile
 import numpy as np

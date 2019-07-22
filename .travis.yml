@@ -5,10 +5,11 @@ matrix:
     - python: "3.6"
     - python: "3.7"
       dist: xenial
-      addons:
-        apt:
-          packages:
-            - libhdf5-serial-dev
+
+addons:
+  apt:
+    packages:
+      - libhdf5-serial-dev
 
 
 before_install:
@@ -17,8 +18,8 @@ before_install:
 
 install:
   - pip install restructuredtext-lint sphinx~=1.8 pygments
-  - pip install .
-  - python -c 'import tables; print(tables.filters.blosc_compressor_list())'
+  # make sure tables and h5py get linked vs the same hdf5 library
+  - pip install --no-binary=h5py --no-binary=tables .
 
 script:
   - python setup.py test
