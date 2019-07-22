@@ -1,12 +1,16 @@
 from os import path
-import pandas as pd
 import json
+import tables
 import h5py
+import pandas as pd
 import sys
 import logging
 import numpy as np
 from copy import copy
 import astropy.units as u
+import tempfile
+import warnings
+from time import perf_counter
 
 
 __all__ = [
@@ -17,6 +21,7 @@ __all__ = [
     'read_h5py_chunked',
     'check_extension',
     'to_h5py',
+    'create_blosc_compression_options',
 ]
 
 log = logging.getLogger(__name__)
@@ -24,6 +29,42 @@ log = logging.getLogger(__name__)
 
 allowed_extensions = ('.hdf', '.hdf5', '.h5', '.json', '.jsonl', '.jsonlines', '.csv')
 native_byteorder = native_byteorder = {'little': '<', 'big': '>'}[sys.byteorder]
+
+
+def create_blosc_compression_options(complevel=5, complib='blosc:zstd', shuffle=True):
+    '''Create correct kwargs for h5py.create_dataset to use the more modern
+    compression filters, default is zstandard with moderate compression settings
+    See https://github.com/h5py/h5py/issues/611#issuecomment-353694301
+    '''
+    shuffle = 2 if shuffle == 'bit' else 1 if shuffle else 0
+    compressors = tables.filters.blosc_compressor_list()
+    complib = ['blosc:' + c for c in compressors].index(complib)
+    args = {
+        'compression': 32001,
+        'compression_opts': (0, 0, 0, 0, complevel, shuffle, complib)
+    }
+    if shuffle:
+        args['shuffle'] = False
+    return args
+
+
+DEFAULT_COMPRESSION = {}
+with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+    zstd_opts = create_blosc_compression_options()
+
+    try:
+        with h5py.File(f.name, 'w') as of:
+            of.create_dataset('test', dtype='float64', shape=(1, ), **zstd_opts)
+
+        DEFAULT_COMPRESSION.update(zstd_opts)
+    except ValueError:
+        warnings.warn(
+            'BLOSC compression for hdf5 not available, you will not be able'
+            ' to create or read blosc compressed datasets'
+            ' make sure tables and h5py are linked against the same hdf5 library'
+            ' e.g. by installing hdf5 in your system and doing '
+            ' `pip install --no-binary=tables --no-binary=h5py tables h5py`'
+        )
 
 
 def write_data(df, file_path, key='data', use_h5py=True, **kwargs):
@@ -363,7 +404,12 @@ def initialize_h5py(f, array, key='events', **kwargs):
 
     dtypes = array.dtype
     for name in dtypes.names:
-        create_empty_h5py_dataset(array[name], group, name, **kwargs)
+        create_empty_h5py_dataset(
+            array[name],
+            group,
+            name,
+            **kwargs,
+        )
 
     return group
 
@@ -407,6 +453,10 @@ def create_empty_h5py_dataset(array, group, name, **kwargs):
 
     else:
         dt = dtype.base
+
+    # add default compression options if no options are given
+    if 'compression' not in kwargs:
+        kwargs.update(DEFAULT_COMPRESSION)
 
     dataset = group.create_dataset(
         name,

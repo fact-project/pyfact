@@ -1,3 +1,4 @@
+import tables.filters
 import pandas as pd
 import tempfile
 import numpy as np
@@ -304,3 +305,33 @@ def test_read_data_h5py():
         df_from_file = read_data(f.name, key='lecker_daten').sort_index(1)
         assert set(df.columns) == set(df_from_file.columns)
         assert df.equals(df_from_file)
+
+
+def test_compression():
+    from fact.io import to_h5py, read_h5py
+
+    df = pd.DataFrame({
+        'x': np.random.normal(size=50),
+        'N': np.random.randint(0, 10, dtype='uint8'),
+        'idx': np.arange(50),
+    })
+
+    with tempfile.NamedTemporaryFile() as f:
+        to_h5py(df, f.name, key='test', compression=None)
+
+        with h5py.File(f.name, 'r') as hf:
+
+            assert 'test' in hf.keys()
+
+            g = hf['test']
+
+            assert 'x' in g.keys()
+            assert 'N' in g.keys()
+
+        df2 = read_h5py(f.name, key='test')
+        df2.sort_index(1, inplace=True)
+        df.sort_index(1, inplace=True)
+
+        assert all(df.dtypes == df2.dtypes)
+        assert all(df['x'] == df2['x'])
+        assert all(df['N'] == df2['N'])
