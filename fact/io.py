@@ -1,6 +1,6 @@
 from os import path
 import json
-import tables  # must import before h5py for blosc compression to work
+import tables
 import h5py
 import pandas as pd
 import sys
@@ -8,6 +8,9 @@ import logging
 import numpy as np
 from copy import copy
 import astropy.units as u
+import tempfile
+import warnings
+from time import perf_counter
 
 
 __all__ = [
@@ -45,7 +48,23 @@ def create_blosc_compression_options(complevel=5, complib='blosc:zstd', shuffle=
     return args
 
 
-DEFAULT_COMPRESSION = create_blosc_compression_options()
+DEFAULT_COMPRESSION = {}
+with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
+    zstd_opts = create_blosc_compression_options()
+
+    try:
+        with h5py.File(f.name, 'w') as of:
+            of.create_dataset('test', dtype='float64', shape=(1, ), **zstd_opts)
+
+        DEFAULT_COMPRESSION.update(zstd_opts)
+    except ValueError:
+        warnings.warn(
+            'BLOSC compression for hdf5 not available, you will not be able'
+            ' to create or read blosc compressed datasets'
+            ' make sure tables and h5py are linked against the same hdf5 library'
+            ' e.g. by installing hdf5 in your system and doing '
+            ' `pip install --no-binary=tables --no-binary=h5py tables h5py`'
+        )
 
 
 def write_data(df, file_path, key='data', use_h5py=True, **kwargs):
