@@ -546,10 +546,24 @@ def read_simulated_spectrum(corsika_headers_path):
     runs = read_h5py(corsika_headers_path, key='corsika_runs')
 
     summary = {}
-    try:
-        summary['n_showers'] = runs['n_showers'].sum()
-    except KeyError:
-        summary['n_showers'] = runs['n_events'].sum()
+    if 'n_showers' in runs.columns:
+        n_showers = runs['n_showers']
+    else:
+        n_showers = runs['n_events']
+
+    summary['n_showers'] = n_showers.sum()
+
+    with h5py.File(corsika_headers_path, 'r') as f:
+        summary['n_reuse'] = f['corsika_runs'].attrs.get('n_reuse', 1)
+
+        if 'n_reuse' in runs.columns:
+            # if reuse is not the same for all runs, multply n_showers
+            # and set reuse to 1
+            if len(runs['n_resuse'].unique()) > 1:
+                summary['n_showers'] = (n_showers * runs['n_reuse']).sum()
+                summary['n_reuse'] = 1
+
+            summary['n_reuse'] = runs['n_reuse']
 
     keys = {'energy_min': u.GeV, 'energy_max': u.GeV, 'energy_spectrum_slope': None}
     if 'x_scatter' in runs.columns:
