@@ -559,11 +559,13 @@ def read_simulated_spectrum(corsika_headers_path):
         if 'n_reuse' in runs.columns:
             # if reuse is not the same for all runs, multply n_showers
             # and set reuse to 1
-            if len(runs['n_resuse'].unique()) > 1:
+            unique = runs['reuse'].unique()
+            if len(unique) > 1:
                 summary['n_showers'] = (n_showers * runs['n_reuse']).sum()
                 summary['n_reuse'] = 1
 
-            summary['n_reuse'] = runs['n_reuse']
+            else:
+                summary['n_reuse'] = runs['n_reuse'].iloc[0]
 
     keys = {'energy_min': u.GeV, 'energy_max': u.GeV, 'energy_spectrum_slope': None}
     if 'x_scatter' in runs.columns:
