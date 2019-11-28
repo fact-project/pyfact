@@ -407,8 +407,8 @@ def power_law_integral(
     res = flux_normalization * e_ref / int_index * e_term
 
     if flux_normalization.unit.is_equivalent(FLUX_UNIT):
-        return res.to(FLUX_UNIT)
-    return res.to(POINT_SOURCE_FLUX_UNIT)
+        return res.to(FLUX_UNIT * u.GeV)
+    return res.to(POINT_SOURCE_FLUX_UNIT * u.GeV)
 
 
 @u.quantity_input
