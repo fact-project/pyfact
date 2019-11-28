@@ -10,7 +10,6 @@ from copy import copy
 import astropy.units as u
 import tempfile
 import warnings
-from time import perf_counter
 
 
 __all__ = [
@@ -559,7 +558,7 @@ def read_simulated_spectrum(corsika_headers_path):
         if 'n_reuse' in runs.columns:
             # if reuse is not the same for all runs, multply n_showers
             # and set reuse to 1
-            unique = runs['reuse'].unique()
+            unique = runs['n_reuse'].unique()
             if len(unique) > 1:
                 summary['n_showers'] = (n_showers * runs['n_reuse']).sum()
                 summary['n_reuse'] = 1
