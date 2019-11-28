@@ -26,3 +26,20 @@ def test_power():
 
     with raises(ValueError):
         random_power(2.7, 5 * u.GeV, 10 * u.GeV, e_ref=1 * u.GeV, size=1)
+
+
+def test_power_law_integral():
+    from fact.analysis.statistics import power_law_integral, FLUX_UNIT
+    import astropy.units as u
+    import numpy as np
+
+    # wolfram alpha result https://www.wolframalpha.com/input/?i=int_100%5E1000+x%5E-2
+    result = power_law_integral(
+        flux_normalization=1 * FLUX_UNIT,
+        spectral_index=-2,
+        e_min=100 * u.GeV,
+        e_max=1000 * u.GeV,
+        e_ref=1 * u.GeV,
+    )
+    assert np.isclose(result.value, 0.009)
+    assert result.unit == (FLUX_UNIT * u.GeV)
