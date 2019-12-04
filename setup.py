@@ -39,7 +39,6 @@ setup(
         'numpy',
         'pandas',
         'peewee>=3',
-        'pymongo>=2.7',
         'pymysql',
         'python-dateutil',
         'scipy',
