@@ -1,10 +1,9 @@
-import tables.filters
 import pandas as pd
 import tempfile
 import numpy as np
 import h5py
 import pytest
-from pandas.util.testing import assert_frame_equal
+
 
 
 def test_to_h5py():
@@ -335,3 +334,16 @@ def test_compression():
         assert all(df.dtypes == df2.dtypes)
         assert all(df['x'] == df2['x'])
         assert all(df['N'] == df2['N'])
+
+
+def test_read_simulated_spectrum():
+    from fact.io import read_simulated_spectrum
+    import astropy.units as u
+
+    s = read_simulated_spectrum('tests/resources/proton_header_test.hdf5')
+
+    assert s['n_showers'] == 20000
+    assert s['n_reuse'] == 20
+    assert s['energy_min'] == 100 * u.GeV
+    assert s['energy_max'] == 200 * u.TeV
+    assert s['energy_spectrum_slope'] == -2.0
