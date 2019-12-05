@@ -59,7 +59,7 @@ Utils for plotting data into a FACT camera view. Based on matplotlib.
 .. code:: python
 
     import matplotlib.pyplot as plt
-    import fact.plotting import camera
+    from fact.plotting import camera
     from numpy.random import normal
 
     # create some pseudo data with shape (10, 1440):
