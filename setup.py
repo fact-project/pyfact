@@ -46,7 +46,7 @@ setup(
         'setuptools',
         'simple-crypt',
         'sqlalchemy',
-        'tables',  # pytables in anaconda
+        'tables>=3.3',  # pytables in anaconda
         'wrapt',
     ],
     zip_safe=False,
