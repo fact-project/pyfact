@@ -42,6 +42,7 @@ To store pandas dataframes in column-oriented storage into hdf5 files,
 we created some helpfull wrappers around ``pandas`` and ``h5py``:
 
 .. code:: python
+
     from fact.io import read_h5py, to_h5py
     import pandas as pd
 
