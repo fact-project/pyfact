@@ -34,6 +34,7 @@ setup(
     setup_requires=['pytest-runner'],
     install_requires=[
         'astropy',
+        'click',
         'h5py',
         'matplotlib>=1.4',
         'numpy',
@@ -45,7 +46,7 @@ setup(
         'setuptools',
         'simple-crypt',
         'sqlalchemy',
-        'tables',  # pytables in anaconda
+        'tables>=3.3',  # pytables in anaconda
         'wrapt',
     ],
     zip_safe=False,
