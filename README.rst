@@ -35,6 +35,22 @@ e.g. :
 Submodules
 ----------
 
+io
+~~
+
+To store pandas dataframes in column-oriented storage into hdf5 files,
+we created some helpfull wrappers around ``pandas`` and ``h5py``:
+
+.. code:: python
+    from fact.io import read_h5py, to_h5py
+    import pandas as pd
+
+    df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
+    to_h5py(df, 'test.hdf5', key='events')
+
+    print(read_h5py('test.hdf5', key='events'))
+
+
 plotting
 ~~~~~~~~
 
@@ -43,28 +59,15 @@ Utils for plotting data into a FACT camera view. Based on matplotlib.
 .. code:: python
 
     import matplotlib.pyplot as plt
-    import fact.plotting as factplot
+    import fact.plotting import camera
     from numpy.random import normal
 
     # create some pseudo data with shape (10, 1440):
     data = normal(30, 5, (10, 1440))
 
-    factplot.camera(data[0])
+    camera(data[0])
     plt.show()
 
-Or you can start an interactive Viewer which lets you click through the
-events and save the images:
-
-.. code:: python
-
-    from fact.plotting import Viewer
-    from numpy.random import poisson
-
-    # pseudo data:
-    data = poisson(30, (10, 1440))
-
-    # call the Viewer with data and a label for the colorbar:
-    Viewer(data, "label")
 
 There are also functions to get the camera\_geometry from the delivered
 source file:
@@ -111,7 +114,7 @@ To download the database and read it to Pandas dataframe without using peewee:
 
      from fact import credentials
      import pandas as pd
-     
+
      factDB = credentials.create_factdb_engine()
      runInfo = pd.read_sql_table(table_name="RunInfo", con=factDB)  
 
