@@ -37,7 +37,11 @@ def create_blosc_compression_options(complevel=5, complib='blosc:zstd', shuffle=
     '''
     shuffle = 2 if shuffle == 'bit' else 1 if shuffle else 0
     compressors = tables.filters.blosc_compressor_list()
-    complib = ['blosc:' + c for c in compressors].index(complib)
+    try:
+        complib = ['blosc:' + c for c in compressors].index(complib)
+    except ValueError:
+        raise ValueError('Unsupported compression "{}"'.format(complib))
+
     args = {
         'compression': 32001,
         'compression_opts': (0, 0, 0, 0, complevel, shuffle, complib)
@@ -49,9 +53,8 @@ def create_blosc_compression_options(complevel=5, complib='blosc:zstd', shuffle=
 
 DEFAULT_COMPRESSION = {}
 with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
-    zstd_opts = create_blosc_compression_options()
-
     try:
+        zstd_opts = create_blosc_compression_options()
         with h5py.File(f.name, 'w') as of:
             of.create_dataset('test', dtype='float64', shape=(1, ), **zstd_opts)
 
@@ -63,6 +66,7 @@ with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:
             ' make sure tables and h5py are linked against the same hdf5 library'
             ' e.g. by installing hdf5 in your system and doing '
             ' `pip install --no-binary=tables --no-binary=h5py tables h5py`'
+            ' or using conda'
         )
 
 

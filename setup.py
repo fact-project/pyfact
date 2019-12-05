@@ -34,6 +34,7 @@ setup(
     setup_requires=['pytest-runner'],
     install_requires=[
         'astropy',
+        'click',
         'h5py',
         'matplotlib>=1.4',
         'numpy',
