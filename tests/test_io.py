@@ -295,7 +295,8 @@ def test_read_data_h5py():
 
     df = pd.DataFrame({
         'x': np.random.normal(size=50).astype('float32'),
-        'N': np.random.randint(0, 10, dtype='uint8', size=50)
+        'N': np.random.randint(0, 10, dtype='uint8', size=50),
+        'name': [f"s{i}" for i in range(50)],
     }).sort_index(1)
 
     with tempfile.NamedTemporaryFile(suffix='.hdf5') as f:

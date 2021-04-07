@@ -177,9 +177,9 @@ def read_h5py(
             dataset = group[col]
             array = to_native_byteorder(dataset[first:last])
 
-            # pandas cannot handle bytes, convert to str
-            if array.dtype.kind == 'S':
-                array = array.astype(str)
+            # decode unicode strings to str
+            if array.dtype.kind in {'S', 'O'}:
+                array = array.astype('U')
 
             if parse_dates and dataset.attrs.get('timeformat') is not None:
                 array = pd.to_datetime(array, infer_datetime_format=True)
